@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'https://api.example.com'
+  apiBaseUrl: 'http://localhost:3000/api' // Update with your backend API URL
 };
 

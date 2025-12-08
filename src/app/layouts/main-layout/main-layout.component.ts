@@ -1,14 +1,52 @@
-import { Component } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+
+import { MenuService } from '../../core/services/menu.service';
+import { AuthService } from '../../core/services/auth.service';
+import { AuthStore } from '../../core/state/auth.store';
 
 @Component({
   selector: 'app-main-layout',
-  standalone: true,
-  imports: [RouterOutlet, RouterLink],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.css'
 })
 export class MainLayoutComponent {
+  menuService = inject(MenuService);
+  authStore = inject(AuthStore);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
   readonly currentYear = new Date().getFullYear();
+  isProfileDropdownOpen = signal(false);
+  isMobileMenuOpen = signal(false);
+
+  toggleProfileDropdown(): void {
+    this.isProfileDropdownOpen.update(v => !v);
+  }
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen.update(v => !v);
+  }
+
+  onLogout(): void {
+    this.authService.logout();
+    this.router.navigate(['/auth/login']);
+  }
+
+  getUserDisplayName(): string {
+    const user = this.authStore.user();
+    if (!user) return 'User';
+    
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    return user.firstName || user.email;
+  }
+
+  getUserEmail(): string {
+    return this.authStore.user()?.email || '';
+  }
 }
 

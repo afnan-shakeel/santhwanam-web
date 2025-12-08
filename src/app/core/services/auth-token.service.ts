@@ -1,21 +1,22 @@
-import { Injectable } from '@angular/core';
-
-const TOKEN_KEY = 'santhwanam.auth.token';
+import { Injectable, inject } from '@angular/core';
+import { AuthStore } from '../state/auth.store';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthTokenService {
+  private authStore = inject(AuthStore);
+
   getToken(): string | null {
-    return localStorage.getItem(TOKEN_KEY);
+    return this.authStore.accessToken();
   }
 
   setToken(token: string): void {
-    localStorage.setItem(TOKEN_KEY, token);
+    this.authStore.setAccessToken(token);
   }
 
   clearToken(): void {
-    localStorage.removeItem(TOKEN_KEY);
+    this.authStore.clearAuth();
   }
 }
 
