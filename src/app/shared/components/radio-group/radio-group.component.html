@@ -1,0 +1,34 @@
+<fieldset class="text-sm text-gray-900">
+  @if (label) {
+    <legend class="text-sm font-semibold text-gray-900">{{ label }}</legend>
+  }
+  @if (hint) {
+    <p class="mt-1 text-sm text-gray-600">{{ hint }}</p>
+  }
+  <div class="mt-4 space-y-4">
+    @for (option of options; track option.value) {
+      <label class="flex items-center gap-3" [class.opacity-50]="disabled || option.disabled">
+        <input
+          type="radio"
+          class="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white not-checked:before:hidden checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400"
+          [name]="name"
+          [value]="option.value"
+          [checked]="value === option.value"
+          [disabled]="disabled || option.disabled"
+          (change)="select(option.value)"
+        />
+        <span class="ml-1 flex flex-col">
+          <span class="font-medium text-gray-900">{{ option.label }}</span>
+          @if (option.description) {
+            <span class="text-xs text-gray-500">{{ option.description }}</span>
+          }
+        </span>
+      </label>
+    }
+  </div>
+
+  @if (error) {
+    <span class="text-xs text-red-600">{{ error }}</span>
+  }
+</fieldset>
+

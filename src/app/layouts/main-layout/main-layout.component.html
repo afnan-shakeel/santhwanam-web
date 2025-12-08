@@ -1,0 +1,30 @@
+<div class="min-h-screen bg-neutral-50 text-slate-900">
+  <header class="border-b border-slate-200 bg-white/80 backdrop-blur">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <div class="flex items-center gap-2">
+        <div class="h-9 w-9 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500"></div>
+        <div class="leading-tight">
+          <p class="text-sm font-semibold tracking-tight text-primary-700">Santhwanam</p>
+          <p class="text-xs text-slate-500">Care, organized.</p>
+        </div>
+      </div>
+      <nav class="hidden items-center gap-4 text-sm font-medium text-slate-600 sm:flex">
+        <a class="hover:text-primary-700" routerLink="/">Home</a>
+        <a class="hover:text-primary-700" routerLink="/about">About</a>
+        <a class="hover:text-primary-700" routerLink="/contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl px-6 py-10">
+    <router-outlet />
+  </main>
+
+  <footer class="border-t border-slate-200 bg-white/80 backdrop-blur">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 text-xs text-slate-500">
+      <p>© {{ currentYear }} Santhwanam. All rights reserved.</p>
+      <p>Built with Angular, Tailwind, and Signals.</p>
+    </div>
+  </footer>
+</div>
+

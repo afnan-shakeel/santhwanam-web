@@ -1,0 +1,47 @@
+<section class="rounded-3xl border border-slate-200 bg-white/70 p-8 shadow-sm backdrop-blur">
+  <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+    <div class="space-y-3">
+      <p class="text-sm font-semibold uppercase tracking-[0.2em] text-primary-600">Welcome</p>
+      <h1 class="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
+        Compassionate care with a modern workflow.
+      </h1>
+      <p class="max-w-2xl text-base text-slate-600">
+        Santhwanam keeps your team aligned with a clean UI, sensible defaults, and
+        Angular signals for fast, reactive state. Tailwind CSS powers the design system with
+        project-specific colors and typography.
+      </p>
+      <div class="flex flex-wrap items-center gap-3">
+        <app-button variant="primary" label="Get Started"></app-button>
+        <app-button variant="soft" label="View UI templates"></app-button>
+      </div>
+      <p class="text-sm text-slate-500">
+        Current user: <strong>{{ isAuthenticated() ? 'Signed in' : 'Guest' }}</strong>
+      </p>
+    </div>
+    <div class="w-full max-w-sm space-y-4 rounded-2xl border border-slate-200 bg-gradient-to-br from-primary-50 to-secondary-50 p-6 shadow-inner">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-semibold text-slate-700">Live signals</p>
+        <span class="rounded-full bg-primary-100 px-3 py-1 text-xs font-medium text-primary-700">
+          Signal Store
+        </span>
+      </div>
+      <div class="space-y-3 text-sm text-slate-600">
+        <div class="flex items-center justify-between rounded-lg bg-white/60 px-3 py-2">
+          <span class="text-slate-500">App</span>
+          <span class="font-semibold text-slate-900">{{ title() }}</span>
+        </div>
+        <div class="flex items-center justify-between rounded-lg bg-white/60 px-3 py-2">
+          <span class="text-slate-500">Environment</span>
+          <span class="font-semibold text-slate-900">
+            {{ (environment.production ? 'Production' : 'Development') }}
+          </span>
+        </div>
+        <div class="flex items-center justify-between rounded-lg bg-white/60 px-3 py-2">
+          <span class="text-slate-500">Status</span>
+          <span class="font-semibold text-primary-700">Healthy</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+

@@ -1,0 +1,22 @@
+# initial setup notes
+- setup tailwindcss [done]
+- setup up tailwind primary colors and fonts for the project.
+- setup folder structure
+    - src/app/core for core services like api, http, interceptors, guards, etc.
+    - src/app/layouts/ for layouts like header, footer, sidebar, etc.
+    - src/app/features/ for features like home, about, contact, etc.
+        - each feature will have its own component, service, module, routes, etc.
+    - src/app/shared/ for shared components, services, pipes, directives, models, etc.
+        - ex: shared/components/button/button.component.ts 
+    - docs/ui-html-templates/ for ui templates like buttons, forms, tables, cards, etc references. HTML templates will be given to you to implement.
+- Do State management (NgRx / Signals) setup, if setup is required to use signals and observable for state management in v20+.
+- Create a core HTTP service using HttpClient.
+    - Add interceptors for:
+        - Authorization tokens
+        - Logging / Error handling
+        - Loading indicators
+- Environment configurations: Use environments/environment.ts and environment.prod.ts.
+- Linting and Formatting: ESLint and Prettier for consistent code style
+- No testing framework for now.
+- setup up all shared components for ui by referring to docs/ui-html-templates/
+- create cluade and copilot instructions file conveying all the above setup and instructions to the cluade and copilot.
