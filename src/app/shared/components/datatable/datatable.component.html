@@ -1,0 +1,451 @@
+<div class="bg-white shadow-sm rounded-lg dark:bg-gray-800">
+    <!-- Mobile filter dialog -->
+    @if (config.filters && config.filters.length > 0) {
+    <el-dialog>
+        <dialog id="mobile-filters" class="overflow-hidden backdrop:bg-transparent sm:hidden">
+            <el-dialog-backdrop
+                class="fixed inset-0 bg-black/25 transition-opacity duration-300 ease-linear data-closed:opacity-0"></el-dialog-backdrop>
+
+            <div tabindex="0" class="fixed inset-0 flex focus:outline-none">
+                <el-dialog-panel
+                    class="relative ml-auto flex size-full max-w-xs transform flex-col overflow-y-auto bg-white pt-4 pb-6 shadow-xl transition duration-300 ease-in-out data-closed:translate-x-full dark:bg-gray-800">
+                    <div class="flex items-center justify-between px-4">
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Filters</h2>
+                        <button type="button" command="close" commandfor="mobile-filters"
+                            class="relative -mr-2 flex size-10 items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden dark:bg-gray-800 dark:hover:bg-gray-700">
+                            <span class="absolute -inset-0.5"></span>
+                            <span class="sr-only">Close menu</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                                data-slot="icon" aria-hidden="true" class="size-6">
+                                <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Mobile Filters -->
+                    <form class="mt-4">
+                        @for (filter of config.filters; track filter.key) {
+                        <div class="border-t border-gray-200 px-4 py-6 dark:border-gray-700">
+                            @if (filter.type === 'select') {
+                            <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">{{ filter.label }}</h3>
+                            <select [id]="'mobile-filter-' + filter.key" [value]="filterValues()[filter.key] || ''"
+                                (change)="onFilterChange(filter.key, ($any($event.target)).value); onApplyFilters()"
+                                class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm dark:bg-white/5 dark:text-white dark:ring-gray-700">
+                                <option value="">{{ filter.placeholder || 'Select...' }}</option>
+                                @for (option of filter.options; track option.value) {
+                                <option [value]="option.value">{{ option.label }}</option>
+                                }
+                            </select>
+                            }
+
+                            @if (filter.type === 'multiselect') {
+                            <h3 class="-mx-2 -my-3 flow-root">
+                                <button type="button" command="--toggle"
+                                    [attr.commandfor]="'filter-section-' + filter.key"
+                                    class="flex w-full items-center justify-between bg-white px-2 py-3 text-sm text-gray-400 dark:bg-gray-800">
+                                    <span class="font-medium text-gray-900 dark:text-white">{{ filter.label }}</span>
+                                    <span class="ml-6 flex items-center">
+                                        <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true"
+                                            class="size-5 transform not-in-aria-expanded:rotate-0 in-aria-expanded:-rotate-180">
+                                            <path
+                                                d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                                                clip-rule="evenodd" fill-rule="evenodd" />
+                                        </svg>
+                                    </span>
+                                </button>
+                            </h3>
+                            <el-disclosure [id]="'filter-section-' + filter.key" hidden class="block pt-6">
+                                <div class="space-y-6">
+                                    @for (option of filter.options; track option.value) {
+                                    <div class="flex gap-3">
+                                        <div class="flex h-5 shrink-0 items-center">
+                                            <div class="group grid size-4 grid-cols-1">
+                                                <input [id]="'mobile-filter-' + filter.key + '-' + option.value"
+                                                    type="checkbox"
+                                                    [checked]="(filterValues()[filter.key] || []).includes(option.value)"
+                                                    (change)="onMultiselectChange(filter.key, option.value, ($any($event.target)).checked); onApplyFilters()"
+                                                    class="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:border-gray-600 dark:bg-gray-700" />
+                                                <svg viewBox="0 0 14 14" fill="none"
+                                                    class="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-disabled:stroke-gray-950/25">
+                                                    <path d="M3 8L6 11L11 3.5" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        class="opacity-0 group-has-checked:opacity-100" />
+                                                    <path d="M3 7H11" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        class="opacity-0 group-has-indeterminate:opacity-100" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <label [for]="'mobile-filter-' + filter.key + '-' + option.value"
+                                            class="text-sm text-gray-500 dark:text-gray-400">
+                                            {{ option.label }}
+                                        </label>
+                                    </div>
+                                    }
+                                </div>
+                            </el-disclosure>
+                            }
+
+                            @if (filter.type === 'date') {
+                            <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">{{ filter.label }}</h3>
+                            <input [id]="'mobile-filter-' + filter.key" type="date"
+                                [value]="filterValues()[filter.key] || ''"
+                                (change)="onFilterChange(filter.key, ($any($event.target)).value); onApplyFilters()"
+                                class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm dark:bg-white/5 dark:text-white dark:ring-gray-700" />
+                            }
+
+                            @if (filter.type === 'daterange') {
+                            <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">{{ filter.label }}</h3>
+                            <div class="space-y-2">
+                                <input [id]="'mobile-filter-' + filter.key + '-start'" type="date"
+                                    [value]="filterValues()[filter.key]?.start || ''"
+                                    (change)="onDateRangeChange(filter.key, 'start', ($any($event.target)).value); onApplyFilters()"
+                                    placeholder="Start date"
+                                    class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm dark:bg-white/5 dark:text-white dark:ring-gray-700" />
+                                <input [id]="'mobile-filter-' + filter.key + '-end'" type="date"
+                                    [value]="filterValues()[filter.key]?.end || ''"
+                                    (change)="onDateRangeChange(filter.key, 'end', ($any($event.target)).value); onApplyFilters()"
+                                    placeholder="End date"
+                                    class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm dark:bg-white/5 dark:text-white dark:ring-gray-700" />
+                            </div>
+                            }
+
+                            @if (filter.type === 'text') {
+                            <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">{{ filter.label }}</h3>
+                            <input [id]="'mobile-filter-' + filter.key" type="text"
+                                [value]="filterValues()[filter.key] || ''"
+                                (input)="onFilterChange(filter.key, ($any($event.target)).value)"
+                                [placeholder]="filter.placeholder || ''"
+                                class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm dark:bg-white/5 dark:text-white dark:ring-gray-700" />
+                            }
+
+                            @if (filter.type === 'number') {
+                            <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">{{ filter.label }}</h3>
+                            <input [id]="'mobile-filter-' + filter.key" type="number"
+                                [value]="filterValues()[filter.key] || ''"
+                                (input)="onFilterChange(filter.key, ($any($event.target)).value)"
+                                [placeholder]="filter.placeholder || ''"
+                                class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm dark:bg-white/5 dark:text-white dark:ring-gray-700" />
+                            }
+                        </div>
+                        }
+                    </form>
+                </el-dialog-panel>
+            </div>
+        </dialog>
+    </el-dialog>
+    }
+
+    <!-- Table Header Controls -->
+    <div class="border-b border-gray-200 px-4 py-4 sm:px-6 dark:border-gray-700">
+        <div class="flex items-center justify-between gap-4">
+            <!-- Search Input -->
+            <div class="flex-1 max-w-md">
+                <div class="relative rounded-md shadow-sm">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <input type="text" (input)="onSearchInput($event)" placeholder="Search..."
+                        class="block w-full rounded-md border-0 py-1.5 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm dark:bg-white/5 dark:text-white dark:ring-gray-700 dark:placeholder:text-gray-500 dark:focus:ring-primary-500" />
+                </div>
+            </div>
+
+            <!-- Action Buttons & Filters -->
+            <div class="flex items-center gap-2">
+                <button (click)="onRefresh()" type="button"
+                    class="inline-flex items-center gap-x-1.5 rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:ring-gray-600 dark:hover:bg-gray-600">
+                    <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.39zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0V5.36l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </button>
+
+                <!-- Mobile Filters Button -->
+                @if (config.filters && config.filters.length > 0) {
+                <button type="button" command="show-modal" commandfor="mobile-filters"
+                    class="inline-block text-sm font-medium text-gray-700 hover:text-gray-900 sm:hidden dark:text-gray-300 dark:hover:text-white">
+                    Filters
+                </button>
+                }
+
+                <!-- Desktop Filter Buttons -->
+                @if (config.filters && config.filters.length > 0) {
+                <el-popover-group class="hidden sm:flex sm:items-baseline sm:space-x-2">
+                    @for (filter of config.filters; track filter.key) {
+                    @if (filter.type === 'select') {
+                    <!-- Select filter with dropdown menu -->
+                    <el-dropdown class="inline-block">
+                        <button 
+                            class="group inline-flex items-center justify-center text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
+                            <span>{{ filter.label }}</span>
+                            @if (getFilterValueCount(filter.key) > 0) {
+                            <span
+                                class="ml-1.5 rounded-sm bg-gray-200 px-1.5 py-0.5 text-xs font-semibold text-gray-700 tabular-nums dark:bg-gray-700 dark:text-gray-300">{{
+                                getFilterValueCount(filter.key) }}</span>
+                            }
+                            <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true"
+                                class="-mr-1 ml-1 size-5 shrink-0 text-gray-400 group-hover:text-gray-500">
+                                <path
+                                    d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                                    clip-rule="evenodd" fill-rule="evenodd" />
+                            </svg>
+                        </button>
+
+                        <el-menu anchor="bottom end" popover
+                            class="w-32 origin-top-right rounded-md bg-white shadow-lg outline-1 outline-black/5 transition transition-discrete [--anchor-gap:--spacing(2)] data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in dark:bg-gray-800 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10">
+                            <div class="py-1">
+                                <!-- @if (filter.placeholder) {
+                                <button type="button" (click)="onFilterChange(filter.key, ''); onApplyFilters()" class="block w-full px-4 py-2 text-left text-sm font-medium text-gray-900 hover:bg-gray-100 focus:bg-gray-100 focus:outline-hidden dark:text-gray-200 dark:hover:bg-gray-700">
+                                  {{ filter.placeholder }}
+                                </button>
+                              } -->
+                                @for (option of filter.options; track option.value) {
+                                <a (click)="onFilterChange(filter.key, option.value); onApplyFilters()"
+                                    [class.bg-gray-100]="filterValues()[filter.key] === option.value"
+                                    class="block px-4 py-2 text-sm text-gray-700 focus:bg-gray-100 focus:text-gray-900 focus:outline-hidden dark:text-gray-300 dark:focus:bg-white/5 dark:focus:text-white">
+                                    {{ option.label }}
+                                </a>
+
+                                }
+                            </div>
+                        </el-menu>
+                    </el-dropdown>
+                    } @else {
+                    <!-- Other filter types with popover -->
+                    <div class="relative inline-block text-left">
+                        <div>
+                            <button [attr.popovertarget]="'desktop-menu-' + filter.key" type="button"
+                                class="group inline-flex items-center justify-center text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
+                                <span>{{ filter.label }}</span>
+                                @if (getFilterValueCount(filter.key) > 0) {
+                                <span
+                                    class="ml-1.5 rounded-sm bg-gray-200 px-1.5 py-0.5 text-xs font-semibold text-gray-700 tabular-nums dark:bg-gray-700 dark:text-gray-300">{{
+                                    getFilterValueCount(filter.key) }}</span>
+                                }
+                                <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true"
+                                    class="-mr-1 ml-1 size-5 shrink-0 text-gray-400 group-hover:text-gray-500">
+                                    <path
+                                        d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                                        clip-rule="evenodd" fill-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <el-popover [id]="'desktop-menu-' + filter.key" anchor="bottom end" popover
+                            class="origin-top-right overflow-visible rounded-md bg-white p-4 shadow-2xl ring-1 ring-black/5 transition transition-discrete [--anchor-gap:--spacing(2)] backdrop:bg-transparent open:block focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in dark:bg-gray-800 dark:ring-white/10">
+                            <form class="space-y-4">
+                                @if (filter.type === 'multiselect') {
+                                @for (option of filter.options; track option.value) {
+                                <div class="flex gap-3">
+                                    <div class="flex h-5 shrink-0 items-center">
+                                        <div class="group grid size-4 grid-cols-1">
+                                            <input [id]="'desktop-filter-' + filter.key + '-' + option.value"
+                                                type="checkbox"
+                                                [checked]="(filterValues()[filter.key] || []).includes(option.value)"
+                                                (change)="onMultiselectChange(filter.key, option.value, ($any($event.target)).checked); onApplyFilters()"
+                                                class="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:border-gray-600 dark:bg-gray-700" />
+                                            <svg viewBox="0 0 14 14" fill="none"
+                                                class="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white">
+                                                <path d="M3 8L6 11L11 3.5" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    class="opacity-0 group-has-checked:opacity-100" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <label [for]="'desktop-filter-' + filter.key + '-' + option.value"
+                                        class="pr-6 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-gray-200">
+                                        {{ option.label }}
+                                    </label>
+                                </div>
+                                }
+                                }
+
+                                @if (filter.type === 'date') {
+                                <input [id]="'desktop-filter-' + filter.key" type="date"
+                                    [value]="filterValues()[filter.key] || ''"
+                                    (change)="onFilterChange(filter.key, ($any($event.target)).value); onApplyFilters()"
+                                    class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm dark:bg-white/5 dark:text-white dark:ring-gray-700" />
+                                }
+
+                                @if (filter.type === 'daterange') {
+                                <div class="space-y-2">
+                                    <input [id]="'desktop-filter-' + filter.key + '-start'" type="date"
+                                        [value]="filterValues()[filter.key]?.start || ''"
+                                        (change)="onDateRangeChange(filter.key, 'start', ($any($event.target)).value); onApplyFilters()"
+                                        placeholder="Start date"
+                                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm dark:bg-white/5 dark:text-white dark:ring-gray-700" />
+                                    <input [id]="'desktop-filter-' + filter.key + '-end'" type="date"
+                                        [value]="filterValues()[filter.key]?.end || ''"
+                                        (change)="onDateRangeChange(filter.key, 'end', ($any($event.target)).value); onApplyFilters()"
+                                        placeholder="End date"
+                                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm dark:bg-white/5 dark:text-white dark:ring-gray-700" />
+                                </div>
+                                }
+
+                                @if (filter.type === 'text') {
+                                <input [id]="'desktop-filter-' + filter.key" type="text"
+                                    [value]="filterValues()[filter.key] || ''"
+                                    (input)="onFilterChange(filter.key, ($any($event.target)).value)"
+                                    (blur)="onApplyFilters()" [placeholder]="filter.placeholder || ''"
+                                    class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm dark:bg-white/5 dark:text-white dark:ring-gray-700" />
+                                }
+
+                                @if (filter.type === 'number') {
+                                <input [id]="'desktop-filter-' + filter.key" type="number"
+                                    [value]="filterValues()[filter.key] || ''"
+                                    (input)="onFilterChange(filter.key, ($any($event.target)).value)"
+                                    (blur)="onApplyFilters()" [placeholder]="filter.placeholder || ''"
+                                    class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm dark:bg-white/5 dark:text-white dark:ring-gray-700" />
+                                }
+                            </form>
+                        </el-popover>
+                    </div>
+                    }
+                    }
+                </el-popover-group>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+        @if (loading) {
+        <div class="flex items-center justify-center py-12">
+            <svg class="animate-spin h-8 w-8 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+            </svg>
+        </div>
+        } @else if (!data || data.items.length === 0) {
+        <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No data</h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">No records found matching your criteria.</p>
+        </div>
+        } @else {
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-900">
+                <tr>
+                    @for (column of visibleColumns; track trackByKey($index, column)) {
+                    <th scope="col" [style.width]="column.width"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                        @if (column.sortable) {
+                        <button (click)="onSort(column)"
+                            class="group inline-flex items-center gap-x-1 hover:text-gray-700 dark:hover:text-gray-200">
+                            {{ column.label }}
+                            <span
+                                class="ml-2 flex-none rounded text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300">
+                                @if (currentSort()?.field === column.key) {
+                                @if (currentSort()?.order === 'asc') {
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                } @else {
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                }
+                                } @else {
+                                <svg class="h-5 w-5 opacity-0 group-hover:opacity-100" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                }
+                            </span>
+                        </button>
+                        } @else {
+                        {{ column.label }}
+                        }
+                    </th>
+                    }
+                    @if (showActionsColumn) {
+                    <th scope="col" class="relative px-6 py-3">
+                        <span class="sr-only">Actions</span>
+                    </th>
+                    }
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                @for (row of data.items; track trackByIndex($index)) {
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    @for (column of visibleColumns; track trackByKey($index, column)) {
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                        @if (column.cellTemplate) {
+                        <ng-container
+                            *ngTemplateOutlet="column.cellTemplate; context: { $implicit: row, value: getCellValue(row, column) }"></ng-container>
+                        } @else if (column.type === 'link' && column.linkUrl) {
+                        <a [routerLink]="column.linkUrl(row)" class="text-primary-600 hover:text-primary-800 hover:underline dark:text-primary-400 dark:hover:text-primary-300">
+                            {{ getCellValue(row, column) }}
+                        </a>
+                        } @else if (column.type === 'badge') {
+                        <span [class]="getCellClass(column, getCellValue(row, column))">
+                            {{ getCellValue(row, column) }}
+                        </span>
+                        } @else if (column.type === 'date') {
+                        {{ formatDate(getCellValue(row, column)) }}
+                        } @else {
+                        {{ getCellValue(row, column) }}
+                        }
+                    </td>
+                    }
+                    @if (showActionsColumn) {
+                    <td class="px-6 py-4">
+                        <el-dropdown class="inline-block">
+                            <button
+                                class="flex items-center rounded-full text-gray-400 hover:text-gray-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:text-gray-400 dark:hover:text-gray-300 dark:focus-visible:outline-indigo-500">
+                                <span class="sr-only">Open options</span>
+                                <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true"
+                                    class="size-5">
+                                    <path
+                                        d="M10 3a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM10 8.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM11.5 15.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0Z" />
+                                </svg>
+                            </button>
+
+                            <el-menu anchor="bottom end" popover
+                                class="w-32 origin-top-right rounded-md bg-white shadow-lg outline-1 outline-black/5 transition transition-discrete [--anchor-gap:--spacing(2)] data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in dark:bg-gray-800 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10">
+                                <div class="py-1">
+                                    @for (action of config.actions; track action.label) {
+                                    @if (isActionVisible(action, row)) {
+                                    <a (click)="onActionClick(action, row)"
+                                        class="block px-4 py-2 text-sm text-gray-700 focus:bg-gray-100 focus:text-gray-900 focus:outline-hidden dark:text-gray-300 dark:focus:bg-white/5 dark:focus:text-white">
+                                        {{ action.label }}
+                                    </a>
+                                    }
+                                    }
+                                </div>
+                            </el-menu>
+                        </el-dropdown>
+                    </td>
+                    }
+                </tr>
+                }
+            </tbody>
+        </table>
+        }
+    </div>
+
+    <!-- Pagination -->
+    @if (data && data.items.length > 0) {
+    <app-pagination [currentPage]="data.page" [totalPages]="data.totalPages" [totalItems]="data.total"
+        [pageSize]="data.pageSize" (pageChange)="onPageChange($event)">
+    </app-pagination>
+    }
+</div>

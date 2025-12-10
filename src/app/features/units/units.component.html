@@ -1,0 +1,19 @@
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
+
+  <app-listing-page-header
+    title="Units"
+    description="Manage units in your organization"
+    actionLabel="Add Unit"
+    (actionClick)="onAddUnit()">
+  </app-listing-page-header>
+
+  <div class="mt-8">
+    <app-datatable
+      [config]="tableConfig"
+      [data]="unitData()"
+      [loading]="loading()"
+      (searchChange)="onSearchChange($event)">
+    </app-datatable>
+  </div>
+</div>

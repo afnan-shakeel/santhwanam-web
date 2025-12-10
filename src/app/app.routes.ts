@@ -46,6 +46,43 @@ export const routes: Routes = [
       {
         path: 'calendar',
         loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent)
+      },
+      {
+        path: 'users',
+        loadComponent: () => import('./features/users/users.component').then((m) => m.UsersComponent)
+      },
+      {
+        path: 'permissions',
+        loadComponent: () => import('./features/permissions/permissions.component').then((m) => m.PermissionsComponent)
+      },
+      {
+        path: 'roles',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/roles/roles.component').then((m) => m.RolesComponent)
+          },
+          {
+            path: 'new',
+            loadComponent: () => import('./features/roles/role-form/role-form.component').then((m) => m.RoleFormComponent)
+          },
+          {
+            path: ':id',
+            loadComponent: () => import('./features/roles/role-form/role-form.component').then((m) => m.RoleFormComponent)
+          }
+        ]
+      },
+      {
+        path: 'forums',
+        loadComponent: () => import('./features/forums/forums.component').then((m) => m.ForumsComponent)
+      },
+      {
+        path: 'areas',
+        loadComponent: () => import('./features/areas/areas.component').then((m) => m.AreasComponent)
+      },
+      {
+        path: 'units',
+        loadComponent: () => import('./features/units/units.component').then((m) => m.UnitsComponent)
       }
     ]
   },

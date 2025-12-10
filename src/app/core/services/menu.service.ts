@@ -13,8 +13,12 @@ export interface MenuItem {
 export class MenuService {
   private menuItems = signal<MenuItem[]>([
     { label: 'Admin', route: '/admin', active: true },
-    { label: 'Users', route: '/user', active: true },
-    { label: 'Organization Bodies', route: '/organization-bodies', active: true },
+    { label: 'Permissions', route: '/permissions', active: false },
+    { label: 'Roles', route: '/roles', active: false },
+    { label: 'Users', route: '/users', active: false },
+    { label: 'Forums', route: '/forums', active: true },
+    { label: 'Areas', route: '/areas', active: true },
+    { label: 'Units', route: '/units', active: true },
     { label: 'Agents', route: '/agents', active: false },
     { label: 'Members', route: '/members', active: false },
     { label: 'Death Claims', route: '/claims', active: false },

@@ -29,6 +29,7 @@ This is an Angular 20 standalone application with signals-first state management
 - Register routes in `src/app/app.routes.ts`
 - Use signals for reactive state management
 - Keep components focused and single-responsibility
+- **Use Angular 20+ control flow syntax**: `@if`, `@else`, `@for`, `@switch` instead of `*ngIf`, `*ngFor`, `*ngSwitch`
 
 ### State Management
 - Use Angular signals for local and shared state
@@ -60,6 +61,13 @@ This is an Angular 20 standalone application with signals-first state management
 - Add comments only for non-obvious logic
 - Use TypeScript strict mode features
 - Prefer functional programming patterns where appropriate
+
+### Template Syntax (Angular 20+)
+- Use `@if (condition) { } @else { }` instead of `*ngIf`
+- Use `@for (item of items; track item.id) { }` instead of `*ngFor`
+- Use `@switch (value) { @case (x) { } @default { } }` instead of `*ngSwitch`
+- Always provide a `track` expression in `@for` loops for performance
+- Create separate `.html` and `.css` files instead of inline templates (except for very small components)
 
 ### Best Practices
 - Avoid adding new dependencies unless necessary

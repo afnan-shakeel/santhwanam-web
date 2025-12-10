@@ -1,0 +1,19 @@
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
+
+  <app-listing-page-header
+    title="Areas"
+    description="Manage areas in your organization"
+    actionLabel="Add Area"
+    (actionClick)="onAddArea()">
+  </app-listing-page-header>
+
+  <div class="mt-8">
+    <app-datatable
+      [config]="tableConfig"
+      [data]="areaData()"
+      [loading]="loading()"
+      (searchChange)="onSearchChange($event)">
+    </app-datatable>
+  </div>
+</div>

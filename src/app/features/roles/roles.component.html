@@ -1,0 +1,19 @@
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
+
+  <app-listing-page-header
+    title="Roles"
+    description="Manage user roles and role assignments"
+    actionLabel="Add Role"
+    (actionClick)="onAddRole()">
+  </app-listing-page-header>
+
+  <div class="mt-8">
+    <app-datatable
+      [config]="tableConfig"
+      [data]="roleData()"
+      [loading]="loading()"
+      (searchChange)="onSearchChange($event)">
+    </app-datatable>
+  </div>
+</div>

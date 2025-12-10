@@ -1,0 +1,159 @@
+import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+
+import { BreadcrumbsComponent, BreadcrumbItem } from '../../shared/components/breadcrumbs/breadcrumbs.component';
+import { ListingPageHeaderComponent } from '../../shared/components/listing-page-header/listing-page-header.component';
+import { DatatableComponent } from '../../shared/components/datatable/datatable.component';
+import { DataTableConfig } from '../../shared/models/datatable.model';
+import { ForumService } from '../../core/services/forum.service';
+import { Forum } from '../../shared/models/forum.model';
+import { SearchRequest, SearchResponse } from '../../shared/models/search.model';
+
+@Component({
+  selector: 'app-forums',
+  standalone: true,
+  imports: [
+    CommonModule,
+    BreadcrumbsComponent,
+    ListingPageHeaderComponent,
+    DatatableComponent
+  ],
+  templateUrl: './forums.component.html',
+  styleUrls: ['./forums.component.css']
+})
+export class ForumsComponent {
+  private forumService = inject(ForumService);
+  private router = inject(Router);
+
+  forumData = signal<SearchResponse<Forum>>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+    totalPages: 0
+  });
+
+  loading = signal(false);
+
+  breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Forums', current: true }
+  ];
+
+  tableConfig: DataTableConfig<Forum> = {
+    columns: [
+      {
+        key: 'forumName',
+        label: 'Forum Name',
+        sortable: true
+      },
+      {
+        key: 'description',
+        label: 'Description',
+        sortable: false,
+        format: (value: any) => value || '-'
+      },
+      {
+        key: 'isActive',
+        label: 'Status',
+        sortable: true,
+        type: 'badge',
+        valueMapping: {
+          'true': 'Active',
+          'false': 'Inactive'
+        },
+        format: (value: any) => value ? 'Active' : 'Inactive'
+      },
+      {
+        key: 'createdAt',
+        label: 'Created',
+        sortable: true,
+        type: 'date'
+      }
+    ],
+    actions: [
+      {
+        label: 'View',
+        callback: (forum: Forum) => this.onViewForum(forum)
+      },
+      {
+        label: 'Edit',
+        callback: (forum: Forum) => this.onEditForum(forum)
+      }
+    ],
+    showActions: true,
+    pageSize: 10,
+    searchFields: ['forumName', 'description'],
+    filters: [
+      {
+        key: 'isActive',
+        label: 'Status',
+        type: 'select',
+        options: [
+          { label: 'All', value: '' },
+          { label: 'Active', value: 'true' },
+          { label: 'Inactive', value: 'false' }
+        ]
+      },
+      {
+        key: 'createdAt',
+        label: 'Created Date',
+        type: 'date'
+      }
+    ]
+  };
+
+  ngOnInit(): void {
+    this.loadForums();
+  }
+
+  onSearchChange(request: SearchRequest): void {
+    this.loading.set(true);
+    this.forumService.searchForums(request).subscribe({
+      next: (response) => {
+        this.forumData.set(response);
+        this.loading.set(false);
+      },
+      error: (error) => {
+        console.error('Failed to load forums:', error);
+        this.loading.set(false);
+      }
+    });
+  }
+
+  loadForums(): void {
+    this.loading.set(true);
+    const request: SearchRequest = {
+      page: 1,
+      pageSize: 10,
+      sortBy: 'createdAt',
+      sortOrder: 'desc'
+    };
+
+    this.forumService.searchForums(request).subscribe({
+      next: (response) => {
+        this.forumData.set(response);
+        this.loading.set(false);
+      },
+      error: (error) => {
+        console.error('Failed to load forums:', error);
+        this.loading.set(false);
+      }
+    });
+  }
+
+  onViewForum(forum: Forum): void {
+    console.log('View forum:', forum);
+    this.router.navigate(['/forums', forum.forumId]);
+  }
+
+  onEditForum(forum: Forum): void {
+    console.log('Edit forum:', forum);
+    this.router.navigate(['/forums', forum.forumId]);
+  }
+
+  protected onAddForum(): void {
+    console.log('Add forum clicked');
+    this.router.navigate(['/forums', 'new']);
+  }
+}

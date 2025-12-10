@@ -1,0 +1,19 @@
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
+
+  <app-listing-page-header
+    title="Permissions"
+    description="Manage system permissions and access controls"
+    buttonText="Add Permission"
+    (buttonClick)="onAddPermission()">
+  </app-listing-page-header>
+
+  <div class="mt-8">
+    <app-datatable
+      [config]="tableConfig"
+      [data]="permissionData()"
+      [loading]="loading()"
+      (searchChange)="onSearchChange($event)">
+    </app-datatable>
+  </div>
+</div>

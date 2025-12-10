@@ -1,0 +1,13 @@
+/* Datatable styles */
+:host { display: block; }
+
+button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+table {
+  border-collapse: collapse;
+}

@@ -1,0 +1,22 @@
+<div>
+  <div class="mt-1 pb-4">
+    <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
+  </div>
+  <div class="mb-6">
+    <app-listing-page-header
+      title="Users"
+      description="A list of all the users in your account including their name, title, email and role."
+      actionLabel="Add user"
+      (actionClick)="onAddUser()">
+    </app-listing-page-header>
+  </div>
+
+  <div class="bg-white rounded-lg shadow">
+    <app-datatable
+      [config]="tableConfig"
+      [data]="userData()"
+      [loading]="loading()"
+      (searchChange)="onSearchChange($event)">
+    </app-datatable>
+  </div>
+</div>  

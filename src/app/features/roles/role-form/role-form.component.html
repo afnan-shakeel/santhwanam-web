@@ -1,0 +1,216 @@
+<div class="container mx-auto px-4 py-6 max-w-6xl">
+  <!-- Breadcrumbs -->
+  <app-breadcrumbs [items]="breadcrumbs()" class="mb-6" />
+
+  <!-- Page Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+      @if (isEditMode()) {
+        Edit Role
+      } @else {
+        Create New Role
+      }
+    </h1>
+    <p class="text-sm text-gray-600 dark:text-gray-400">
+      @if (isEditMode()) {
+        Update role information and permissions
+      } @else {
+        Create a new role with specific permissions
+      }
+    </p>
+  </div>
+
+  <!-- Form Card -->
+  @if (loading()) {
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center">
+      <p class="text-gray-600 dark:text-gray-400">Loading role...</p>
+    </div>
+  } @else {
+    <form [formGroup]="roleForm" (ngSubmit)="onSubmit()">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <!-- Basic Information Section -->
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+            Basic Information
+          </h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Role Code -->
+            <app-input
+              label="Role Code"
+              placeholder="Enter role code"
+              [required]="true"
+              formControlName="roleCode"
+              [hint]="'Unique identifier for this role'"
+            />
+
+            <!-- Role Name -->
+            <app-input
+              label="Role Name"
+              placeholder="Enter role name"
+              [required]="true"
+              formControlName="roleName"
+              [hint]="'Display name for this role'"
+            />
+
+            <!-- Scope Type -->
+            <app-select
+              label="Scope Type"
+              [required]="true"
+              [options]="scopeTypeOptions"
+              formControlName="scopeType"
+              [hint]="'Define the scope of this role'"
+            />
+
+            <!-- System Role Toggle -->
+            <div class="flex items-center pt-6">
+              <app-checkbox
+                label="System Role"
+                formControlName="isSystemRole"
+                description="System roles cannot be deleted"
+              />
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="mt-6">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Description
+            </label>
+            <textarea
+              formControlName="description"
+              rows="3"
+              placeholder="Enter role description"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+            ></textarea>
+            @if (roleForm.get('description')?.errors?.['maxlength']) {
+              <p class="mt-1 text-sm text-red-600 dark:text-red-400">
+                Description must not exceed 500 characters
+              </p>
+            }
+          </div>
+        </div>
+
+        <!-- Permissions Section -->
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-lg font-medium text-gray-900 dark:text-white">
+                Permissions
+              </h2>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Select permissions for this role. Click module name to select/deselect all permissions in that module.
+              </p>
+            </div>
+            <div class="text-sm font-medium text-primary-600 dark:text-primary-400">
+              {{ selectedPermissionsCount() }} selected
+            </div>
+          </div>
+
+          @if (permissionGroups().length === 0) {
+            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+              Loading permissions...
+            </div>
+          } @else {
+            <div class="space-y-4">
+              @for (group of permissionGroups(); track group.module) {
+                <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                  <!-- Module Header -->
+                  <button
+                    type="button"
+                    (click)="onModuleCheckboxChange(group, !group.allSelected)"
+                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-150 flex items-center justify-between cursor-pointer"
+                  >
+                    <div class="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        [checked]="group.allSelected"
+                        (click)="$event.stopPropagation()"
+                        (change)="onModuleCheckboxChange(group, !group.allSelected)"
+                        class="h-5 w-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 focus:ring-2"
+                      />
+                      <span class="font-medium text-gray-900 dark:text-white">
+                        {{ group.module }}
+                      </span>
+                      <span class="text-sm text-gray-500 dark:text-gray-400">
+                        ({{ group.permissions.length }} permissions)
+                      </span>
+                    </div>
+                    <svg
+                      class="w-5 h-5 text-gray-400 transition-transform"
+                      [class.rotate-180]="group.allSelected"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  <!-- Permissions List -->
+                  <div class="p-4 bg-white dark:bg-gray-800">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      @for (permission of group.permissions; track permission.permissionId) {
+                        <div class="flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            [checked]="isPermissionSelected(permission.permissionId)"
+                            (change)="onPermissionCheckboxChange(permission.permissionId, !isPermissionSelected(permission.permissionId))"
+                            [id]="'perm-' + permission.permissionId"
+                            class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 focus:ring-2"
+                          />
+                          <div class="flex-1 min-w-0">
+                            <label
+                              [for]="'perm-' + permission.permissionId"
+                              class="block text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
+                            >
+                              {{ permission.permissionName }}
+                            </label>
+                            @if (permission.description) {
+                              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                {{ permission.description }}
+                              </p>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Form Actions -->
+        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+          <button
+            type="button"
+            (click)="onCancel()"
+            [disabled]="saving()"
+            class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 ring-1 ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            [disabled]="saving() || roleForm.invalid"
+            class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            @if (saving()) {
+              <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Saving...
+            } @else if (isEditMode()) {
+              Update Role
+            } @else {
+              Create Role
+            }
+          </button>
+        </div>
+      </div>
+    </form>
+  }
+</div>
