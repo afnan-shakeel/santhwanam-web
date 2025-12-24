@@ -1,0 +1,146 @@
+<div class="relative">
+  <!-- Label -->
+  @if (label) {
+    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      {{ label }}
+      @if (required) {
+        <span class="text-red-500">*</span>
+      }
+    </label>
+  }
+
+  <!-- Select Button -->
+  <button
+    #dropdownButton
+    type="button"
+    (click)="toggleDropdown()"
+    [disabled]="disabled"
+    class="relative w-full cursor-pointer rounded-lg border bg-white py-2.5 pl-3 pr-10 text-left shadow-sm transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 dark:bg-gray-900 dark:border-gray-700 dark:disabled:bg-gray-800"
+    [class.border-red-300]="error"
+    [class.border-gray-300]="!error"
+    [class.dark:border-red-600]="error">
+    
+    <span class="flex items-center gap-2 flex-wrap">
+      @if (mode === 'multiple' && selectedValues().length > 0) {
+        <!-- Multiple selection badges -->
+        @for (label of selectedLabels(); track label) {
+          <span class="inline-flex items-center gap-1 rounded-md bg-primary-50 px-2 py-0.5 text-xs font-medium text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
+            {{ label }}
+            <button
+              type="button"
+              (click)="removeValue(selectedValues()[selectedLabels().indexOf(label)], $event)"
+              class="inline-flex items-center justify-center rounded hover:bg-primary-200 dark:hover:bg-primary-800">
+              <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+              </svg>
+            </button>
+          </span>
+        }
+      } @else if (displayValue()) {
+        <!-- Single selection display -->
+        <span class="block truncate text-gray-900 dark:text-white">{{ displayValue() }}</span>
+      } @else {
+        <!-- Placeholder -->
+        <span class="block truncate text-gray-500 dark:text-gray-400">{{ placeholder }}</span>
+      }
+    </span>
+
+    <!-- Right icons -->
+    <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 gap-1">
+      @if (isLoadingDebounced()) {
+        <svg class="animate-spin h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      }
+      @if (selectedValues().length > 0 && !disabled) {
+        <button
+          type="button"
+          (click)="clearAll($event)"
+          class="inline-flex items-center justify-center rounded hover:bg-gray-100 dark:hover:bg-gray-800 p-0.5">
+          <svg class="h-4 w-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+          </svg>
+        </button>
+      }
+      <svg class="h-5 w-5 text-gray-400 transition-transform" [class.rotate-180]="isOpen()" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+      </svg>
+    </span>
+  </button>
+
+  <!-- Dropdown -->
+  @if (isOpen()) {
+    <div class="absolute z-10 mt-1 w-full rounded-lg border border-gray-300 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
+      <!-- Search Input -->
+      <div class="p-2 border-b border-gray-200 dark:border-gray-700">
+        <div class="relative">
+          <input
+            #searchInput
+            type="text"
+            [value]="searchTerm()"
+            (input)="onSearchInput($event)"
+            placeholder="Search..."
+            class="w-full rounded-md border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+          <svg class="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Options List -->
+      <ul 
+        class="overflow-auto py-1"
+        [style.max-height]="maxHeight">
+        @if (isLoadingDebounced()) {
+          <li class="px-3 py-2 text-center text-sm text-gray-500 dark:text-gray-400">
+            <div class="flex items-center justify-center gap-2">
+              <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Loading...
+            </div>
+          </li>
+        } @else if (filteredOptions().length === 0) {
+          <li class="px-3 py-2 text-center text-sm text-gray-500 dark:text-gray-400">
+            No options found
+          </li>
+        } @else {
+          @for (option of filteredOptions(); track option.value) {
+            <li>
+              <button
+                type="button"
+                (click)="selectOption(option)"
+                [disabled]="option.disabled"
+                class="relative w-full cursor-pointer select-none py-2 pl-3 pr-9 text-left text-sm transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-gray-800"
+                [class.bg-primary-50]="isSelected(option.value)"
+                [class.dark:bg-primary-900/20]="isSelected(option.value)">
+                
+                <span class="block truncate" [class.font-medium]="isSelected(option.value)">
+                  {{ option.label }}
+                </span>
+
+                @if (isSelected(option.value)) {
+                  <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-primary-600 dark:text-primary-400">
+                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                }
+              </button>
+            </li>
+          }
+        }
+      </ul>
+    </div>
+  }
+
+  <!-- Hint/Error Text -->
+  @if (hint && !error) {
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ hint }}</p>
+  }
+  @if (error) {
+    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+  }
+</div>

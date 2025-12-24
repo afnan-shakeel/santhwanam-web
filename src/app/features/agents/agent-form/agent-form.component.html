@@ -1,0 +1,288 @@
+<app-modal
+  [id]="'agent-form-modal'"
+  [title]="isEditMode() ? (isDraftMode() ? 'Complete Agent Registration' : 'Edit Agent') : 'Register New Agent'"
+  [size]="'xl'"
+  [open]="open"
+  (openChange)="openChange.emit($event)"
+>
+  @if (loading()) {
+    <div class="flex items-center justify-center py-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  } @else {
+    <form [formGroup]="agentForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      
+      <!-- Organization Section -->
+      <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Organization Details</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Forum -->
+          <app-search-select
+            label="Forum"
+            placeholder="Search and select forum"
+            [required]="true"
+            [mode]="'single'"
+            [options]="forumOptions()"
+            [loading]="forumsLoading()"
+            formControlName="forumId"
+            [error]="getFieldError('forumId')"
+            [disabled]="isEditMode() && !isDraftMode()"
+            hint="Select forum to filter areas"
+            (search)="onForumSearch($event)"
+          ></app-search-select>
+
+          <!-- Area -->
+          <app-search-select
+            label="Area"
+            placeholder="Search and select area"
+            [required]="true"
+            [mode]="'single'"
+            [options]="areaOptions()"
+            [loading]="areasLoading()"
+            formControlName="areaId"
+            [error]="getFieldError('areaId')"
+            [disabled]="isEditMode() && !isDraftMode()"
+            hint="Select area to filter units"
+            (search)="onAreaSearch($event)"
+          ></app-search-select>
+
+          <!-- Unit -->
+          <app-search-select
+            label="Unit"
+            placeholder="Search and select unit"
+            [required]="true"
+            [mode]="'single'"
+            [options]="unitOptions()"
+            [loading]="unitsLoading()"
+            formControlName="unitId"
+            [error]="getFieldError('unitId')"
+            [disabled]="isEditMode() && !isDraftMode()"
+            hint="Unit for this agent"
+            (search)="onUnitSearch($event)"
+          ></app-search-select>
+        </div>
+      </div>
+
+      <!-- Agent Identification -->
+      <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Agent Identification</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Agent Code -->
+          <app-input
+            label="Agent Code"
+            placeholder="Enter agent code"
+            [required]="true"
+            formControlName="agentCode"
+            [error]="getFieldError('agentCode')"
+            [disabled]="isEditMode() && !isDraftMode()"
+            hint="Unique identifier for the agent"
+          ></app-input>
+
+          <!-- Joined Date -->
+          <app-input
+            label="Joined Date"
+            type="date"
+            [required]="true"
+            formControlName="joinedDate"
+            [error]="getFieldError('joinedDate')"
+            [disabled]="isEditMode() && !isDraftMode()"
+            hint="Date when agent joined"
+          ></app-input>
+        </div>
+      </div>
+
+      <!-- Personal Information -->
+      <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Personal Information</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- First Name -->
+          <app-input
+            label="First Name"
+            placeholder="Enter first name"
+            [required]="true"
+            formControlName="firstName"
+            [error]="getFieldError('firstName')"
+          ></app-input>
+
+          <!-- Middle Name -->
+          <app-input
+            label="Middle Name"
+            placeholder="Enter middle name (optional)"
+            formControlName="middleName"
+            [error]="getFieldError('middleName')"
+          ></app-input>
+
+          <!-- Last Name -->
+          <app-input
+            label="Last Name"
+            placeholder="Enter last name"
+            [required]="true"
+            formControlName="lastName"
+            [error]="getFieldError('lastName')"
+          ></app-input>
+
+          <!-- Date of Birth -->
+          <app-input
+            label="Date of Birth"
+            type="date"
+            [required]="true"
+            formControlName="dateOfBirth"
+            [error]="getFieldError('dateOfBirth')"
+            [disabled]="isEditMode() && !isDraftMode()"
+          ></app-input>
+
+          <!-- Gender -->
+          <app-select
+            label="Gender"
+            [required]="true"
+            [options]="genderOptions"
+            formControlName="gender"
+            [error]="getFieldError('gender')"
+            [disabled]="isEditMode() && !isDraftMode()"
+          ></app-select>
+        </div>
+      </div>
+
+      <!-- Contact Information -->
+      <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Contact Information</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Contact Number -->
+          <app-input
+            label="Contact Number"
+            placeholder="Enter contact number"
+            [required]="true"
+            formControlName="contactNumber"
+            [error]="getFieldError('contactNumber')"
+          ></app-input>
+
+          <!-- Alternate Contact Number -->
+          <app-input
+            label="Alternate Contact Number"
+            placeholder="Enter alternate contact number (optional)"
+            formControlName="alternateContactNumber"
+            [error]="getFieldError('alternateContactNumber')"
+          ></app-input>
+
+          <!-- Email -->
+          <app-input
+            label="Email"
+            type="email"
+            placeholder="Enter email address"
+            [required]="true"
+            formControlName="email"
+            [error]="getFieldError('email')"
+            [disabled]="isEditMode() && !isDraftMode()"
+          ></app-input>
+        </div>
+      </div>
+
+      <!-- Address Information -->
+      <div>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Address Information</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Address Line 1 -->
+          <app-input
+            label="Address Line 1"
+            placeholder="Enter address line 1 (optional)"
+            formControlName="addressLine1"
+            [error]="getFieldError('addressLine1')"
+          ></app-input>
+
+          <!-- Address Line 2 -->
+          <app-input
+            label="Address Line 2"
+            placeholder="Enter address line 2 (optional)"
+            formControlName="addressLine2"
+            [error]="getFieldError('addressLine2')"
+          ></app-input>
+
+          <!-- City -->
+          <app-input
+            label="City"
+            placeholder="Enter city (optional)"
+            formControlName="city"
+            [error]="getFieldError('city')"
+          ></app-input>
+
+          <!-- State -->
+          <app-input
+            label="State"
+            placeholder="Enter state (optional)"
+            formControlName="state"
+            [error]="getFieldError('state')"
+          ></app-input>
+
+          <!-- Postal Code -->
+          <app-input
+            label="Postal Code"
+            placeholder="Enter postal code (optional)"
+            formControlName="postalCode"
+            [error]="getFieldError('postalCode')"
+          ></app-input>
+
+          <!-- Country -->
+          <app-input
+            label="Country"
+            placeholder="Enter country (optional)"
+            formControlName="country"
+            [error]="getFieldError('country')"
+          ></app-input>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div>
+          @if (!isEditMode() || isDraftMode()) {
+            <button
+              type="button"
+              (click)="onSaveAsDraft()"
+              [disabled]="saving()"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              @if (saving()) {
+                <span class="flex items-center">
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Saving...
+                </span>
+              } @else {
+                Save as Draft
+              }
+            </button>
+          }
+        </div>
+        <div class="flex space-x-3">
+          <button
+            type="button"
+            (click)="onCancel()"
+            [disabled]="saving() || submitting()"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            [disabled]="submitting() || saving() || !isFormValid()"
+            class="px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            @if (submitting()) {
+              <span class="flex items-center">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {{ isDraftMode() ? 'Submitting...' : 'Updating...' }}
+              </span>
+            } @else {
+              {{ isDraftMode() ? 'Submit for Approval' : (isEditMode() ? 'Update Agent' : 'Submit for Approval') }}
+            }
+          </button>
+        </div>
+      </div>
+    </form>
+  }
+</app-modal>

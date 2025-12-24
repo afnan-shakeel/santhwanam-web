@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 
 import { HttpService } from '../http/http.service';
 import { SearchRequest, SearchResponse } from '../../shared/models/search.model';
-import { Unit } from '../../shared/models/unit.model';
+import { Unit, CreateUnitRequest, UpdateUnitRequest } from '../../shared/models/unit.model';
 
 @Injectable({
   providedIn: 'root'
@@ -19,11 +19,11 @@ export class UnitService {
     return this.http.get<Unit>(`/organization-bodies/units/${unitId}`);
   }
 
-  createUnit(unit: Partial<Unit>): Observable<Unit> {
+  createUnit(unit: CreateUnitRequest): Observable<Unit> {
     return this.http.post<Unit>('/organization-bodies/units', unit);
   }
 
-  updateUnit(unitId: string, unit: Partial<Unit>): Observable<Unit> {
+  updateUnit(unitId: string, unit: UpdateUnitRequest): Observable<Unit> {
     return this.http.patch<Unit>(`/organization-bodies/units/${unitId}`, unit);
   }
 

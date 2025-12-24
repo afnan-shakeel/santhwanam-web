@@ -1,0 +1,27 @@
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
+
+  <app-listing-page-header
+    title="Agents"
+    description="Manage agents"
+    actionLabel="Add Agent"
+    (actionClick)="onAddAgent()">
+  </app-listing-page-header>
+
+  <div class="mt-8">
+    <app-datatable
+      [config]="tableConfig"
+      [data]="agentData()"
+      [loading]="loading()"
+      (searchChange)="onSearchChange($event)">
+    </app-datatable>
+  </div>
+</div>
+
+<app-agent-form
+  [agentId]="selectedAgentId()"
+  [open]="showAgentForm()"
+  (openChange)="showAgentForm.set($event)"
+  (saved)="onAgentSaved($event)"
+  (cancelled)="onFormCancelled()">
+</app-agent-form>

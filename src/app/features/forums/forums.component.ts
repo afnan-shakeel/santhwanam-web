@@ -9,6 +9,7 @@ import { DataTableConfig } from '../../shared/models/datatable.model';
 import { ForumService } from '../../core/services/forum.service';
 import { Forum } from '../../shared/models/forum.model';
 import { SearchRequest, SearchResponse } from '../../shared/models/search.model';
+import { ForumFormComponent } from './forum-form/forum-form.component';
 
 @Component({
   selector: 'app-forums',
@@ -17,7 +18,8 @@ import { SearchRequest, SearchResponse } from '../../shared/models/search.model'
     CommonModule,
     BreadcrumbsComponent,
     ListingPageHeaderComponent,
-    DatatableComponent
+    DatatableComponent,
+    ForumFormComponent
   ],
   templateUrl: './forums.component.html',
   styleUrls: ['./forums.component.css']
@@ -35,6 +37,8 @@ export class ForumsComponent {
   });
 
   loading = signal(false);
+  showForumForm = signal(false);
+  selectedForumId = signal<string | undefined>(undefined);
 
   breadcrumbs: BreadcrumbItem[] = [
     { label: 'Forums', current: true }
@@ -149,11 +153,24 @@ export class ForumsComponent {
 
   onEditForum(forum: Forum): void {
     console.log('Edit forum:', forum);
-    this.router.navigate(['/forums', forum.forumId]);
+    this.selectedForumId.set(forum.forumId);
+    this.showForumForm.set(true);
   }
 
   protected onAddForum(): void {
     console.log('Add forum clicked');
-    this.router.navigate(['/forums', 'new']);
+    this.selectedForumId.set(undefined);
+    this.showForumForm.set(true);
+  }
+
+  onForumSaved(): void {
+    this.showForumForm.set(false);
+    this.selectedForumId.set(undefined);
+    this.loadForums();
+  }
+
+  onForumFormCancelled(): void {
+    this.showForumForm.set(false);
+    this.selectedForumId.set(undefined);
   }
 }

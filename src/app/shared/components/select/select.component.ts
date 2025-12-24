@@ -47,6 +47,7 @@ export class SelectComponent<T = string> implements ControlValueAccessor {
   @Input() error = '';
 
   @Output() blur = new EventEmitter<void>();
+  @Output() valueChange = new EventEmitter<T | null>();
 
   value: T | null = null;
   disabled = false;
@@ -90,6 +91,7 @@ export class SelectComponent<T = string> implements ControlValueAccessor {
     const selected = this.options.find((o) => `${o.value}` === value)?.value ?? null;
     this.value = selected;
     this.onChange(selected);
+    this.valueChange.emit(selected);
   }
 
   handleBlur(): void {

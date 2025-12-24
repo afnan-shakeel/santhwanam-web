@@ -1,0 +1,208 @@
+<div class="space-y-6">
+  <form [formGroup]="personalForm" class="space-y-6">
+    
+    <!-- Personal Information Section -->
+    <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Personal Information</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <app-input
+          label="First Name"
+          placeholder="Enter first name"
+          formControlName="firstName"
+          [required]="true"
+          [error]="getFieldError('firstName')"
+        ></app-input>
+
+        <app-input
+          label="Middle Name"
+          placeholder="Enter middle name (optional)"
+          formControlName="middleName"
+          [error]="getFieldError('middleName')"
+        ></app-input>
+
+        <app-input
+          label="Last Name"
+          placeholder="Enter last name"
+          formControlName="lastName"
+          [required]="true"
+          [error]="getFieldError('lastName')"
+        ></app-input>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+        <app-input
+          label="Date of Birth"
+          type="date"
+          formControlName="dateOfBirth"
+          [required]="true"
+          hint="Member must be at least 18 years old"
+          [error]="getFieldError('dateOfBirth')"
+        ></app-input>
+
+        <app-select
+          label="Gender"
+          placeholder="Select gender"
+          formControlName="gender"
+          [options]="genderOptions"
+          [required]="true"
+          [error]="getFieldError('gender')"
+        ></app-select>
+      </div>
+    </div>
+
+    <!-- Contact Information Section -->
+    <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Contact Information</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <app-input
+          label="Contact Number"
+          type="text"
+          placeholder="+91XXXXXXXXXX"
+          formControlName="contactNumber"
+          [required]="true"
+          hint="10-20 digits including country code"
+          [error]="getFieldError('contactNumber')"
+        ></app-input>
+
+        <app-input
+          label="Alternate Contact Number"
+          type="text"
+          placeholder="+91XXXXXXXXXX (optional)"
+          formControlName="alternateContactNumber"
+          [error]="getFieldError('alternateContactNumber')"
+        ></app-input>
+      </div>
+
+      <div class="mt-4">
+        <app-input
+          label="Email"
+          type="email"
+          placeholder="email@example.com (optional)"
+          formControlName="email"
+          [error]="getFieldError('email')"
+        ></app-input>
+      </div>
+    </div>
+
+    <!-- Address Information Section -->
+    <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Address Information</h3>
+      
+      <div class="space-y-4">
+        <app-input
+          label="Address Line 1"
+          placeholder="Street address, building name, etc."
+          formControlName="addressLine1"
+          [required]="true"
+          [error]="getFieldError('addressLine1')"
+        ></app-input>
+
+        <app-input
+          label="Address Line 2"
+          placeholder="Apartment, suite, floor, etc. (optional)"
+          formControlName="addressLine2"
+          [error]="getFieldError('addressLine2')"
+        ></app-input>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <app-input
+            label="City"
+            placeholder="Enter city"
+            formControlName="city"
+            [required]="true"
+            [error]="getFieldError('city')"
+          ></app-input>
+
+          <app-input
+            label="State"
+            placeholder="Enter state"
+            formControlName="state"
+            [required]="true"
+            [error]="getFieldError('state')"
+          ></app-input>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <app-input
+            label="Postal Code"
+            placeholder="Enter postal code"
+            formControlName="postalCode"
+            [required]="true"
+            [error]="getFieldError('postalCode')"
+          ></app-input>
+
+          <app-input
+            label="Country"
+            placeholder="Enter country"
+            formControlName="country"
+            [required]="true"
+            [error]="getFieldError('country')"
+          ></app-input>
+        </div>
+      </div>
+    </div>
+
+    <!-- Membership Details Section -->
+    <div class="pb-6">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Membership Details</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <app-select
+          label="Membership Tier"
+          placeholder="Select tier"
+          formControlName="tierId"
+          [options]="tierOptions()"
+          [required]="true"
+          [error]="getFieldError('tierId')"
+        ></app-select>
+
+        <app-search-select
+          label="Unit"
+          placeholder="Search for unit..."
+          mode="single"
+          formControlName="unitId"
+          [options]="unitOptions()"
+          [loading]="loadingUnits()"
+          [required]="true"
+          [error]="getFieldError('unitId')"
+          (search)="onSearchUnits($event)"
+        ></app-search-select>
+
+        <app-search-select
+          label="Agent"
+          placeholder="Search for agent..."
+          mode="single"
+          formControlName="agentId"
+          [options]="agentOptions()"
+          [loading]="loadingAgents()"
+          [required]="true"
+          [error]="getFieldError('agentId')"
+          (search)="onSearchAgents($event)"
+        ></app-search-select>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
+      <app-button
+        label="x Save as Draft"
+        variant="secondary"
+        (click)="onSaveDraft()"
+        [disabled]="loading()"
+      >
+        Save as Draft
+      </app-button>
+
+      <app-button
+        label="x Continue to Nominees"
+        variant="primary"
+        (click)="onContinue()"
+        [disabled]="loading()"
+      >
+        Continue to Nominees
+      </app-button>
+    </div>
+  </form>
+</div>

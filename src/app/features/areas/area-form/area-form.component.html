@@ -1,0 +1,106 @@
+<app-modal
+  [id]="'area-form-modal'"
+  [title]="isEditMode() ? 'Edit Area' : 'Create New Area'"
+  [size]="'lg'"
+  [open]="open"
+  (openChange)="openChange.emit($event)"
+>
+  @if (loading()) {
+    <div class="flex items-center justify-center py-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  } @else {
+    <form [formGroup]="areaForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Forum -->
+        <app-search-select
+          label="Forum"
+          placeholder="Search and select forum"
+          [required]="true"
+          [mode]="'single'"
+          [options]="forumOptions()"
+          [loading]="forumsLoading()"
+          formControlName="forumId"
+          [error]="getFieldError('forumId')"
+          [disabled]="isEditMode()"
+          hint="The forum this area belongs to"
+          (search)="onForumSearch($event)"
+        ></app-search-select>
+
+        <!-- Area Code -->
+        <app-input
+          label="Area Code"
+          placeholder="Enter area code"
+          [required]="true"
+          formControlName="areaCode"
+          [error]="getFieldError('areaCode')"
+          [disabled]="isEditMode()"
+          hint="Unique identifier for the area"
+        ></app-input>
+
+        <!-- Area Name -->
+        <app-input
+          label="Area Name"
+          placeholder="Enter area name"
+          [required]="true"
+          formControlName="areaName"
+          [error]="getFieldError('areaName')"
+        ></app-input>
+
+        <!-- Admin User -->
+        <app-search-select
+          label="Area Admin"
+          placeholder="Search and select admin user"
+          [required]="true"
+          [mode]="'single'"
+          [options]="userOptions()"
+          [loading]="usersLoading()"
+          formControlName="adminUserId"
+          [error]="getFieldError('adminUserId')"
+          [disabled]="isEditMode()"
+          hint="User who will administer this area"
+          (search)="onUserSearch($event)"
+        ></app-search-select>
+
+        <!-- Established Date -->
+        <app-input
+          label="Established Date"
+          type="date"
+          [required]="true"
+          formControlName="establishedDate"
+          [error]="getFieldError('establishedDate')"
+          hint="Date when the area was established"
+        ></app-input>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <button
+          type="button"
+          (click)="onCancel()"
+          [disabled]="saving()"
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="saving() || areaForm.invalid"
+          class="px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          @if (saving()) {
+            <span class="flex items-center">
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ isEditMode() ? 'Updating...' : 'Creating...' }}
+            </span>
+          } @else {
+            {{ isEditMode() ? 'Update Area' : 'Create Area' }}
+          }
+        </button>
+      </div>
+    </form>
+  }
+</app-modal>

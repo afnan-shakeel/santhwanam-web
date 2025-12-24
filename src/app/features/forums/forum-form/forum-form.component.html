@@ -1,0 +1,91 @@
+<app-modal
+  [id]="'forum-form-modal'"
+  [title]="isEditMode() ? 'Edit Forum' : 'Create New Forum'"
+  [size]="'lg'"
+  [open]="open"
+  (openChange)="openChange.emit($event)"
+>
+  @if (loading()) {
+    <div class="flex items-center justify-center py-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  } @else {
+    <form [formGroup]="forumForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Forum Code -->
+        <app-input
+          label="Forum Code"
+          placeholder="Enter forum code"
+          [required]="true"
+          formControlName="forumCode"
+          [error]="getFieldError('forumCode')"
+          [disabled]="isEditMode()"
+          hint="Unique identifier for the forum"
+        ></app-input>
+
+        <!-- Forum Name -->
+        <app-input
+          label="Forum Name"
+          placeholder="Enter forum name"
+          [required]="true"
+          formControlName="forumName"
+          [error]="getFieldError('forumName')"
+        ></app-input>
+
+        <!-- Admin User -->
+        <app-search-select
+          label="Forum Admin"
+          placeholder="Search and select admin user"
+          [required]="true"
+          [mode]="'single'"
+          [options]="userOptions()"
+          [loading]="usersLoading()"
+          formControlName="adminUserId"
+          [error]="getFieldError('adminUserId')"
+          [disabled]="isEditMode()"
+          hint="User who will administer this forum"
+          (search)="onUserSearch($event)"
+        ></app-search-select>
+
+        <!-- Established Date -->
+        <app-input
+          label="Established Date"
+          type="date"
+          [required]="true"
+          formControlName="establishedDate"
+          [error]="getFieldError('establishedDate')"
+          hint="Date when the forum was established"
+        ></app-input>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <button
+          type="button"
+          (click)="onCancel()"
+          [disabled]="saving()"
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="saving() || forumForm.invalid"
+          class="px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          @if (saving()) {
+            <span class="flex items-center">
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ isEditMode() ? 'Updating...' : 'Creating...' }}
+            </span>
+          } @else {
+            {{ isEditMode() ? 'Update Forum' : 'Create Forum' }}
+          }
+        </button>
+      </div>
+    </form>
+  }
+</app-modal>

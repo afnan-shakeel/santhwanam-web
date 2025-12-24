@@ -1,0 +1,247 @@
+<div class="space-y-8">
+  
+  <!-- Documents Section -->
+  <div class="border-b border-gray-200 dark:border-gray-700 pb-8">
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+      Documents ({{ documents().length }})
+    </h3>
+
+    <!-- Document Upload Form -->
+    <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 mb-4">
+      <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Upload Document</h4>
+      
+      <form [formGroup]="documentForm" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <app-select
+            label="Document Type"
+            placeholder="Select document type"
+            formControlName="documentType"
+            [options]="documentTypeOptions"
+            [required]="true"
+            [error]="getDocumentFieldError('documentType')"
+          ></app-select>
+
+          <app-select
+            label="Document Category"
+            placeholder="Select category"
+            formControlName="documentCategory"
+            [options]="documentCategoryOptions"
+            [required]="true"
+            [error]="getDocumentFieldError('documentCategory')"
+          ></app-select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <app-input
+            label="Document Name"
+            placeholder="e.g., National ID - Front"
+            formControlName="documentName"
+            [required]="true"
+            [error]="getDocumentFieldError('documentName')"
+          ></app-input>
+
+          <app-input
+            label="Expiry Date (Optional)"
+            type="date"
+            formControlName="expiryDate"
+          ></app-input>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+            Select File <span class="text-red-600">*</span>
+          </label>
+          <input
+            id="file-upload"
+            type="file"
+            [accept]="getAllowedFileTypes()"
+            (change)="onFileSelected($event)"
+            class="block w-full text-sm text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer bg-white dark:bg-gray-900 focus:outline-none"
+          />
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Allowed: PDF, JPEG, PNG. Max size: 5MB
+          </p>
+          @if (selectedFile) {
+            <p class="mt-2 text-sm text-green-600 dark:text-green-400">
+              Selected: {{ selectedFile.name }} ({{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB)
+            </p>
+          }
+        </div>
+
+        <div class="flex justify-end">
+          <app-button
+            label="Upload Document"
+            variant="primary"
+            (click)="onUploadDocument()"
+            [disabled]="uploadingFile() || !selectedFile"
+          ></app-button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Documents List -->
+    @if (documents().length === 0) {
+      <div class="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No documents uploaded</h3>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Upload at least one document to continue.</p>
+      </div>
+    } @else {
+      <div class="space-y-3">
+        @for (doc of documents(); track doc.documentId) {
+          <div class="flex items-center justify-between bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            <div class="flex items-center space-x-3">
+              <div class="shrink-0">
+                @if (doc.mimeType.includes('pdf')) {
+                  <svg class="h-10 w-10 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+                  </svg>
+                } @else {
+                  <svg class="h-10 w-10 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+                  </svg>
+                }
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ doc.documentName }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  {{ doc.documentType }} - {{ doc.documentCategory }}
+                  @if (doc.expiryDate) {
+                    <span> • Expires: {{ doc.expiryDate }}</span>
+                  }
+                </p>
+                <p class="text-xs text-gray-400">{{ (doc.fileSize / 1024 / 1024).toFixed(2) }} MB</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              (click)="onDeleteDocument(doc.documentId)"
+              class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+              title="Delete document"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Payment Section -->
+  <div>
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Payment Details</h3>
+
+    <form [formGroup]="paymentForm" class="space-y-6">
+      <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <app-input
+            label="Registration Fee"
+            type="number"
+            placeholder="0"
+            formControlName="registrationFee"
+            [required]="true"
+            [error]="getPaymentFieldError('registrationFee')"
+          ></app-input>
+
+          <app-input
+            label="Advance Deposit"
+            type="number"
+            placeholder="0"
+            formControlName="advanceDeposit"
+            [required]="true"
+            [error]="getPaymentFieldError('advanceDeposit')"
+          ></app-input>
+        </div>
+
+        <div class="mt-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+          <div class="flex justify-between items-center">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Total Amount:</span>
+            <span class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">₹{{ totalAmount.toLocaleString() }}</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <app-input
+            label="Collection Date"
+            type="date"
+            formControlName="collectionDate"
+            [required]="true"
+            [error]="getPaymentFieldError('collectionDate')"
+          ></app-input>
+
+          <app-select
+            label="Collection Mode"
+            placeholder="Select mode"
+            formControlName="collectionMode"
+            [options]="collectionModeOptions"
+            [required]="true"
+            [error]="getPaymentFieldError('collectionMode')"
+          ></app-select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <app-input
+            label="Collected By"
+            placeholder="User ID or name"
+            formControlName="collectedBy"
+            [required]="true"
+            [error]="getPaymentFieldError('collectedBy')"
+          ></app-input>
+
+          <app-input
+            label="Reference Number (Optional)"
+            placeholder="Transaction reference"
+            formControlName="referenceNumber"
+          ></app-input>
+        </div>
+
+        <div class="flex justify-end mt-4">
+          <app-button
+            label="Save Payment Details"
+            variant="secondary"
+            (click)="onSavePayment()"
+            [disabled]="loading()"
+          ></app-button>
+        </div>
+      </div>
+    </form>
+
+    @if (payment()) {
+      <div class="mt-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+        <div class="flex items-start">
+          <svg class="h-5 w-5 text-green-600 dark:text-green-400 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+          <div>
+            <p class="text-sm font-medium text-green-800 dark:text-green-300">Payment details recorded</p>
+            <p class="text-xs text-green-700 dark:text-green-400 mt-1">
+              Amount: ₹{{ (payment()!.registrationFee + payment()!.advanceDeposit).toLocaleString() }} 
+              via {{ payment()!.collectionMode }}
+            </p>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
+    <app-button
+      label="Back to Nominees"
+      variant="secondary"
+      (click)="onBack()"
+      [disabled]="loading()"
+    ></app-button>
+
+    <app-button
+      label="Submit Registration"
+      variant="primary"
+      (click)="onSubmitRegistration()"
+      [disabled]="loading() || documents().length === 0 || !payment()"
+    ></app-button>
+  </div>
+</div>

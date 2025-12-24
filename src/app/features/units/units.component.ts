@@ -9,6 +9,7 @@ import { DataTableConfig } from '../../shared/models/datatable.model';
 import { UnitService } from '../../core/services/unit.service';
 import { Unit } from '../../shared/models/unit.model';
 import { SearchRequest, SearchResponse } from '../../shared/models/search.model';
+import { UnitFormComponent } from './unit-form/unit-form.component';
 
 @Component({
   selector: 'app-units',
@@ -17,7 +18,8 @@ import { SearchRequest, SearchResponse } from '../../shared/models/search.model'
     CommonModule,
     BreadcrumbsComponent,
     ListingPageHeaderComponent,
-    DatatableComponent
+    DatatableComponent,
+    UnitFormComponent
   ],
   templateUrl: './units.component.html',
   styleUrls: ['./units.component.css']
@@ -35,6 +37,8 @@ export class UnitsComponent {
   });
 
   loading = signal(false);
+  showUnitForm = signal(false);
+  selectedUnitId = signal<string | undefined>(undefined);
 
   breadcrumbs: BreadcrumbItem[] = [
     { label: 'Units', current: true }
@@ -148,12 +152,22 @@ export class UnitsComponent {
   }
 
   onEditUnit(unit: Unit): void {
-    console.log('Edit unit:', unit);
-    this.router.navigate(['/units', unit.unitId]);
+    this.selectedUnitId.set(unit.unitId);
+    this.showUnitForm.set(true);
   }
 
   protected onAddUnit(): void {
-    console.log('Add unit clicked');
-    this.router.navigate(['/units', 'new']);
+    this.selectedUnitId.set(undefined);
+    this.showUnitForm.set(true);
+  }
+
+  onUnitSaved(unit: Unit): void {
+    console.log('Unit saved:', unit);
+    this.loadUnits();
+  }
+
+  onFormCancelled(): void {
+    this.showUnitForm.set(false);
+    this.selectedUnitId.set(undefined);
   }
 }

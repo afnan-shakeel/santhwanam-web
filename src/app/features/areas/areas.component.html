@@ -17,3 +17,12 @@
     </app-datatable>
   </div>
 </div>
+
+<!-- Area Form Modal -->
+<app-area-form
+  [open]="showAreaForm()"
+  [areaId]="selectedAreaId()"
+  (openChange)="showAreaForm.set($event)"
+  (saved)="onAreaSaved()"
+  (cancelled)="onAreaFormCancelled()">
+</app-area-form>

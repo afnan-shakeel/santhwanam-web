@@ -1,0 +1,78 @@
+<app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
+
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Page Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">All Approval Requests</h1>
+    <p class="text-gray-600 mt-1">System-wide view of all approval requests for monitoring and audit</p>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-white border border-gray-200 rounded-lg p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600">Total Requests</p>
+          <p class="text-2xl font-bold text-gray-900">{{ stats().total }}</p>
+        </div>
+        <div class="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
+          <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-lg p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600">Pending</p>
+          <p class="text-2xl font-bold text-yellow-600">{{ stats().pending }}</p>
+        </div>
+        <div class="h-12 w-12 bg-yellow-100 rounded-full flex items-center justify-center">
+          <svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-lg p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600">Approved</p>
+          <p class="text-2xl font-bold text-green-600">{{ stats().approved }}</p>
+        </div>
+        <div class="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
+          <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-lg p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600">Rejected</p>
+          <p class="text-2xl font-bold text-red-600">{{ stats().rejected }}</p>
+        </div>
+        <div class="h-12 w-12 bg-red-100 rounded-full flex items-center justify-center">
+          <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="bg-white border border-gray-200 rounded-lg">
+    <app-datatable
+      [config]="tableConfig"
+      [data]="requestData()"
+      [loading]="loading()"
+      (searchChange)="onSearchChange($event)"
+    ></app-datatable>
+  </div>
+</div>

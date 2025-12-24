@@ -17,3 +17,12 @@
     </app-datatable>
   </div>
 </div>
+
+<!-- Forum Form Modal -->
+<app-forum-form
+  [open]="showForumForm()"
+  [forumId]="selectedForumId()"
+  (openChange)="showForumForm.set($event)"
+  (saved)="onForumSaved()"
+  (cancelled)="onForumFormCancelled()">
+</app-forum-form>

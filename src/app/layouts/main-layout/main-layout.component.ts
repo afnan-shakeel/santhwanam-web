@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
@@ -10,6 +10,7 @@ import { AvatarComponent } from '../../shared/components/avatar/avatar.component
 @Component({
   selector: 'app-main-layout',
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, AvatarComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.css'
 })

@@ -84,6 +84,49 @@ export const routes: Routes = [
         path: 'units',
         loadComponent: () => import('./features/units/units.component').then((m) => m.UnitsComponent)
       }
+      ,
+      {
+        path: 'agents',
+        loadComponent: () => import('./features/agents/agents.component').then((m) => m.AgentsComponent)
+      },
+      {
+        path: 'members',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/members/members.component').then((m) => m.MembersComponent)
+          },
+          {
+            path: 'add',
+            loadComponent: () => import('./features/members/member-form/member-form.component').then((m) => m.MemberFormComponent)
+          },
+          {
+            path: ':memberId/edit',
+            loadComponent: () => import('./features/members/member-form/member-form.component').then((m) => m.MemberFormComponent)
+          }
+        ]
+      },
+      {
+        path: 'approvals/workflows',
+        loadComponent: () => import('./features/approvals/approval-workflows/approval-workflows.component').then((m) => m.ApprovalWorkflowsComponent)
+      },
+      {
+        path: 'approvals/my-approvals',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/approvals/my-approvals/my-approvals.component').then((m) => m.MyApprovalsComponent)
+          },
+          {
+            path: ':requestId',
+            loadComponent: () => import('./features/approvals/my-approvals/approval-details.component').then((m) => m.ApprovalDetailsComponent)
+          }
+        ]
+      },
+      {
+        path: 'approvals/all-requests',
+        loadComponent: () => import('./features/approvals/all-requests/all-requests.component').then((m) => m.AllRequestsComponent)
+      }
     ]
   },
   {

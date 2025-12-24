@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   forwardRef,
@@ -34,7 +35,7 @@ type InputSize = 'sm' | 'md' | 'lg';
 export class InputComponent implements ControlValueAccessor {
   @Input() label = '';
   @Input() placeholder = '';
-  @Input() type: 'text' | 'email' | 'password' | 'number' = 'text';
+  @Input() type: 'text' | 'email' | 'password' | 'number' | 'date' = 'text';
   @Input() size: InputSize = 'md';
   @Input() required = false;
   @Input() hint = '';
@@ -47,6 +48,8 @@ export class InputComponent implements ControlValueAccessor {
 
   private onChange: (value: unknown) => void = () => {};
   private onTouched: () => void = () => {};
+
+  constructor(private cdr: ChangeDetectorRef) {}
 
   inputClasses(error: string): string {
     const sizeClasses: Record<InputSize, string> = {
@@ -73,6 +76,8 @@ export class InputComponent implements ControlValueAccessor {
 
   writeValue(value: unknown): void {
     this.value = (value as string) ?? '';
+    // Trigger change detection when value is written (e.g., on form reset)
+    this.cdr.markForCheck();
   }
 
   registerOnChange(fn: (value: unknown) => void): void {
@@ -85,6 +90,8 @@ export class InputComponent implements ControlValueAccessor {
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
+    // Trigger change detection when disabled state changes
+    this.cdr.markForCheck();
   }
 
   handleInput(value: string): void {

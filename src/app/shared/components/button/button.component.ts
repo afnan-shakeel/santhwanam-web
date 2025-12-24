@@ -17,6 +17,7 @@ export class ButtonComponent {
   @Input() variant: ButtonVariant = 'primary';
   @Input() type: 'button' | 'submit' = 'button';
   @Input() size: ButtonSize = 'md';
+  @Input() disabled = false;
 
   protected get classes(): string {
     const sizeMap: Record<ButtonSize, string> = {

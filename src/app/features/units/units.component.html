@@ -17,3 +17,11 @@
     </app-datatable>
   </div>
 </div>
+
+<app-unit-form
+  [unitId]="selectedUnitId()"
+  [open]="showUnitForm()"
+  (openChange)="showUnitForm.set($event)"
+  (saved)="onUnitSaved($event)"
+  (cancelled)="onFormCancelled()">
+</app-unit-form>

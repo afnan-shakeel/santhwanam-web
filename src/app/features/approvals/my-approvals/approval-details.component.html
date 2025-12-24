@@ -1,0 +1,324 @@
+<app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
+
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  @if (loading()) {
+    <div class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <p class="mt-2 text-gray-600">Loading approval details...</p>
+    </div>
+  } @else if (requestDetails()) {
+    <!-- Header -->
+    <div class="mb-6 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">
+          {{ requestDetails()!.entityType }} - {{ requestDetails()!.entityId }}
+        </h1>
+        @if (workflow()) {
+          <p class="text-gray-600 mt-1">{{ workflow()!.workflowName }}</p>
+        }
+      </div>
+      <button
+        (click)="goBack()"
+        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+      >
+        ← Back to List
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Main Content (Left 2/3) -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Entity Information -->
+        <div class="bg-white border border-gray-200 rounded-lg p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Entity Information</h2>
+          
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span class="text-gray-600">ID:</span>
+              <span class="ml-2 font-medium">{{ requestDetails()!.entityId }}</span>
+            </div>
+            
+            @if (requestDetails()!.entityDisplayName) {
+              <div>
+                <span class="text-gray-600">Name:</span>
+                <span class="ml-2 font-medium">{{ requestDetails()!.entityDisplayName }}</span>
+              </div>
+            }
+            
+            <div>
+              <span class="text-gray-600">Type:</span>
+              <span class="ml-2 font-medium">{{ requestDetails()!.entityType }}</span>
+            </div>
+            
+            <div>
+              <span class="text-gray-600">Module:</span>
+              <span class="ml-2">
+                @if (workflow()) {
+                  <span [class]="getModuleBadgeClass(workflow()!.module)" class="px-2 py-1 rounded text-xs font-medium">
+                    {{ workflow()!.module }}
+                  </span>
+                } @else {
+                  <span class="px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                    {{ requestDetails()!.module }}
+                  </span>
+                }
+              </span>
+            </div>
+            
+            <div>
+              <span class="text-gray-600">Submitted by:</span>
+              <span class="ml-2 font-medium">{{ requestDetails()!.requestedByUserName }}</span>
+            </div>
+            
+            <div>
+              <span class="text-gray-600">Submitted on:</span>
+              <span class="ml-2">{{ formatDate(requestDetails()!.requestedAt) }}</span>
+            </div>
+            
+            <div>
+              <span class="text-gray-600">Status:</span>
+              <span class="ml-2">
+                <span 
+                  [class]="requestDetails()!.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                           requestDetails()!.status === 'Approved' ? 'bg-green-100 text-green-800' :
+                           requestDetails()!.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                           'bg-gray-100 text-gray-800'"
+                  class="px-2 py-1 rounded text-xs font-medium"
+                >
+                  {{ requestDetails()!.status }}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Workflow Information -->
+        @if (workflow()) {
+          <div class="bg-white border border-gray-200 rounded-lg p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Workflow Details</h2>
+            
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span class="text-gray-600">Workflow Name:</span>
+                <span class="ml-2 font-medium">{{ workflow()!.workflowName }}</span>
+              </div>
+              
+              <div>
+                <span class="text-gray-600">Workflow Code:</span>
+                <span class="ml-2 font-mono text-xs bg-gray-100 px-2 py-1 rounded">{{ workflow()!.workflowCode }}</span>
+              </div>
+              
+              @if (workflow()!.description) {
+                <div class="col-span-2">
+                  <span class="text-gray-600">Description:</span>
+                  <span class="ml-2">{{ workflow()!.description }}</span>
+                </div>
+              }
+              
+              <div>
+                <span class="text-gray-600">Total Stages:</span>
+                <span class="ml-2 font-medium">{{ workflow()!.stages?.length || 0 }}</span>
+              </div>
+              
+              <div>
+                <span class="text-gray-600">Requires All Stages:</span>
+                <span class="ml-2">
+                  @if (workflow()!.requiresAllStages) {
+                    <span class="text-green-600">✓ Yes</span>
+                  } @else {
+                    <span class="text-gray-600">✗ No</span>
+                  }
+                </span>
+              </div>
+            </div>
+
+            <!-- Workflow Stages -->
+            @if (workflow()!.stages && workflow()!.stages.length > 0) {
+              <div class="mt-4 pt-4 border-t border-gray-200">
+                <h3 class="text-sm font-medium text-gray-700 mb-3">Configured Stages</h3>
+                <div class="space-y-2">
+                  @for (stage of workflow()!.stages; track stage.stageId) {
+                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <div class="flex items-center gap-3">
+                        <span class="text-xs font-medium text-gray-500">Stage {{ stage.stageOrder }}</span>
+                        <span class="font-medium">{{ stage.stageName }}</span>
+                        @if (stage.isOptional) {
+                          <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Optional</span>
+                        }
+                        @if (stage.autoApprove) {
+                          <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">Auto-approve</span>
+                        }
+                      </div>
+                      <span class="text-xs text-gray-500">
+                        {{ stage.approverType }}
+                      </span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Approval Progress -->
+        <div class="bg-white border border-gray-200 rounded-lg p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Approval Progress</h2>
+          
+          <div class="space-y-4">
+            @for (execution of executions(); track execution.executionId; let isLast = $last) {
+              <div class="relative">
+                <!-- Progress Line -->
+                @if (!isLast) {
+                  <div 
+                    class="absolute left-3 top-8 bottom-0 w-0.5"
+                    [class]="execution.status === 'Approved' ? 'bg-green-400' : 'bg-gray-300'"
+                  ></div>
+                }
+                
+                <!-- Stage Card -->
+                <div class="flex gap-4">
+                  <!-- Icon -->
+                  <div class="shrink-0 text-2xl">
+                    {{ getStageStatusIcon(execution) }}
+                  </div>
+                  
+                  <!-- Content -->
+                  <div class="flex-1 pb-4">
+                    <div class="flex items-center justify-between mb-1">
+                      <h3 class="font-medium text-gray-900">
+                        {{ getStageName(execution.stageOrder) }}
+                      </h3>
+                      @if (requestDetails()!.currentStageOrder === execution.stageOrder && canTakeAction()) {
+                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+                          Your Turn
+                        </span>
+                      }
+                    </div>
+                    
+                    <p [class]="getStageStatusClass(execution)" class="text-sm">
+                      {{ getStageStatusText(execution) }}
+                    </p>
+                    
+                    <p class="text-xs text-gray-500 mt-1">
+                      {{ getApproverInfo(execution) }}
+                    </p>
+                    
+                    @if (execution.comments) {
+                      <div class="mt-2 bg-gray-50 p-2 rounded text-sm">
+                        <span class="font-medium">Comments:</span> {{ execution.comments }}
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Panel (Right 1/3) -->
+      <div class="lg:col-span-1">
+        @if (canTakeAction()) {
+          <div class="bg-white border border-gray-200 rounded-lg p-6 sticky top-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Take Action</h2>
+            
+            <div class="mb-4">
+              <p class="text-sm text-gray-600 mb-2">
+                You are responsible for: <span class="font-medium">{{ getStageName(requestDetails()!.currentStageOrder!) }}</span>
+              </p>
+            </div>
+
+            <!-- Comments -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Comments
+                @if (requestDetails()!.status === 'Pending') {
+                  <span class="text-red-500">*</span>
+                  <span class="text-xs text-gray-500">(Required for rejection)</span>
+                }
+              </label>
+              <textarea
+                [(ngModel)]="comments"
+                [value]="comments()"
+                (ngModelChange)="comments.set($event)"
+                rows="4"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Add your comments here..."
+              ></textarea>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-3">
+              <button
+                (click)="onApprove()"
+                [disabled]="processing()"
+                class="w-full px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              >
+                @if (processing()) {
+                  Processing...
+                } @else {
+                  ✓ Approve
+                }
+              </button>
+              
+              <button
+                (click)="onReject()"
+                [disabled]="processing()"
+                class="w-full px-4 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              >
+                @if (processing()) {
+                  Processing...
+                } @else {
+                  ✗ Reject
+                }
+              </button>
+            </div>
+
+            <p class="text-xs text-gray-500 mt-4">
+              Note: Your decision will be recorded and cannot be undone.
+            </p>
+          </div>
+        } @else {
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-2">No Action Required</h2>
+            <p class="text-sm text-gray-600">
+              @if (requestDetails()!.status === 'Approved') {
+                This request has been approved and completed.
+              } @else if (requestDetails()!.status === 'Rejected') {
+                This request has been rejected.
+              } @else {
+                This request is not currently assigned to you.
+              }
+            </p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Reject Confirmation Modal -->
+@if (showRejectConfirm()) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Confirm Rejection</h3>
+      <p class="text-sm text-gray-600 mb-6">
+        Are you sure you want to reject this request? This action cannot be undone and will stop the approval process.
+      </p>
+      <div class="flex gap-3 justify-end">
+        <button
+          (click)="cancelReject()"
+          class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="confirmReject()"
+          class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+        >
+          Confirm Rejection
+        </button>
+      </div>
+    </div>
+  </div>
+}

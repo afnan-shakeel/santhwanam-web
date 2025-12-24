@@ -1,0 +1,19 @@
+<app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
+
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <app-listing-page-header
+    title="Members"
+    subtitle="Manage and view all members"
+    buttonText="Add Member"
+    (buttonClick)="onAddMember()"
+  ></app-listing-page-header>
+
+  <div class="mt-8">
+    <app-datatable
+      [config]="tableConfig"
+      [data]="memberData()"
+      [loading]="loading()"
+      (searchChange)="onSearchChange($event)"
+    ></app-datatable>
+  </div>
+</div>

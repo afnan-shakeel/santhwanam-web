@@ -1,0 +1,65 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Page Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ pageTitle() }}</h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      @if (isEditMode()) {
+        Continue the registration process for this member.
+      } @else {
+        Complete all steps to register a new member.
+      }
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- Progress Stepper Sidebar -->
+    <div class="lg:col-span-3">
+      <div class="bg-white dark:bg-gray-900 rounded-lg shadow p-6 sticky top-4">
+        <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">Registration Progress</h2>
+        <app-progress-stepper [steps]="steps()"></app-progress-stepper>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="lg:col-span-9">
+      <div class="bg-white dark:bg-gray-900 rounded-lg shadow p-6">
+        
+        @if (loading()) {
+          <div class="flex justify-center items-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          </div>
+        } @else {
+          
+          <!-- Step 1: Personal Details -->
+          @if (currentStep() === 1) {
+            <app-personal-details-step
+              [memberId]="memberId()"
+              [initialData]="memberData()"
+              (saveDraft)="onSaveDraft($event)"
+              (continue)="onContinueFromPersonalDetails($event)"
+            ></app-personal-details-step>
+          }
+
+          <!-- Step 2: Nominees -->
+          @if (currentStep() === 2) {
+            <app-nominees-step
+              [memberId]="memberId()!"
+              (back)="onBackToPersonalDetails()"
+              (continue)="onContinueFromNominees()"
+            ></app-nominees-step>
+          }
+
+          <!-- Step 3: Documents & Payment -->
+          @if (currentStep() === 3) {
+            <app-documents-payment-step
+              [memberId]="memberId()!"
+              (back)="onBackToNominees()"
+              (submit)="onSubmitRegistration()"
+            ></app-documents-payment-step>
+          }
+
+        }
+      </div>
+    </div>
+  </div>
+</div>

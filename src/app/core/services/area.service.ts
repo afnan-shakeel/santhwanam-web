@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 
 import { HttpService } from '../http/http.service';
 import { SearchRequest, SearchResponse } from '../../shared/models/search.model';
-import { Area } from '../../shared/models/area.model';
+import { Area, CreateAreaRequest, UpdateAreaRequest } from '../../shared/models/area.model';
 
 @Injectable({
   providedIn: 'root'
@@ -19,12 +19,12 @@ export class AreaService {
     return this.http.get<Area>(`/organization-bodies/areas/${areaId}`);
   }
 
-  createArea(area: Partial<Area>): Observable<Area> {
-    return this.http.post<Area>('/organization-bodies/areas', area);
+  createArea(request: CreateAreaRequest): Observable<Area> {
+    return this.http.post<Area>('/organization-bodies/areas', request);
   }
 
-  updateArea(areaId: string, area: Partial<Area>): Observable<Area> {
-    return this.http.patch<Area>(`/organization-bodies/areas/${areaId}`, area);
+  updateArea(areaId: string, request: UpdateAreaRequest): Observable<Area> {
+    return this.http.patch<Area>(`/organization-bodies/areas/${areaId}`, request);
   }
 
   deleteArea(areaId: string): Observable<void> {

@@ -9,6 +9,7 @@ import { DataTableConfig } from '../../shared/models/datatable.model';
 import { AreaService } from '../../core/services/area.service';
 import { Area } from '../../shared/models/area.model';
 import { SearchRequest, SearchResponse } from '../../shared/models/search.model';
+import { AreaFormComponent } from './area-form/area-form.component';
 
 @Component({
   selector: 'app-areas',
@@ -17,7 +18,8 @@ import { SearchRequest, SearchResponse } from '../../shared/models/search.model'
     CommonModule,
     BreadcrumbsComponent,
     ListingPageHeaderComponent,
-    DatatableComponent
+    DatatableComponent,
+    AreaFormComponent
   ],
   templateUrl: './areas.component.html',
   styleUrls: ['./areas.component.css']
@@ -35,6 +37,8 @@ export class AreasComponent {
   });
 
   loading = signal(false);
+  showAreaForm = signal(false);
+  selectedAreaId = signal<string | undefined>(undefined);
 
   breadcrumbs: BreadcrumbItem[] = [
     { label: 'Areas', current: true }
@@ -149,11 +153,24 @@ export class AreasComponent {
 
   onEditArea(area: Area): void {
     console.log('Edit area:', area);
-    this.router.navigate(['/areas', area.areaId]);
+    this.selectedAreaId.set(area.areaId);
+    this.showAreaForm.set(true);
   }
 
   protected onAddArea(): void {
     console.log('Add area clicked');
-    this.router.navigate(['/areas', 'new']);
+    this.selectedAreaId.set(undefined);
+    this.showAreaForm.set(true);
+  }
+
+  onAreaSaved(): void {
+    this.showAreaForm.set(false);
+    this.selectedAreaId.set(undefined);
+    this.loadAreas();
+  }
+
+  onAreaFormCancelled(): void {
+    this.showAreaForm.set(false);
+    this.selectedAreaId.set(undefined);
   }
 }

@@ -1,0 +1,144 @@
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
+
+  <!-- Header -->
+  <div class="sm:flex sm:items-center sm:justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Approval Workflows</h1>
+      <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
+        Configure approval templates and stages for different processes
+      </p>
+    </div>
+    <div class="mt-4 sm:mt-0">
+      <button
+        type="button"
+        (click)="onAddWorkflow()"
+        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+      >
+        <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+        </svg>
+        New Workflow
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex items-center justify-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @else if (workflows().length === 0) {
+    <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No workflows</h3>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating a new approval workflow.</p>
+      <div class="mt-6">
+        <button
+          type="button"
+          (click)="onAddWorkflow()"
+          class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+        >
+          <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+          </svg>
+          New Workflow
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Workflows Grid -->
+  @else {
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      @for (workflow of workflows(); track workflow.workflowId) {
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+          <div class="p-5">
+            <!-- Header -->
+            <div class="flex items-start justify-between">
+              <div class="flex-1 min-w-0">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white truncate">
+                  {{ workflow.workflowName }}
+                </h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 truncate">
+                  {{ workflow.workflowCode }}
+                </p>
+              </div>
+              <span 
+                [class]="getModuleBadgeClass(workflow.module)"
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ml-2"
+              >
+                {{ workflow.module }}
+              </span>
+            </div>
+
+            <!-- Description -->
+            @if (workflow.description) {
+              <p class="mt-3 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                {{ workflow.description }}
+              </p>
+            }
+
+            <!-- Stats -->
+            <div class="mt-4 flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+              <div class="flex items-center">
+                <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span>{{ workflow.stages.length || 0 }} stages</span>
+              </div>
+              @if (workflow.usageCount !== undefined) {
+                <div class="flex items-center">
+                  <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                  <span>Used {{ workflow.usageCount }} times</span>
+                </div>
+              }
+            </div>
+
+            <!-- Status & Actions -->
+            <div class="mt-5 flex items-center justify-between">
+              <span 
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                [class.bg-green-100]="workflow.isActive"
+                [class.text-green-800]="workflow.isActive"
+                [class.dark:bg-green-900]="workflow.isActive"
+                [class.dark:text-green-300]="workflow.isActive"
+                [class.bg-gray-100]="!workflow.isActive"
+                [class.text-gray-800]="!workflow.isActive"
+                [class.dark:bg-gray-900]="!workflow.isActive"
+                [class.dark:text-gray-300]="!workflow.isActive"
+              >
+                {{ workflow.isActive ? 'Active' : 'Inactive' }}
+              </span>
+              <button
+                type="button"
+                (click)="onEditWorkflow(workflow)"
+                class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 shadow-sm text-xs font-medium rounded text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              >
+                <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                View/Edit
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<app-workflow-form
+  [workflowId]="selectedWorkflowId()"
+  [open]="showWorkflowForm()"
+  (openChange)="showWorkflowForm.set($event)"
+  (saved)="onWorkflowSaved()"
+  (cancelled)="onFormCancelled()">
+</app-workflow-form>
