@@ -8,6 +8,30 @@ Member registration is a **3-step workflow** with draft-save capability at each 
 
 ---
 
+## ⚠️ CRITICAL: "Continue" Button Pattern
+
+**For Step 1 (Personal Details):**
+The "Continue" button ALWAYS makes **TWO sequential API calls**:
+
+1. **Save/Update the data:**
+   - If NEW member (no memberId): `POST /api/members/register`
+   - If EXISTING draft: `PATCH /api/members/{memberId}/draft/personal-details`
+
+2. **Then mark step as complete:**
+   - `POST /api/members/{memberId}/complete/personal-details`
+
+**For Step 2 (Nominees):**
+The "Continue" button makes **ONE API call**:
+- `POST /api/members/{memberId}/complete/nominees`
+- (Nominees are already saved individually via add/edit throughout Step 2)
+
+**For Step 3 (Documents & Payment):**
+The "Submit Registration" button makes **ONE API call**:
+- `POST /api/members/{memberId}/submit`
+- (Documents and payment are already saved individually throughout Step 3)
+
+---
+
 ## QUERY & VIEW ENDPOINTS
 
 ### Get Member Details
@@ -105,14 +129,14 @@ Page load → GET /api/membership/tiers?activeOnly=true
 POST /api/members/register
 ```
 **When to use:**
-- ✅ Initial "Add Member" button click - creating a completely new member
-- ✅ First time saving ANY data in the registration form
+- ✅ "Continue" button click for NEW member (no memberId yet)
+- ✅ "Save as Draft" button for NEW member
 - ✅ Returns `memberId` which you MUST store for subsequent API calls
 
 **UI Flow:**
 ```
-User clicks "Add Member" → Fill initial form → Click "Save" or "Continue"
-→ POST /api/members/register → Get memberId → Store in state
+User clicks "Add Member" → Fill form → Click "Save as Draft"
+→ POST /api/members/register → Get memberId → Store in state → Stay on Step 1
 ```
 
 ---
@@ -122,15 +146,14 @@ User clicks "Add Member" → Fill initial form → Click "Save" or "Continue"
 PATCH /api/members/:memberId/draft/personal-details
 ```
 **When to use:**
-- ✅ Editing an existing draft member (when you already have `memberId`)
+- ✅ "Save as Draft" button for EXISTING member (memberId exists)
 - ✅ Auto-save functionality while user is editing
-- ✅ "Save as Draft" button - saving partial/incomplete data
-- ✅ User goes back to Step 1 to modify details before submission
+- ✅ User modifies Step 1 data and wants to save without moving forward
 
 **UI Flow:**
 ```
-Edit existing draft → Modify any field → Click "Save as Draft" or auto-save
-→ PATCH /api/members/{memberId}/draft/personal-details
+Edit existing draft → Modify any field → Click "Save as Draft"
+→ PATCH /api/members/{memberId}/draft/personal-details → Stay on Step 1
 ```
 
 ---
@@ -140,19 +163,31 @@ Edit existing draft → Modify any field → Click "Save as Draft" or auto-save
 POST /api/members/:memberId/complete/personal-details
 ```
 **When to use:**
-- ✅ "Continue to Next Step" button - validates ALL required fields are filled
+- ✅ ALWAYS called after save/update when user clicks "Continue" button
+- ✅ Validates ALL required fields are filled
 - ✅ Moves registration to Step 2 (Nominees)
 - ✅ Marks Step 1 as complete in `registrationStep` field
 
-**UI Flow:**
+**⚠️ CRITICAL: "Continue" Button Workflow**
 ```
-All required fields filled → Click "Continue" button
-→ POST /api/members/{memberId}/complete/personal-details
-→ Navigate to Step 2 (Nominees)
+User clicks "Continue" button:
+
+IF memberId is NULL (new member):
+  1. POST /api/members/register (with form data)
+     → Get memberId → Store in state
+  2. POST /api/members/{memberId}/complete/personal-details
+     → Navigate to Step 2
+
+ELSE (existing draft):
+  1. PATCH /api/members/{memberId}/draft/personal-details (with form data)
+     → Update draft
+  2. POST /api/members/{memberId}/complete/personal-details
+     → Navigate to Step 2
 ```
 
 **Important Notes:**
-- This endpoint validates that ALL required fields exist
+- The `complete/*` endpoints are what actually move the workflow forward
+- `complete/personal-details` validates that ALL required fields exist
 - If validation fails, returns 400 error with specific message
 - On success, updates `registrationStep` to indicate Step 1 complete
 
@@ -233,8 +268,16 @@ All required fields filled → Click "Continue" button
 3. User fills in details
    ↓
 4. Show two buttons:
-   - "Save as Draft" (saves partial data)
-   - "Continue to Next Step" (validates all fields)
+   - "Save as Draft":
+     → POST /api/members/register (with partial data)
+     → Get memberId, store in state
+     → Stay on Step 1
+   
+   - "Continue to Next Step":
+     → POST /api/members/register (with all required data)
+     → Get memberId, store in state
+     → POST /api/members/{memberId}/complete/personal-details
+     → Navigate to Step 2
 ```
 
 #### Edit Draft Member
@@ -247,6 +290,16 @@ All required fields filled → Click "Continue" button
    ↓
 4. User can modify any field
    ↓
+5. Show two buttons:
+   - "Save as Draft":
+     → PATCH /api/members/{memberId}/draft/personal-details
+     → Stay on Step 1
+   
+   - "Continue to Next Step":
+     → PATCH /api/members/{memberId}/draft/personal-details
+     → POST /api/members/{memberId}/complete/personal-details
+     → Navigate to Step 2
+```
 5. Show same save/continue buttons
 ```
 
@@ -351,6 +404,21 @@ POST /api/members/:memberId/complete/nominees
 - ✅ Validates at least 1 active nominee exists
 - ✅ Moves registration to Step 3
 
+**⚠️ CRITICAL: Step 2 "Continue" Button Workflow**
+```
+User clicks "Continue" button:
+
+1. Validate at least 1 nominee exists (client-side check)
+2. POST /api/members/{memberId}/complete/nominees
+   → Backend validates at least 1 active nominee
+   → Navigate to Step 3
+```
+
+**Note:** Unlike Step 1, nominees are added/edited individually throughout Step 2,
+so there's no bulk save needed before calling complete. The complete endpoint
+just validates and marks the step as done.
+- ✅ Moves registration to Step 3
+
 **UI Flow:**
 ```
 At least 1 nominee added → Click "Continue"
@@ -422,18 +490,36 @@ At least 1 nominee added → Click "Continue"
 
 #### Add Nominee
 ```
-1. Display nominee list (initially empty)
+1. Display nominee list (initially empty from GET /api/members/{memberId}/nominees)
 2. Show "Add Nominee" button
 3. Click button → Show nominee form
-4. Fill details
-5. Submit → Add to list
-6. Show "Add Another Nominee" option
-7. After minimum 1 added → Show "Continue" button
+4. Fill details → Click "Save"
+   → POST /api/members/{memberId}/nominees
+   → Refresh nominee list (GET /api/members/{memberId}/nominees)
+5. Show "Add Another Nominee" option
+6. After minimum 1 added → Enable "Continue" button
+7. Click "Continue":
+   → POST /api/members/{memberId}/complete/nominees
+   → Navigate to Step 3
 ```
 
 #### Edit Nominee
 ```
 1. Click "Edit" on nominee row
+2. Show form with pre-filled data
+3. User modifies fields → Click "Update"
+   → PATCH /api/members/{memberId}/nominees/{nomineeId}
+   → Refresh list
+```
+
+#### Delete Nominee
+```
+1. Show "Delete" button on each nominee
+2. Check: If last nominee → disable with tooltip "At least 1 nominee required"
+3. If allowed → Show confirmation modal
+4. Confirm → DELETE /api/members/{memberId}/nominees/{nomineeId}
+   → Refresh list
+```
 2. Show form with pre-filled data
 3. User modifies fields
 4. Submit to update
@@ -816,10 +902,15 @@ POST /api/members/:memberId/submit
 
 2. Show empty Step 1 form
 
-3. User fills data + clicks "Save" or "Continue":
-   → POST /api/members/register
+3a. User fills data + clicks "Save as Draft":
+   → POST /api/members/register (with partial/complete data)
    → Store memberId in component state
-   → If "Continue" → POST /api/members/{memberId}/complete/personal-details
+   → Stay on Step 1
+
+3b. User fills data + clicks "Continue":
+   → POST /api/members/register (with all required data)
+   → Store memberId in component state
+   → POST /api/members/{memberId}/complete/personal-details
    → Navigate to Step 2
 ```
 
@@ -833,12 +924,13 @@ POST /api/members/:memberId/submit
 
 2. Pre-fill Step 1 form with returned data
 
-3. User modifies fields + clicks "Save as Draft":
+3a. User modifies fields + clicks "Save as Draft":
    → PATCH /api/members/{memberId}/draft/personal-details
-   → Only send changed fields
+   → Stay on Step 1
 
-4. User clicks "Continue":
-   → POST /api/members/{memberId}/complete/personal-details
+3b. User modifies fields + clicks "Continue":
+   → PATCH /api/members/{memberId}/draft/personal-details (update data first)
+   → POST /api/members/{memberId}/complete/personal-details (then complete step)
    → Navigate to Step 2
 ```
 
@@ -866,6 +958,11 @@ POST /api/members/:memberId/submit
    → Show confirmation modal
    → DELETE /api/members/{memberId}/nominees/{nomineeId}
    → Refresh list
+
+5. User clicks "Continue to Documents":
+   → POST /api/members/{memberId}/complete/nominees
+   → Navigate to Step 3
+```
 
 5. User clicks "Continue to Documents":
    → POST /api/members/{memberId}/complete/nominees

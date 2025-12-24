@@ -117,36 +117,64 @@ export class MemberFormComponent implements OnInit {
         }
       });
     } else {
-      // For new registration, we need all required fields
-      alert('Please fill all required fields to create a new member registration.');
+      // Register new member as draft
+      this.loading.set(true);
+      this.memberService.registerMember(data as RegisterMemberRequest).subscribe({
+        next: (response) => {
+          this.memberId.set(response.memberId);
+          this.loading.set(false);
+          alert(`Draft saved successfully! Member Code: ${response.memberCode}`);
+        },
+        error: () => {
+          this.loading.set(false);
+          alert('Failed to save draft');
+        }
+      });
     }
   }
 
   onContinueFromPersonalDetails(data: RegisterMemberRequest): void {
     const memberId = this.memberId();
+    this.loading.set(true);
 
     if (memberId) {
-      // Complete step for existing member
-      this.loading.set(true);
-      this.memberService.completePersonalDetailsStep(memberId).subscribe({
+      // TWO-STEP for existing draft: 1) Update data, 2) Complete step
+      this.memberService.updateDraftPersonalDetails(memberId, data).subscribe({
         next: () => {
-          this.loading.set(false);
-          this.currentStep.set(2);
+          // Step 1 succeeded, now complete the step
+          this.memberService.completePersonalDetailsStep(memberId).subscribe({
+            next: () => {
+              this.loading.set(false);
+              this.currentStep.set(2);
+            },
+            error: () => {
+              this.loading.set(false);
+              alert('Failed to complete personal details step. Please retry.');
+            }
+          });
         },
         error: () => {
           this.loading.set(false);
-          alert('Failed to complete personal details step');
+          alert('Failed to update member data');
         }
       });
     } else {
-      // Register new member
-      this.loading.set(true);
+      // TWO-STEP for new member: 1) Register, 2) Complete step
       this.memberService.registerMember(data).subscribe({
         next: (response) => {
           this.memberId.set(response.memberId);
-          this.loading.set(false);
-          this.currentStep.set(2);
-          alert(`Member registered successfully! Member Code: ${response.memberCode}`);
+          // Step 1 succeeded, now complete the step
+          this.memberService.completePersonalDetailsStep(response.memberId).subscribe({
+            next: () => {
+              this.loading.set(false);
+              this.currentStep.set(2);
+              alert(`Member registered successfully! Member Code: ${response.memberCode}`);
+            },
+            error: () => {
+              this.loading.set(false);
+              alert('Member created but failed to complete step. Please click Continue again.');
+            }
+          });
         },
         error: () => {
           this.loading.set(false);
@@ -162,7 +190,23 @@ export class MemberFormComponent implements OnInit {
   }
 
   onContinueFromNominees(): void {
-    this.currentStep.set(3);
+    const memberId = this.memberId();
+    if (!memberId) {
+      alert('Invalid member ID');
+      return;
+    }
+
+    this.loading.set(true);
+    this.memberService.completeNomineesStep(memberId).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.currentStep.set(3);
+      },
+      error: () => {
+        this.loading.set(false);
+        alert('Failed to complete nominees step. Please ensure at least one nominee is added.');
+      }
+    });
   }
 
   // Step 3: Documents & Payment Handlers
@@ -171,8 +215,23 @@ export class MemberFormComponent implements OnInit {
   }
 
   onSubmitRegistration(): void {
-    // Navigate to member details or list page
-    alert('Registration submitted successfully! Pending approval.');
-    this.router.navigate(['/members']);
+    const memberId = this.memberId();
+    if (!memberId) {
+      alert('Invalid member ID');
+      return;
+    }
+
+    this.loading.set(true);
+    this.memberService.submitRegistration(memberId).subscribe({
+      next: () => {
+        this.loading.set(false);
+        alert('Registration submitted successfully! Pending approval.');
+        this.router.navigate(['/members']);
+      },
+      error: () => {
+        this.loading.set(false);
+        alert('Failed to submit registration');
+      }
+    });
   }
 }

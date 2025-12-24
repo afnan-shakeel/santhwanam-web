@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 import { HttpService } from '../http/http.service';
 import { SearchRequest, SearchResponse } from '../../shared/models/search.model';
@@ -15,7 +15,9 @@ import {
   UploadDocumentRequest,
   MemberPayment,
   RecordPaymentRequest,
-  SubmitRegistrationResponse
+  SubmitRegistrationResponse,
+  MemberMetadata,
+  MetadataOption
 } from '../../shared/models/member.model';
 
 @Injectable({
@@ -24,8 +26,62 @@ import {
 export class MemberService {
   private http = inject(HttpService);
 
+  // ==================== METADATA ====================
+
+  /**
+   * Get all member metadata (document types, categories, collection modes)
+   */
+  getMetadata(): Observable<MemberMetadata> {
+    return this.http.get<MemberMetadata>('/members/metadata');
+  }
+
+  /**
+   * Get document types for dropdown
+   */
+  getDocumentTypes(): Observable<MetadataOption[]> {
+    return this.getMetadata().pipe(map(metadata => metadata.documentTypes));
+  }
+
+  /**
+   * Get document categories for dropdown
+   */
+  getDocumentCategories(): Observable<MetadataOption[]> {
+    return this.getMetadata().pipe(map(metadata => metadata.documentCategories));
+  }
+
+  /**
+   * Get collection modes for dropdown
+   */
+  getCollectionModes(): Observable<MetadataOption[]> {
+    return this.getMetadata().pipe(map(metadata => metadata.collectionModes));
+  }
+
   // ==================== MEMBER SEARCH & QUERIES ====================
 
+  /**
+   * Simple member listing with basic filters using query parameters
+   */
+  listMembers(params?: {
+    registrationStatus?: string;
+    memberStatus?: string;
+    unitId?: string;
+    agentId?: string;
+    areaId?: string;
+    forumId?: string;
+    tierId?: string;
+    searchQuery?: string;
+    page?: number;
+    limit?: number;
+  }): Observable<{ data: Member[]; total: number; page: number; limit: number }> {
+    return this.http.get<{ data: Member[]; total: number; page: number; limit: number }>(
+      '/members',
+      { params: params as any }
+    );
+  }
+
+  /**
+   * Advanced search with complex filters
+   */
   searchMembers(request: SearchRequest): Observable<SearchResponse<Member>> {
     return this.http.post<SearchResponse<Member>>('/members/search', request);
   }

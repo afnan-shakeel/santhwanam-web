@@ -207,6 +207,7 @@ export interface MemberPayment {
   memberId: string;
   registrationFee: number;
   advanceDeposit: number;
+  totalAmount: number;
   collectedBy: string;
   collectionDate: string;
   collectionMode: CollectionMode;
@@ -229,4 +230,16 @@ export interface SubmitRegistrationResponse {
   registrationStatus: RegistrationStatus;
   approvalRequestId: string;
   submittedAt: string;
+}
+
+// Metadata Interfaces
+export interface MetadataOption {
+  value: string;
+  label: string;
+}
+
+export interface MemberMetadata {
+  documentTypes: MetadataOption[];
+  documentCategories: MetadataOption[];
+  collectionModes: MetadataOption[];
 }

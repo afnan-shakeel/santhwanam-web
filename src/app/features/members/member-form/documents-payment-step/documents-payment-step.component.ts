@@ -45,35 +45,15 @@ export class DocumentsPaymentStepComponent implements OnInit {
   documentForm!: FormGroup;
   paymentForm!: FormGroup;
 
-  documentTypeOptions: SelectOption<DocumentType>[] = [
-    { value: 'NationalID', label: 'National ID' },
-    { value: 'Passport', label: 'Passport' },
-    { value: 'DrivingLicense', label: 'Driving License' },
-    { value: 'BirthCertificate', label: 'Birth Certificate' },
-    { value: 'MemberPhoto', label: 'Member Photo' },
-    { value: 'AddressProof_UtilityBill', label: 'Address Proof - Utility Bill' },
-    { value: 'AddressProof_BankStatement', label: 'Address Proof - Bank Statement' },
-    { value: 'Other', label: 'Other' }
-  ];
-
-  documentCategoryOptions: SelectOption<DocumentCategory>[] = [
-    { value: 'MemberIdentity', label: 'Member Identity' },
-    { value: 'MemberAddress', label: 'Member Address' },
-    { value: 'MemberPhoto', label: 'Member Photo' },
-    { value: 'Other', label: 'Other' }
-  ];
-
-  collectionModeOptions: SelectOption<CollectionMode>[] = [
-    { value: 'Cash', label: 'Cash' },
-    { value: 'BankTransfer', label: 'Bank Transfer' },
-    { value: 'Cheque', label: 'Cheque' },
-    { value: 'Online', label: 'Online Payment' }
-  ];
+  documentTypeOptions = signal<SelectOption<DocumentType>[]>([]);
+  documentCategoryOptions = signal<SelectOption<DocumentCategory>[]>([]);
+  collectionModeOptions = signal<SelectOption<CollectionMode>[]>([]);
 
   selectedFile: File | null = null;
 
   ngOnInit(): void {
     this.initializeForms();
+    this.loadMetadata();
     this.loadDocuments();
     this.loadPayment();
   }
@@ -94,6 +74,29 @@ export class DocumentsPaymentStepComponent implements OnInit {
       collectionDate: [today, Validators.required],
       collectionMode: ['', Validators.required],
       referenceNumber: ['']
+    });
+  }
+
+  private loadMetadata(): void {
+    this.memberService.getDocumentTypes().subscribe({
+      next: (options) => {
+        this.documentTypeOptions.set(options as SelectOption<DocumentType>[]);
+      },
+      error: () => {}
+    });
+
+    this.memberService.getDocumentCategories().subscribe({
+      next: (options) => {
+        this.documentCategoryOptions.set(options as SelectOption<DocumentCategory>[]);
+      },
+      error: () => {}
+    });
+
+    this.memberService.getCollectionModes().subscribe({
+      next: (options) => {
+        this.collectionModeOptions.set(options as SelectOption<CollectionMode>[]);
+      },
+      error: () => {}
     });
   }
 

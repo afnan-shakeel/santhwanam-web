@@ -16,7 +16,7 @@
             label="Document Type"
             placeholder="Select document type"
             formControlName="documentType"
-            [options]="documentTypeOptions"
+            [options]="documentTypeOptions()"
             [required]="true"
             [error]="getDocumentFieldError('documentType')"
           ></app-select>
@@ -25,7 +25,7 @@
             label="Document Category"
             placeholder="Select category"
             formControlName="documentCategory"
-            [options]="documentCategoryOptions"
+            [options]="documentCategoryOptions()"
             [required]="true"
             [error]="getDocumentFieldError('documentCategory')"
           ></app-select>
@@ -90,11 +90,11 @@
       </div>
     } @else {
       <div class="space-y-3">
-        @for (doc of documents(); track doc.documentId) {
+        @for (doc of documents(); let idx = $index; track idx) {
           <div class="flex items-center justify-between bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-3 flex-1 min-w-0">
               <div class="shrink-0">
-                @if (doc.mimeType.includes('pdf')) {
+                @if (doc?.mimeType?.includes('pdf')) {
                   <svg class="h-10 w-10 text-red-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
                   </svg>
@@ -104,8 +104,8 @@
                   </svg>
                 }
               </div>
-              <div>
-                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ doc.documentName }}</p>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ doc.documentName }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">
                   {{ doc.documentType }} - {{ doc.documentCategory }}
                   @if (doc.expiryDate) {
@@ -118,7 +118,7 @@
             <button
               type="button"
               (click)="onDeleteDocument(doc.documentId)"
-              class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+              class="shrink-0 ml-4 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
               title="Delete document"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -177,7 +177,7 @@
             label="Collection Mode"
             placeholder="Select mode"
             formControlName="collectionMode"
-            [options]="collectionModeOptions"
+            [options]="collectionModeOptions()"
             [required]="true"
             [error]="getPaymentFieldError('collectionMode')"
           ></app-select>
@@ -219,7 +219,7 @@
           <div>
             <p class="text-sm font-medium text-green-800 dark:text-green-300">Payment details recorded</p>
             <p class="text-xs text-green-700 dark:text-green-400 mt-1">
-              Amount: ₹{{ (payment()!.registrationFee + payment()!.advanceDeposit).toLocaleString() }} 
+              Amount: ₹{{ (payment()!.totalAmount).toLocaleString() }} 
               via {{ payment()!.collectionMode }}
             </p>
           </div>
