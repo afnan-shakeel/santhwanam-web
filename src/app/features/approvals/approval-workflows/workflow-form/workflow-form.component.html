@@ -6,261 +6,339 @@
   (openChange)="openChange.emit($event)"
 >
   @if (loading()) {
-    <div class="flex items-center justify-center py-8">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    <div class="flex flex-col items-center justify-center py-16">
+      <div class="relative">
+        <div class="h-12 w-12 rounded-full border-4 border-primary/20"></div>
+        <div class="absolute top-0 left-0 h-12 w-12 rounded-full border-4 border-transparent border-t-primary animate-spin"></div>
+      </div>
+      <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">Loading workflow details...</p>
     </div>
   } @else {
-    <form [formGroup]="workflowForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <form [formGroup]="workflowForm" (ngSubmit)="onSubmit()" class="space-y-8">
       
-      <!-- Workflow Details -->
-      <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Workflow Details</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Workflow Code -->
-          <app-input
-            label="Workflow Code"
-            placeholder="e.g., member_registration"
-            [required]="true"
-            formControlName="workflowCode"
-            [error]="getFieldError('workflowCode')"
-            [disabled]="isEditMode()"
-            hint="Unique identifier for this workflow"
-          ></app-input>
-
-          <!-- Workflow Name -->
-          <app-input
-            label="Workflow Name"
-            placeholder="e.g., Member Registration Approval"
-            [required]="true"
-            formControlName="workflowName"
-            [error]="getFieldError('workflowName')"
-          ></app-input>
-
-          <!-- Module -->
-          <app-select
-            label="Module"
-            [required]="true"
-            [options]="moduleOptions"
-            formControlName="module"
-            [error]="getFieldError('module')"
-            [disabled]="isEditMode()"
-          ></app-select>
-
-          <!-- Entity Type -->
-          <app-input
-            label="Entity Type"
-            placeholder="e.g., Member, Claim, Agent"
-            [required]="true"
-            formControlName="entityType"
-            [error]="getFieldError('entityType')"
-            [disabled]="isEditMode()"
-            hint="Type of entity this workflow applies to"
-          ></app-input>
-
-          <!-- Description -->
-          <div class="md:col-span-2">
+      <!-- Workflow Details Card -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <!-- Card Header -->
+        <div class="bg-linear-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/5 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center gap-3">
+            <div class="flex items-center justify-center h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/20">
+              <svg class="h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-base font-semibold text-gray-900 dark:text-white">Workflow Information</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Define the basic details of your approval workflow</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Card Body -->
+        <div class="p-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+            <!-- Workflow Code -->
             <app-input
-              label="Description"
-              placeholder="Brief description of this workflow"
-              formControlName="description"
-              [error]="getFieldError('description')"
+              label="Workflow Code"
+              placeholder="e.g., member_registration"
+              [required]="true"
+              formControlName="workflowCode"
+              [error]="getFieldError('workflowCode')"
+              [disabled]="isEditMode()"
+              hint="Unique identifier for this workflow"
             ></app-input>
+
+            <!-- Workflow Name -->
+            <app-input
+              label="Workflow Name"
+              placeholder="e.g., Member Registration Approval"
+              [required]="true"
+              formControlName="workflowName"
+              [error]="getFieldError('workflowName')"
+            ></app-input>
+
+            <!-- Module -->
+            <app-select
+              label="Module"
+              [required]="true"
+              [options]="moduleOptions"
+              formControlName="module"
+              [error]="getFieldError('module')"
+              [disabled]="isEditMode()"
+            ></app-select>
+
+            <!-- Entity Type -->
+            <app-input
+              label="Entity Type"
+              placeholder="e.g., Member, Claim, Agent"
+              [required]="true"
+              formControlName="entityType"
+              [error]="getFieldError('entityType')"
+              [disabled]="isEditMode()"
+              hint="Type of entity this workflow applies to"
+            ></app-input>
+
+            <!-- Description -->
+            <div class="md:col-span-2">
+              <app-input
+                label="Description"
+                placeholder="Brief description of this workflow"
+                formControlName="description"
+                [error]="getFieldError('description')"
+              ></app-input>
+            </div>
           </div>
 
-          <!-- Checkboxes -->
-          <app-checkbox
-            label="Active"
-            formControlName="isActive"
-            hint="Whether this workflow is currently active"
-          ></app-checkbox>
+          <!-- Workflow Settings -->
+          <div class="mt-6 pt-5 border-t border-gray-100 dark:border-gray-700/50">
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Workflow Settings</h4>
+            <div class="flex flex-wrap gap-6">
+              <app-checkbox
+                label="Active"
+                formControlName="isActive"
+                hint="Enable this workflow for processing"
+              ></app-checkbox>
 
-          <app-checkbox
-            label="Requires All Stages"
-            formControlName="requiresAllStages"
-            hint="All stages must be completed for approval"
-          ></app-checkbox>
+              <app-checkbox
+                label="Requires All Stages"
+                formControlName="requiresAllStages"
+                hint="All stages must be completed for approval"
+              ></app-checkbox>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Stages Section -->
-      <div>
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-medium text-gray-900 dark:text-white">Approval Stages</h3>
-          <button
-            type="button"
-            (click)="addStage()"
-            class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-          >
-            <svg class="-ml-0.5 mr-1.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-            </svg>
-            Add Stage
-          </button>
+      <!-- Approval Stages Card -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <!-- Card Header -->
+        <div class="bg-linear-to-r from-secondary/5 to-secondary/10 dark:from-secondary/10 dark:to-secondary/5 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center justify-center h-10 w-10 rounded-lg bg-secondary/10 dark:bg-secondary/20">
+                <svg class="h-5 w-5 text-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Approval Stages</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Configure the approval pipeline stages</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              (click)="addStage()"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg shadow-sm hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200"
+            >
+              <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+              </svg>
+              Add Stage
+            </button>
+          </div>
         </div>
 
-        <div formArrayName="stages" class="space-y-4">
-          @for (stage of stages.controls; track $index) {
-            <div 
-              [formGroupName]="$index"
-              class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
-            >
-              <!-- Stage Header -->
-              <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center space-x-2">
-                  <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-primary text-white text-sm font-medium">
-                    {{ $index + 1 }}
-                  </span>
-                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Stage {{ $index + 1 }}
-                  </span>
-                </div>
-
-                <!-- Stage Actions -->
-                <div class="flex items-center space-x-2">
-                  @if ($index > 0) {
-                    <button
-                      type="button"
-                      (click)="moveStageUp($index)"
-                      class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                      title="Move up"
-                    >
-                      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-                      </svg>
-                    </button>
-                  }
-                  @if ($index < stages.length - 1) {
-                    <button
-                      type="button"
-                      (click)="moveStageDown($index)"
-                      class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                      title="Move down"
-                    >
-                      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                  }
-                  @if (stages.length > 1) {
-                    <button
-                      type="button"
-                      (click)="removeStage($index)"
-                      class="p-1 text-red-400 hover:text-red-600 dark:hover:text-red-300"
-                      title="Remove stage"
-                    >
-                      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  }
-                </div>
+        <!-- Stages List -->
+        <div class="p-6">
+          @if (stages.length === 0) {
+            <div class="text-center py-12 px-4">
+              <div class="mx-auto h-16 w-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
+                <svg class="h-8 w-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
               </div>
+              <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-1">No stages configured</h4>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Add your first approval stage to get started</p>
+              <button
+                type="button"
+                (click)="addStage()"
+                class="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-600"
+              >
+                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                </svg>
+                Add First Stage
+              </button>
+            </div>
+          } @else {
+            <div formArrayName="stages" class="space-y-4">
+              @for (stage of stages.controls; track $index) {
+                <div 
+                  [formGroupName]="$index"
+                  class="group relative bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl transition-colors duration-200 hover:border-primary/30"
+                >
+                  <!-- Stage Number Indicator (Left Side) -->
+                  <div class="absolute -left-px top-0 bottom-0 w-1 bg-linear-to-b from-primary to-primary/60 rounded-l-xl"></div>
+                  
+                  <!-- Stage Content -->
+                  <div class="p-5 pl-6">
+                    <!-- Stage Header -->
+                    <div class="flex items-center justify-between mb-5">
+                      <div class="flex items-center gap-3">
+                        <div class="flex items-center justify-center h-9 w-9 rounded-lg bg-primary text-white text-sm font-bold shadow-sm">
+                          {{ $index + 1 }}
+                        </div>
+                        <div>
+                          <span class="text-sm font-semibold text-gray-900 dark:text-white">
+                            Stage {{ $index + 1 }}
+                          </span>
+                          @if (stages.at($index).get('stageName')?.value) {
+                            <span class="text-gray-400 mx-2">•</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ stages.at($index).get('stageName')?.value }}</span>
+                          }
+                        </div>
+                      </div>
 
-              <!-- Stage Form Fields -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Stage Name -->
-                <app-input
-                  label="Stage Name"
-                  placeholder="e.g., Agent Review"
-                  [required]="true"
-                  formControlName="stageName"
-                  [error]="getStageFieldError($index, 'stageName')"
-                ></app-input>
+                      <!-- Stage Actions -->
+                      <div class="flex items-center gap-1">
+                        @if ($index > 0) {
+                          <button
+                            type="button"
+                            (click)="moveStageUp($index)"
+                            class="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors duration-200"
+                            title="Move up"
+                          >
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+                            </svg>
+                          </button>
+                        }
+                        @if ($index < stages.length - 1) {
+                          <button
+                            type="button"
+                            (click)="moveStageDown($index)"
+                            class="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors duration-200"
+                            title="Move down"
+                          >
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
+                        }
+                        @if (stages.length > 1) {
+                          <button
+                            type="button"
+                            (click)="removeStage($index)"
+                            class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors duration-200"
+                            title="Remove stage"
+                          >
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        }
+                      </div>
+                    </div>
 
-                <!-- Approver Type -->
-                <app-select
-                  label="Approver Type"
-                  [required]="true"
-                  [options]="approverTypeOptions"
-                  formControlName="approverType"
-                  [error]="getStageFieldError($index, 'approverType')"
-                  (valueChange)="onApproverTypeChange($index, $event)"
-                ></app-select>
+                    <!-- Stage Form Fields -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                      <!-- Stage Name -->
+                      <app-input
+                        label="Stage Name"
+                        placeholder="e.g., Initial Review"
+                        [required]="true"
+                        formControlName="stageName"
+                        [error]="getStageFieldError($index, 'stageName')"
+                      ></app-input>
 
-                <!-- Role Selection (if approverType is Role) -->
-                @if (stages.at($index).get('approverType')?.value === 'Role') {
-                  <app-search-select
-                    label="Role"
-                    placeholder="Search and select role"
-                    [required]="true"
-                    [mode]="'single'"
-                    [options]="roleOptions()"
-                    [loading]="rolesLoading()"
-                    formControlName="roleId"
-                    [error]="getStageFieldError($index, 'roleId')"
-                    (search)="onRoleSearch($event)"
-                  ></app-search-select>
-                }
+                      <!-- Approver Type -->
+                      <app-select
+                        label="Approver Type"
+                        [required]="true"
+                        [options]="approverTypeOptions"
+                        formControlName="approverType"
+                        [error]="getStageFieldError($index, 'approverType')"
+                        (valueChange)="onApproverTypeChange($index, $event)"
+                      ></app-select>
 
-                <!-- User Selection (if approverType is SpecificUser) -->
-                @if (stages.at($index).get('approverType')?.value === 'SpecificUser') {
-                  <app-search-select
-                    label="User"
-                    placeholder="Search and select user"
-                    [required]="true"
-                    [mode]="'single'"
-                    [options]="userOptions()"
-                    [loading]="usersLoading()"
-                    formControlName="userId"
-                    [error]="getStageFieldError($index, 'userId')"
-                    (search)="onUserSearch($event)"
-                  ></app-search-select>
-                }
+                      <!-- Role Selection (if approverType is Role) -->
+                      @if (stages.at($index).get('approverType')?.value === 'Role') {
+                        <app-select
+                          label="Select Role"
+                          placeholder="Choose a role"
+                          [required]="true"
+                          [options]="roleSelectOptions()"
+                          formControlName="roleId"
+                          [error]="getStageFieldError($index, 'roleId')"
+                        ></app-select>
+                      }
 
-                <!-- Organization Body (if approverType is OrganizationAdmin) -->
-                @if (stages.at($index).get('approverType')?.value === 'OrganizationAdmin') {
-                  <app-select
-                    label="Organization Body"
-                    [required]="true"
-                    [options]="organizationBodyOptions"
-                    formControlName="organizationBody"
-                    [error]="getStageFieldError($index, 'organizationBody')"
-                  ></app-select>
-                }
+                      <!-- User Selection (if approverType is SpecificUser) -->
+                      @if (stages.at($index).get('approverType')?.value === 'SpecificUser') {
+                        <app-search-select
+                          label="Select User"
+                          placeholder="Search and select user"
+                          [required]="true"
+                          [mode]="'single'"
+                          [options]="userOptions()"
+                          [loading]="usersLoading()"
+                          formControlName="userId"
+                          [error]="getStageFieldError($index, 'userId')"
+                          (search)="onUserSearch($event)"
+                        ></app-search-select>
+                      }
 
-                <!-- Optional & Auto-approve -->
-                <div class="flex items-center space-x-6">
-                  <app-checkbox
-                    label="Optional"
-                    formControlName="isOptional"
-                  ></app-checkbox>
+                      <!-- Organization Body (if approverType is OrganizationAdmin) -->
+                      @if (stages.at($index).get('approverType')?.value === 'OrganizationAdmin') {
+                        <app-select
+                          label="Organization Body"
+                          [required]="true"
+                          [options]="organizationBodyOptions"
+                          formControlName="organizationBody"
+                          [error]="getStageFieldError($index, 'organizationBody')"
+                        ></app-select>
+                      }
+                    </div>
 
-                  <app-checkbox
-                    label="Auto-approve"
-                    formControlName="autoApprove"
-                  ></app-checkbox>
+                    <!-- Stage Options -->
+                    <div class="mt-5 pt-4 border-t border-gray-200 dark:border-gray-700/50">
+                      <div class="flex flex-wrap items-center gap-6">
+                        <app-checkbox
+                          label="Optional Stage"
+                          formControlName="isOptional"
+                          hint="Can be skipped if needed"
+                        ></app-checkbox>
+
+                        <app-checkbox
+                          label="Auto-approve"
+                          formControlName="autoApprove"
+                          hint="Automatically approve after timeout"
+                        ></app-checkbox>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              }
             </div>
           }
         </div>
       </div>
 
       <!-- Form Actions -->
-      <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div class="flex items-center justify-end gap-3 pt-2">
         <button
           type="button"
           (click)="onCancel()"
           [disabled]="saving()"
-          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 dark:focus:ring-gray-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Cancel
         </button>
         <button
           type="submit"
-          [disabled]="false"
-          class="px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          [disabled]="saving()"
+          class="inline-flex items-center justify-center px-6 py-2.5 text-sm font-medium text-white bg-primary rounded-lg shadow-sm hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px]"
         >
           @if (saving()) {
-            <span class="flex items-center">
-              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              {{ isEditMode() ? 'Updating...' : 'Creating...' }}
-            </span>
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ isEditMode() ? 'Saving...' : 'Creating...' }}
           } @else {
-            {{ isEditMode() ? 'Update Workflow' : 'Create Workflow' }}
+            <svg class="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            {{ isEditMode() ? 'Save Changes' : 'Create Workflow' }}
           }
         </button>
       </div>

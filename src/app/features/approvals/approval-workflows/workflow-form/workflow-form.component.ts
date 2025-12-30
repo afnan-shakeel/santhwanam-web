@@ -15,7 +15,7 @@ import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } fr
 
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
-import { SelectComponent } from '../../../../shared/components/select/select.component';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import {
   SearchSelectComponent,
   SearchSelectOption,
@@ -68,13 +68,23 @@ export class WorkflowFormComponent implements OnInit, OnChanges {
   users = signal<User[]>([]);
   usersLoading = signal(false);
 
-  roleOptions = computed<SearchSelectOption<string>[]>(() => {
+  // Standard select options for roles (used with app-select)
+  roleSelectOptions = computed<SelectOption<string>[]>(() => {
     return this.roles().map((role) => ({
       value: role.roleId,
       label: role.roleName,
     }));
   });
 
+  // Standard select options for users (used with app-select)
+  userSelectOptions = computed<SelectOption<string>[]>(() => {
+    return this.users().map((user) => ({
+      value: user.userId,
+      label: `${user.firstName} ${user.lastName}`,
+    }));
+  });
+
+  // Search select options for users (used with app-search-select)
   userOptions = computed<SearchSelectOption<string>[]>(() => {
     return this.users().map((user) => ({
       value: user.userId,
