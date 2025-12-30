@@ -1,261 +1,295 @@
-<div class="space-y-6">
-  
-  <!-- Nominees List -->
-  <div>
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-        Nominees ({{ nominees().length }})
-      </h3>
+<div>
+  <!-- Step Header -->
+  <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10 text-primary">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-base font-semibold text-gray-900 dark:text-white">Nominees</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Step 2 of 3 • {{ nominees().length }} nominee(s) added</p>
+        </div>
+      </div>
       @if (!showNomineeForm()) {
-        <app-button
-          label="Add Nominee"
-          variant="primary"
-          size="sm"
+        <button
+          type="button"
           (click)="onAddNominee()"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-600"
         >
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
           Add Nominee
-        </app-button>
-      }
-    </div>
-
-    @if (nominees().length === 0 && !showNomineeForm()) {
-      <div class="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-        </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No nominees added</h3>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by adding at least one nominee.</p>
-      </div>
-    }
-
-    <!-- Nominee Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      @for (nominee of nominees(); track nominee.nomineeId) {
-        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm">
-          <div class="flex justify-between items-start mb-3">
-            <div>
-              <h4 class="text-base font-semibold text-gray-900 dark:text-white">{{ nominee.name }}</h4>
-              <p class="text-sm text-gray-500 dark:text-gray-400">{{ nominee.relationType }}</p>
-            </div>
-            <div class="flex space-x-2">
-              <button
-                type="button"
-                (click)="onEditNominee(nominee)"
-                class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
-                title="Edit nominee"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                </svg>
-              </button>
-              <button
-                type="button"
-                (click)="onDeleteNominee(nominee.nomineeId)"
-                [disabled]="nominees().length === 1"
-                [class.opacity-50]="nominees().length === 1"
-                [class.cursor-not-allowed]="nominees().length === 1"
-                class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                [title]="nominees().length === 1 ? 'At least 1 nominee required' : 'Delete nominee'"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-          
-          <div class="space-y-2 text-sm">
-            <div class="flex">
-              <span class="text-gray-500 dark:text-gray-400 w-32">Contact:</span>
-              <span class="text-gray-900 dark:text-white">{{ nominee.contactNumber }}</span>
-            </div>
-            <div class="flex">
-              <span class="text-gray-500 dark:text-gray-400 w-32">DOB:</span>
-              <span class="text-gray-900 dark:text-white">{{ nominee.dateOfBirth }}</span>
-            </div>
-            <div class="flex">
-              <span class="text-gray-500 dark:text-gray-400 w-32">ID Proof:</span>
-              <span class="text-gray-900 dark:text-white">{{ nominee.idProofType }} - {{ nominee.idProofNumber }}</span>
-            </div>
-            <div class="flex">
-              <span class="text-gray-500 dark:text-gray-400 w-32">Address:</span>
-              <span class="text-gray-900 dark:text-white">{{ nominee.city }}, {{ nominee.state }}</span>
-            </div>
-          </div>
-        </div>
+        </button>
       }
     </div>
   </div>
 
-  <!-- Nominee Form -->
-  @if (showNomineeForm()) {
-    <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        {{ editingNomineeId() ? 'Edit Nominee' : 'Add New Nominee' }}
-      </h3>
+  <!-- Content -->
+  <div class="p-6">
+    <!-- Empty State -->
+    @if (nominees().length === 0 && !showNomineeForm()) {
+      <div class="text-center py-12 bg-gray-50 dark:bg-gray-900/50 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+        <div class="inline-flex items-center justify-center h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
+          <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </div>
+        <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-1">No nominees added</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">At least one nominee is required to proceed.</p>
+        <button
+          type="button"
+          (click)="onAddNominee()"
+          class="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-600"
+        >
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Add your first nominee
+        </button>
+      </div>
+    }
 
-      <form [formGroup]="nomineeForm" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <app-input
-            label="Full Name"
-            placeholder="Enter nominee name"
-            formControlName="name"
-            [required]="true"
-            [error]="getFieldError('name')"
-          ></app-input>
+    <!-- Nominee Cards -->
+    @if (nominees().length > 0 && !showNomineeForm()) {
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        @for (nominee of nominees(); track nominee.nomineeId) {
+          <div class="bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <div>
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-white">{{ nominee.name }}</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ nominee.relationType }}</p>
+              </div>
+              <div class="flex items-center gap-1">
+                <button
+                  type="button"
+                  (click)="onEditNominee(nominee)"
+                  class="p-1.5 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-md"
+                  title="Edit"
+                >
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  (click)="onDeleteNominee(nominee.nomineeId)"
+                  [disabled]="nominees().length === 1"
+                  class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-md disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-400"
+                  [title]="nominees().length === 1 ? 'At least 1 nominee required' : 'Delete'"
+                >
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="p-4">
+              <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                <div>
+                  <dt class="text-xs text-gray-500 dark:text-gray-400">Contact</dt>
+                  <dd class="text-gray-900 dark:text-white">{{ nominee.contactNumber }}</dd>
+                </div>
+                <div>
+                  <dt class="text-xs text-gray-500 dark:text-gray-400">Date of Birth</dt>
+                  <dd class="text-gray-900 dark:text-white">{{ nominee.dateOfBirth }}</dd>
+                </div>
+                <div>
+                  <dt class="text-xs text-gray-500 dark:text-gray-400">ID Proof</dt>
+                  <dd class="text-gray-900 dark:text-white truncate" title="{{ nominee.idProofNumber }}">{{ nominee.idProofType }}</dd>
+                </div>
+                <div>
+                  <dt class="text-xs text-gray-500 dark:text-gray-400">Location</dt>
+                  <dd class="text-gray-900 dark:text-white truncate">{{ nominee.city }}, {{ nominee.state }}</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        }
+      </div>
+    }
 
-          <app-select
-            label="Relation Type"
-            placeholder="Select relation"
-            formControlName="relationType"
-            [options]="relationTypeOptions"
-            [required]="true"
-            [error]="getFieldError('relationType')"
-          ></app-select>
+    <!-- Nominee Form -->
+    @if (showNomineeForm()) {
+      <div class="bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+        <div class="px-5 py-3 border-b border-gray-200 dark:border-gray-700">
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
+            {{ editingNomineeId() ? 'Edit Nominee' : 'Add New Nominee' }}
+          </h3>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <app-input
-            label="Date of Birth"
-            type="date"
-            formControlName="dateOfBirth"
-            [required]="true"
-            [error]="getFieldError('dateOfBirth')"
-          ></app-input>
+        <form [formGroup]="nomineeForm" class="p-5 space-y-5">
+          <!-- Basic Info -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <app-input
+              label="Full Name"
+              placeholder="Enter nominee name"
+              formControlName="name"
+              [required]="true"
+              [error]="getFieldError('name')"
+            ></app-input>
 
-          <app-input
-            label="Contact Number"
-            type="text"
-            placeholder="+91XXXXXXXXXX"
-            formControlName="contactNumber"
-            [required]="true"
-            [error]="getFieldError('contactNumber')"
-          ></app-input>
-        </div>
+            <app-select
+              label="Relation Type"
+              placeholder="Select relation"
+              formControlName="relationType"
+              [options]="relationTypeOptions"
+              [required]="true"
+              [error]="getFieldError('relationType')"
+            ></app-select>
+          </div>
 
-        <app-input
-          label="Alternate Contact Number"
-          type="text"
-          placeholder="+91XXXXXXXXXX (optional)"
-          formControlName="alternateContactNumber"
-          [error]="getFieldError('alternateContactNumber')"
-        ></app-input>
+          <!-- Contact Info -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <app-input
+              label="Date of Birth"
+              type="date"
+              formControlName="dateOfBirth"
+              [required]="true"
+              [error]="getFieldError('dateOfBirth')"
+            ></app-input>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <app-select
-            label="ID Proof Type"
-            placeholder="Select ID proof type"
-            formControlName="idProofType"
-            [options]="idProofTypeOptions"
-            [required]="true"
-            [error]="getFieldError('idProofType')"
-          ></app-select>
+            <app-input
+              label="Contact Number"
+              type="text"
+              placeholder="+91XXXXXXXXXX"
+              formControlName="contactNumber"
+              [required]="true"
+              [error]="getFieldError('contactNumber')"
+            ></app-input>
 
-          <app-input
-            label="ID Proof Number"
-            placeholder="Enter ID proof number"
-            formControlName="idProofNumber"
-            [required]="true"
-            [error]="getFieldError('idProofNumber')"
-          ></app-input>
-        </div>
+            <app-input
+              label="Alternate Contact"
+              type="text"
+              placeholder="Optional"
+              formControlName="alternateContactNumber"
+              [error]="getFieldError('alternateContactNumber')"
+            ></app-input>
+          </div>
 
-        <app-input
-          label="Address Line 1"
-          placeholder="Street address, building name, etc."
-          formControlName="addressLine1"
-          [required]="true"
-          [error]="getFieldError('addressLine1')"
-        ></app-input>
+          <!-- ID Proof -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <app-select
+              label="ID Proof Type"
+              placeholder="Select ID proof type"
+              formControlName="idProofType"
+              [options]="idProofTypeOptions"
+              [required]="true"
+              [error]="getFieldError('idProofType')"
+            ></app-select>
 
-        <app-input
-          label="Address Line 2"
-          placeholder="Apartment, suite, floor, etc. (optional)"
-          formControlName="addressLine2"
-          [error]="getFieldError('addressLine2')"
-        ></app-input>
+            <app-input
+              label="ID Proof Number"
+              placeholder="Enter ID proof number"
+              formControlName="idProofNumber"
+              [required]="true"
+              [error]="getFieldError('idProofNumber')"
+            ></app-input>
+          </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <app-input
-            label="City"
-            placeholder="Enter city"
-            formControlName="city"
-            [required]="true"
-            [error]="getFieldError('city')"
-          ></app-input>
+          <!-- Address -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <app-input
+              label="Address Line 1"
+              placeholder="Street address"
+              formControlName="addressLine1"
+              [required]="true"
+              [error]="getFieldError('addressLine1')"
+            ></app-input>
 
-          <app-input
-            label="State"
-            placeholder="Enter state"
-            formControlName="state"
-            [required]="true"
-            [error]="getFieldError('state')"
-          ></app-input>
+            <app-input
+              label="Address Line 2"
+              placeholder="Optional"
+              formControlName="addressLine2"
+              [error]="getFieldError('addressLine2')"
+            ></app-input>
+          </div>
 
-          <app-input
-            label="Postal Code"
-            placeholder="Enter postal code"
-            formControlName="postalCode"
-            [required]="true"
-            [error]="getFieldError('postalCode')"
-          ></app-input>
-        </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <app-input
+              label="City"
+              placeholder="City"
+              formControlName="city"
+              [required]="true"
+              [error]="getFieldError('city')"
+            ></app-input>
 
-        <app-input
-          label="Country"
-          placeholder="Enter country"
-          formControlName="country"
-          [required]="true"
-          [error]="getFieldError('country')"
-        ></app-input>
+            <app-input
+              label="State"
+              placeholder="State"
+              formControlName="state"
+              [required]="true"
+              [error]="getFieldError('state')"
+            ></app-input>
 
-        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <app-button
-            label="x Cancel"
-            variant="secondary"
-            (click)="onCancelNomineeForm()"
-            [disabled]="loading()"
-          >
-            Cancel
-          </app-button>
+            <app-input
+              label="Postal Code"
+              placeholder="Code"
+              formControlName="postalCode"
+              [required]="true"
+              [error]="getFieldError('postalCode')"
+            ></app-input>
 
-          <app-button
-            label="{{ editingNomineeId() ? 'x Update Nominee' : 'x Add Nominee' }}"
-            variant="primary"
-            (click)="onSaveNominee()"
-            [disabled]="loading()"
-          >
-            {{ editingNomineeId() ? 'Update Nominee' : 'Add Nominee' }}
-          </app-button>
-        </div>
-      </form>
-    </div>
-  }
+            <app-input
+              label="Country"
+              placeholder="Country"
+              formControlName="country"
+              [required]="true"
+              [error]="getFieldError('country')"
+            ></app-input>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button
+              type="button"
+              (click)="onCancelNomineeForm()"
+              [disabled]="loading()"
+              class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              (click)="onSaveNominee()"
+              [disabled]="loading()"
+              class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-600 disabled:opacity-50"
+            >
+              {{ editingNomineeId() ? 'Update Nominee' : 'Add Nominee' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+  </div>
 
   <!-- Navigation Buttons -->
-  <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
-    <app-button
-    label="x Back to Personal Details"
-      variant="secondary"
+  <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex items-center justify-between">
+    <button
+      type="button"
       (click)="onBack()"
       [disabled]="loading()"
+      class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
     >
-      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
       </svg>
-      Back to Personal Details
-    </app-button>
+      Back
+    </button>
 
-    <app-button
-    label="x Continue to Documents & Payment"
-      variant="primary"
+    <button
+      type="button"
       (click)="onContinue()"
       [disabled]="loading() || nominees().length === 0"
+      class="inline-flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
     >
-      Continue to Documents & Payment
-    </app-button>
+      Continue to Documents
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
   </div>
 </div>

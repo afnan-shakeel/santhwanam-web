@@ -1,112 +1,140 @@
-<div class="space-y-6">
-  <form [formGroup]="personalForm" class="space-y-6">
+<div>
+  <form [formGroup]="personalForm">
     
-    <!-- Personal Information Section -->
-    <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Personal Information</h3>
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <app-input
-          label="First Name"
-          placeholder="Enter first name"
-          formControlName="firstName"
-          [required]="true"
-          [error]="getFieldError('firstName')"
-        ></app-input>
-
-        <app-input
-          label="Middle Name"
-          placeholder="Enter middle name (optional)"
-          formControlName="middleName"
-          [error]="getFieldError('middleName')"
-        ></app-input>
-
-        <app-input
-          label="Last Name"
-          placeholder="Enter last name"
-          formControlName="lastName"
-          [required]="true"
-          [error]="getFieldError('lastName')"
-        ></app-input>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-        <app-input
-          label="Date of Birth"
-          type="date"
-          formControlName="dateOfBirth"
-          [required]="true"
-          hint="Member must be at least 18 years old"
-          [error]="getFieldError('dateOfBirth')"
-        ></app-input>
-
-        <app-select
-          label="Gender"
-          placeholder="Select gender"
-          formControlName="gender"
-          [options]="genderOptions"
-          [required]="true"
-          [error]="getFieldError('gender')"
-        ></app-select>
+    <!-- Step Header -->
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10 text-primary">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-base font-semibold text-gray-900 dark:text-white">Personal Details</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Step 1 of 3</p>
+        </div>
       </div>
     </div>
 
-    <!-- Contact Information Section -->
-    <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Contact Information</h3>
+    <!-- Form Content -->
+    <div class="p-6 space-y-8">
       
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <app-input
-          label="Contact Number"
-          type="text"
-          placeholder="+91XXXXXXXXXX"
-          formControlName="contactNumber"
-          [required]="true"
-          hint="10-20 digits including country code"
-          [error]="getFieldError('contactNumber')"
-        ></app-input>
+      <!-- Personal Information Section -->
+      <section>
+        <div class="flex items-center gap-2 mb-4">
+          <h3 class="text-sm font-medium text-gray-900 dark:text-white">Personal Information</h3>
+          <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <app-input
+            label="First Name"
+            placeholder="Enter first name"
+            formControlName="firstName"
+            [required]="true"
+            [error]="getFieldError('firstName')"
+          ></app-input>
 
-        <app-input
-          label="Alternate Contact Number"
-          type="text"
-          placeholder="+91XXXXXXXXXX (optional)"
-          formControlName="alternateContactNumber"
-          [error]="getFieldError('alternateContactNumber')"
-        ></app-input>
-      </div>
+          <app-input
+            label="Middle Name"
+            placeholder="Optional"
+            formControlName="middleName"
+            [error]="getFieldError('middleName')"
+          ></app-input>
 
-      <div class="mt-4">
-        <app-input
-          label="Email"
-          type="email"
-          placeholder="email@example.com (optional)"
-          formControlName="email"
-          [error]="getFieldError('email')"
-        ></app-input>
-      </div>
-    </div>
+          <app-input
+            label="Last Name"
+            placeholder="Enter last name"
+            formControlName="lastName"
+            [required]="true"
+            [error]="getFieldError('lastName')"
+          ></app-input>
+        </div>
 
-    <!-- Address Information Section -->
-    <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Address Information</h3>
-      
-      <div class="space-y-4">
-        <app-input
-          label="Address Line 1"
-          placeholder="Street address, building name, etc."
-          formControlName="addressLine1"
-          [required]="true"
-          [error]="getFieldError('addressLine1')"
-        ></app-input>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <app-input
+            label="Date of Birth"
+            type="date"
+            formControlName="dateOfBirth"
+            [required]="true"
+            hint="Must be at least 18 years old"
+            [error]="getFieldError('dateOfBirth')"
+          ></app-input>
 
-        <app-input
-          label="Address Line 2"
-          placeholder="Apartment, suite, floor, etc. (optional)"
-          formControlName="addressLine2"
-          [error]="getFieldError('addressLine2')"
-        ></app-input>
+          <app-select
+            label="Gender"
+            placeholder="Select gender"
+            formControlName="gender"
+            [options]="genderOptions"
+            [required]="true"
+            [error]="getFieldError('gender')"
+          ></app-select>
 
+          <div></div>
+        </div>
+      </section>
+
+      <!-- Contact Information Section -->
+      <section>
+        <div class="flex items-center gap-2 mb-4">
+          <h3 class="text-sm font-medium text-gray-900 dark:text-white">Contact Information</h3>
+          <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <app-input
+            label="Contact Number"
+            type="text"
+            placeholder="+91XXXXXXXXXX"
+            formControlName="contactNumber"
+            [required]="true"
+            hint="Include country code"
+            [error]="getFieldError('contactNumber')"
+          ></app-input>
+
+          <app-input
+            label="Alternate Contact"
+            type="text"
+            placeholder="Optional"
+            formControlName="alternateContactNumber"
+            [error]="getFieldError('alternateContactNumber')"
+          ></app-input>
+
+          <app-input
+            label="Email Address"
+            type="email"
+            placeholder="email@example.com"
+            formControlName="email"
+            [error]="getFieldError('email')"
+          ></app-input>
+        </div>
+      </section>
+
+      <!-- Address Information Section -->
+      <section>
+        <div class="flex items-center gap-2 mb-4">
+          <h3 class="text-sm font-medium text-gray-900 dark:text-white">Address Information</h3>
+          <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+        </div>
+        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <app-input
+            label="Address Line 1"
+            placeholder="Street address, building name"
+            formControlName="addressLine1"
+            [required]="true"
+            [error]="getFieldError('addressLine1')"
+          ></app-input>
+
+          <app-input
+            label="Address Line 2"
+            placeholder="Apartment, suite, floor (optional)"
+            formControlName="addressLine2"
+            [error]="getFieldError('addressLine2')"
+          ></app-input>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
           <app-input
             label="City"
             placeholder="Enter city"
@@ -122,12 +150,10 @@
             [required]="true"
             [error]="getFieldError('state')"
           ></app-input>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <app-input
             label="Postal Code"
-            placeholder="Enter postal code"
+            placeholder="Enter code"
             formControlName="postalCode"
             [required]="true"
             [error]="getFieldError('postalCode')"
@@ -141,68 +167,77 @@
             [error]="getFieldError('country')"
           ></app-input>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <!-- Membership Details Section -->
-    <div class="pb-6">
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Membership Details</h3>
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <app-select
-          label="Membership Tier"
-          placeholder="Select tier"
-          formControlName="tierId"
-          [options]="tierOptions()"
-          [required]="true"
-          [error]="getFieldError('tierId')"
-        ></app-select>
+      <!-- Membership Details Section -->
+      <section>
+        <div class="flex items-center gap-2 mb-4">
+          <h3 class="text-sm font-medium text-gray-900 dark:text-white">Membership Details</h3>
+          <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <app-select
+            label="Membership Tier"
+            placeholder="Select tier"
+            formControlName="tierId"
+            [options]="tierOptions()"
+            [required]="true"
+            [error]="getFieldError('tierId')"
+          ></app-select>
 
-        <app-search-select
-          label="Unit"
-          placeholder="Search for unit..."
-          mode="single"
-          formControlName="unitId"
-          [options]="unitOptions()"
-          [loading]="loadingUnits()"
-          [required]="true"
-          [error]="getFieldError('unitId')"
-          (search)="onSearchUnits($event)"
-        ></app-search-select>
+          <app-search-select
+            label="Unit"
+            placeholder="Search unit..."
+            mode="single"
+            formControlName="unitId"
+            [options]="unitOptions()"
+            [loading]="loadingUnits()"
+            [required]="true"
+            [error]="getFieldError('unitId')"
+            (search)="onSearchUnits($event)"
+          ></app-search-select>
 
-        <app-search-select
-          label="Agent"
-          placeholder="Search for agent..."
-          mode="single"
-          formControlName="agentId"
-          [options]="agentOptions()"
-          [loading]="loadingAgents()"
-          [required]="true"
-          [error]="getFieldError('agentId')"
-          (search)="onSearchAgents($event)"
-        ></app-search-select>
-      </div>
+          <app-search-select
+            label="Agent"
+            placeholder="Search agent..."
+            mode="single"
+            formControlName="agentId"
+            [options]="agentOptions()"
+            [loading]="loadingAgents()"
+            [required]="true"
+            [error]="getFieldError('agentId')"
+            (search)="onSearchAgents($event)"
+          ></app-search-select>
+        </div>
+      </section>
     </div>
 
     <!-- Action Buttons -->
-    <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
-      <app-button
-        label="x Save as Draft"
-        variant="secondary"
+    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex items-center justify-between">
+      <button
+        type="button"
         (click)="onSaveDraft()"
         [disabled]="loading()"
+        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+        </svg>
         Save as Draft
-      </app-button>
+      </button>
 
-      <app-button
-        label="x Continue to Nominees"
-        variant="primary"
+      <button
+        type="button"
         (click)="onContinue()"
         [disabled]="loading()"
+        class="inline-flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Continue to Nominees
-      </app-button>
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
     </div>
   </form>
 </div>
