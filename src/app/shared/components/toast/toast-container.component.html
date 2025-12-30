@@ -1,0 +1,21 @@
+<!-- Top Right Container -->
+@if (topRightToasts().length > 0) {
+<div aria-live="polite" class="pointer-events-none fixed inset-0 flex items-start justify-end px-4 py-6 sm:p-6 z-50">
+    <div class="flex w-full max-w-sm flex-col items-end space-y-4">
+        @for (toast of topRightToasts(); track toast.id) {
+        <app-toast class="w-full" [toast]="toast" (dismiss)="onDismiss($event)"></app-toast>
+        }
+    </div>
+</div>
+}
+
+<!-- Bottom Right Container -->
+@if (bottomRightToasts().length > 0) {
+<div aria-live="polite" class="pointer-events-none fixed inset-0 flex items-end justify-end px-4 py-6 sm:p-6 z-50">
+    <div class="flex w-full max-w-sm flex-col-reverse items-end space-y-reverse space-y-4">
+        @for (toast of bottomRightToasts(); track toast.id) {
+        <app-toast class="w-full" [toast]="toast" (dismiss)="onDismiss($event)"></app-toast>
+        }
+    </div>
+</div>
+}

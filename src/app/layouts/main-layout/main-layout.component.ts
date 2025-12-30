@@ -6,10 +6,11 @@ import { MenuService } from '../../core/services/menu.service';
 import { AuthService } from '../../core/services/auth.service';
 import { AuthStore } from '../../core/state/auth.store';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
+import { ToastContainerComponent } from '../../shared/components/toast/toast-container.component';
 
 @Component({
   selector: 'app-main-layout',
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, AvatarComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, AvatarComponent, ToastContainerComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.css'

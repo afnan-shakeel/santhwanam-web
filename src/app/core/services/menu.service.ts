@@ -34,7 +34,6 @@ export class MenuService {
     { label: 'Members', route: '/members', active: false },
     { label: 'Death Claims', route: '/claims', active: false },
     { label: 'Contributions', route: '/contributions', active: false },
-    { label: 'Ledger', route: '/ledger', active: false }
   ]);
 
   readonly items = computed(() => this.menuItems());

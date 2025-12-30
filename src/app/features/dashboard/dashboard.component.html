@@ -68,4 +68,34 @@
       </div>
     </div>
   </div>
+
+  <!-- Toast Test Section -->
+  <div class="mt-8 rounded-lg bg-white p-8 shadow-sm dark:bg-gray-800">
+    <div class="text-center">
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Toast Notification Tests</h3>
+      <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+        Click the buttons below to test different toast notification types
+      </p>
+      <div class="mt-6 flex flex-wrap justify-center gap-3">
+        <app-button 
+          variant="primary" 
+          label="Success Toast" 
+          (click)="showSuccessToast()">
+        </app-button>
+        <app-button 
+          label="Error Toast" 
+          (click)="showErrorToast()">
+        </app-button>
+        <app-button 
+          label="Warning Toast" 
+          (click)="showWarningToast()">
+        </app-button>
+        <app-button 
+          variant="soft" 
+          label="Info Toast" 
+          (click)="showInfoToast()">
+        </app-button>
+      </div>
+    </div>
+  </div>
 </div>

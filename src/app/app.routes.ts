@@ -5,6 +5,10 @@ import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
 
 export const routes: Routes = [
+  {
+    path: 'home',
+    loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent)    
+  },
   // Auth routes (no layout, guest only)
   {
     path: 'auth',
