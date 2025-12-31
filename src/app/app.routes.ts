@@ -103,6 +103,10 @@ export const routes: Routes = [
           {
             path: 'my-profile',
             loadComponent: () => import('./features/agents/agent-profile/agent-profile.component').then((m) => m.AgentProfileComponent)
+          },
+          {
+            path: ':agentId/profile',
+            loadComponent: () => import('./features/agents/agent-profile/agent-profile.component').then((m) => m.AgentProfileComponent)
           }
         ]
       },

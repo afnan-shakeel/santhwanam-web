@@ -146,8 +146,7 @@ export class AgentsComponent {
   }
 
   onViewAgent(agent: Agent): void {
-    this.selectedAgentId.set(agent.agentId);
-    this.showAgentForm.set(true);
+    this.router.navigate(['/agents', agent.agentId, 'profile']);
   }
 
   onEditAgent(agent: Agent): void {

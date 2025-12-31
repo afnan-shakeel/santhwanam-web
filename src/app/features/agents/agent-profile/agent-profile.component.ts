@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 import { BreadcrumbsComponent, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs.component';
 import { AgentService } from '../../../core/services/agent.service';
@@ -31,9 +31,14 @@ export class AgentProfileComponent implements OnInit {
   private agentService = inject(AgentService);
   private toastService = inject(ToastService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   // Expose Math for template
   Math = Math;
+
+  // Route params
+  agentIdFromRoute = signal<string | null>(null);
+  isMyProfile = signal(true);
 
   // State
   profile = signal<AgentProfile | null>(null);
@@ -59,11 +64,11 @@ export class AgentProfileComponent implements OnInit {
   // Performance tab state
   performancePeriod = signal<'thisMonth' | 'lastMonth' | 'thisYear'>('thisMonth');
 
-  // Breadcrumbs
-  breadcrumbs: BreadcrumbItem[] = [
+  // Breadcrumbs - now a signal for dynamic updates
+  breadcrumbs = signal<BreadcrumbItem[]>([
     { label: 'Home', route: '/' },
     { label: 'My Profile', route: '/agents/my-profile' }
-  ];
+  ]);
 
   // Computed
   fullName = computed(() => {
@@ -104,7 +109,39 @@ export class AgentProfileComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.loadProfile();
+    // Check if viewing a specific agent or own profile
+    const agentId = this.route.snapshot.paramMap.get('agentId');
+    if (agentId) {
+      this.agentIdFromRoute.set(agentId);
+      this.isMyProfile.set(false);
+      this.loadAgentProfile(agentId);
+    } else {
+      this.isMyProfile.set(true);
+      this.loadProfile();
+    }
+  }
+
+  loadAgentProfile(agentId: string): void {
+    this.loading.set(true);
+    this.agentService.getAgentProfile(agentId).subscribe({
+      next: (profile) => {
+        this.profile.set(profile);
+        this.loading.set(false);
+        // Update breadcrumbs for viewing other agent
+        const fullName = [profile.firstName, profile.middleName, profile.lastName].filter(Boolean).join(' ');
+        this.breadcrumbs.set([
+          { label: 'Home', route: '/' },
+          { label: 'Agents', route: '/agents' },
+          { label: fullName || 'Agent Profile', route: `/agents/${agentId}/profile` }
+        ]);
+        // Load initial tab data
+        this.loadStats();
+      },
+      error: (error) => {
+        this.loading.set(false);
+        this.toastService.error('Failed to load profile', error?.error?.message || 'Please try again');
+      }
+    });
   }
 
   loadProfile(): void {
