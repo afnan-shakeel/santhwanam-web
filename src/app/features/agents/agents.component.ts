@@ -73,13 +73,6 @@ export class AgentsComponent {
         type: 'badge'
       },
       {
-        key: 'isActive',
-        label: 'Status',
-        sortable: true,
-        type: 'badge',
-        format: (value: any) => value ? 'Active' : 'Inactive'
-      },
-      {
         key: 'createdAt',
         label: 'Created',
         sortable: true,

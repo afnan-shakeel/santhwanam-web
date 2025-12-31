@@ -1,0 +1,129 @@
+<app-modal [open]="true" title="Edit Profile" (closed)="onClose()">
+  <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="space-y-5">
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
+        <div class="flex">
+          <div class="shrink-0">
+            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm text-red-700 dark:text-red-300">{{ error() }}</p>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Name Fields -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <app-input
+        label="First Name"
+        formControlName="firstName"
+        [required]="true"
+        [error]="hasError('firstName') ? getError('firstName') : ''"
+      />
+      <app-input
+        label="Middle Name"
+        formControlName="middleName"
+      />
+      <app-input
+        label="Last Name"
+        formControlName="lastName"
+        [required]="true"
+        [error]="hasError('lastName') ? getError('lastName') : ''"
+      />
+    </div>
+
+    <!-- Contact Fields -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <app-input
+        label="Phone"
+        formControlName="contactNumber"
+        [required]="true"
+        [error]="hasError('contactNumber') ? getError('contactNumber') : ''"
+      />
+      <app-input
+        label="Alternate Phone"
+        formControlName="alternateContactNumber"
+      />
+    </div>
+
+    <!-- Email -->
+    <app-input
+      label="Email"
+      type="email"
+      formControlName="email"
+      [required]="true"
+      [error]="hasError('email') ? getError('email') : ''"
+    />
+
+    <!-- Address -->
+    <div class="space-y-4">
+      <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Address</p>
+
+      <app-input
+        label="Address Line 1"
+        formControlName="addressLine1"
+        placeholder="Address Line 1"
+      />
+      <app-input
+        label="Address Line 2"
+        formControlName="addressLine2"
+        placeholder="Address Line 2"
+      />
+
+      <div class="grid grid-cols-2 gap-4">
+        <app-input
+          label="City"
+          formControlName="city"
+          placeholder="City"
+        />
+        <app-input
+          label="State"
+          formControlName="state"
+          placeholder="State"
+        />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <app-input
+          label="Postal Code"
+          formControlName="postalCode"
+          placeholder="Postal Code"
+        />
+        <app-input
+          label="Country"
+          formControlName="country"
+          placeholder="Country"
+        />
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <button
+        type="button"
+        (click)="onClose()"
+        [disabled]="submitting()"
+        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50">
+        Cancel
+      </button>
+      <button
+        type="submit"
+        [disabled]="submitting()"
+        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-lg hover:bg-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50">
+        @if (submitting()) {
+          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Saving...
+        } @else {
+          Save Changes
+        }
+      </button>
+    </div>
+  </form>
+</app-modal>

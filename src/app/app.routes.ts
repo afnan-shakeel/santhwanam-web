@@ -95,7 +95,16 @@ export const routes: Routes = [
       ,
       {
         path: 'agents',
-        loadComponent: () => import('./features/agents/agents.component').then((m) => m.AgentsComponent)
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/agents/agents.component').then((m) => m.AgentsComponent)
+          },
+          {
+            path: 'my-profile',
+            loadComponent: () => import('./features/agents/agent-profile/agent-profile.component').then((m) => m.AgentProfileComponent)
+          }
+        ]
       },
       {
         path: 'members',

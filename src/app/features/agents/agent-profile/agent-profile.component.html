@@ -1,0 +1,470 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="space-y-6">
+  <!-- Breadcrumbs -->
+  <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+    </div>
+  } @else if (profile()) {
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">My Profile</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">View and manage your agent profile</p>
+      </div>
+      <button
+        type="button"
+        (click)="openEditModal()"
+        class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+        </svg>
+        Edit Profile
+      </button>
+    </div>
+
+    <!-- Profile Header Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div class="p-6">
+        <div class="flex flex-col lg:flex-row gap-6">
+          <!-- Avatar & Basic Info -->
+          <div class="flex items-start gap-4">
+            <div class="w-20 h-20 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center shrink-0">
+              <span class="text-2xl font-bold text-primary-600 dark:text-primary-400">{{ initials() }}</span>
+            </div>
+            <div>
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ fullName() }}</h2>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ profile()?.agentCode }}</p>
+              <div class="mt-2 flex items-center gap-2 flex-wrap">
+                <span [class]="'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ' + statusClass()">
+                  {{ profile()?.agentStatus }}
+                </span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">
+                  • Joined {{ formatDate(profile()?.joinedDate) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Info -->
+          <div class="lg:ml-auto space-y-2">
+            <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+              <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+              </svg>
+              {{ profile()?.contactNumber }}
+            </div>
+            <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+              <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+              </svg>
+              {{ profile()?.email }}
+            </div>
+            @if (fullAddress()) {
+              <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+                {{ fullAddress() }}
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Hierarchy & Territory -->
+      @if (profile()?.unit || profile()?.area || profile()?.forum) {
+        <div class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-6 py-4">
+          <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Hierarchy & Territory</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+            @if (profile()?.unit) {
+              <div>
+                <span class="text-gray-500 dark:text-gray-400">Unit:</span>
+                <span class="ml-2 text-gray-900 dark:text-white">{{ profile()?.unit?.unitName }}</span>
+              </div>
+            }
+            @if (profile()?.area) {
+              <div>
+                <span class="text-gray-500 dark:text-gray-400">Area:</span>
+                <span class="ml-2 text-gray-900 dark:text-white">{{ profile()?.area?.areaName }}</span>
+              </div>
+            }
+            @if (profile()?.forum) {
+              <div>
+                <span class="text-gray-500 dark:text-gray-400">Forum:</span>
+                <span class="ml-2 text-gray-900 dark:text-white">{{ profile()?.forum?.forumName }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Tabs -->
+    <div class="border-b border-gray-200 dark:border-gray-700">
+      <nav class="-mb-px flex space-x-8">
+        <button
+          type="button"
+          (click)="setActiveTab('overview')"
+          [class]="activeTab() === 'overview'
+            ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+            : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+          class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium">
+          Overview
+        </button>
+        <button
+          type="button"
+          (click)="setActiveTab('members')"
+          [class]="activeTab() === 'members'
+            ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+            : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+          class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium">
+          Members
+        </button>
+        <button
+          type="button"
+          (click)="setActiveTab('performance')"
+          [class]="activeTab() === 'performance'
+            ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+            : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+          class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium">
+          Performance
+        </button>
+      </nav>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="mt-6">
+      <!-- Overview Tab -->
+      @if (activeTab() === 'overview') {
+        <div class="space-y-6">
+          <!-- Quick Stats -->
+          <div>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Quick Stats</h3>
+            @if (loadingStats()) {
+              <div class="flex justify-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+              </div>
+            } @else if (stats()) {
+              <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Total Members</p>
+                  <p class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">{{ stats()?.totalMembers }}</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Active Members</p>
+                  <p class="mt-1 text-2xl font-semibold text-green-600 dark:text-green-400">{{ stats()?.activeMembers }}</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Pending Approvals</p>
+                  <p class="mt-1 text-2xl font-semibold text-yellow-600 dark:text-yellow-400">{{ stats()?.pendingApprovals }}</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                  <p class="text-sm text-gray-500 dark:text-gray-400">New This Month</p>
+                  <p class="mt-1 text-2xl font-semibold text-primary-600 dark:text-primary-400">{{ stats()?.newMembersThisMonth }}</p>
+                </div>
+              </div>
+
+              <!-- Additional Stats -->
+              <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Suspended</p>
+                  <p class="mt-1 text-xl font-semibold text-yellow-600 dark:text-yellow-400">{{ stats()?.suspendedMembers }}</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Frozen</p>
+                  <p class="mt-1 text-xl font-semibold text-blue-600 dark:text-blue-400">{{ stats()?.frozenMembers }}</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Closed</p>
+                  <p class="mt-1 text-xl font-semibold text-gray-600 dark:text-gray-400">{{ stats()?.closedMembers }}</p>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Recent Activity (Coming Soon) -->
+          <div>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Recent Activity</h3>
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Activity log coming soon</p>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Members Tab -->
+      @if (activeTab() === 'members') {
+        <div class="space-y-4">
+          <!-- Header & Search -->
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+              My Members
+              @if (members()) {
+                <span class="text-sm font-normal text-gray-500 dark:text-gray-400">({{ members()?.total }})</span>
+              }
+            </h3>
+            <button
+              type="button"
+              (click)="registerNewMember()"
+              class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500">
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Register New Member
+            </button>
+          </div>
+
+          <!-- Filters -->
+          <div class="flex flex-col sm:flex-row gap-3">
+            <div class="flex-1">
+              <div class="relative">
+                <input
+                  type="text"
+                  placeholder="Search members..."
+                  [value]="membersSearch()"
+                  (input)="onMembersSearchChange($event)"
+                  (keyup.enter)="onMembersSearch()"
+                  class="block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 pl-10 pr-4 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:ring-primary-500" />
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                  <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <select
+              [value]="membersStatusFilter()"
+              (change)="onMembersStatusChange($event)"
+              class="rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 py-2 pl-3 pr-10 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-primary-500">
+              <option value="">All Status</option>
+              <option value="Active">Active</option>
+              <option value="Suspended">Suspended</option>
+              <option value="Frozen">Frozen</option>
+              <option value="Closed">Closed</option>
+              <option value="Deceased">Deceased</option>
+            </select>
+          </div>
+
+          <!-- Members Table -->
+          @if (loadingMembers()) {
+            <div class="flex justify-center py-12">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            </div>
+          } @else if (members()?.members?.length) {
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead class="bg-gray-50 dark:bg-gray-800/50">
+                    <tr>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Code</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contact</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tier</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                      <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    @for (member of members()?.members; track member.memberId) {
+                      <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                          {{ member.memberCode }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                          {{ member.firstName }} {{ member.lastName }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          {{ member.contactNumber }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          {{ member.tier?.tierName || '-' }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          @if (member.registrationStatus === 'Approved') {
+                            <span [class]="'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ' + getMemberStatusClass(member.memberStatus)">
+                              {{ member.memberStatus || '-' }}
+                            </span>
+                          } @else {
+                            <span [class]="'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ' + getRegistrationStatusClass(member.registrationStatus)">
+                              {{ member.registrationStatus }}
+                            </span>
+                          }
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                          <button
+                            type="button"
+                            (click)="viewMember(member.memberId)"
+                            class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Pagination -->
+              @if (totalPages() > 1) {
+                <div class="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
+                  <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-700 dark:text-gray-300">
+                      Showing {{ (membersPage() - 1) * membersLimit() + 1 }} to {{ Math.min(membersPage() * membersLimit(), members()!.total) }} of {{ members()?.total }} results
+                    </div>
+                    <div class="flex gap-2">
+                      <button
+                        type="button"
+                        (click)="goToMembersPage(membersPage() - 1)"
+                        [disabled]="membersPage() === 1"
+                        class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700">
+                        Previous
+                      </button>
+                      <button
+                        type="button"
+                        (click)="goToMembersPage(membersPage() + 1)"
+                        [disabled]="membersPage() >= totalPages()"
+                        class="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700">
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+              </svg>
+              <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No members found</p>
+              <button
+                type="button"
+                (click)="registerNewMember()"
+                class="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Register Your First Member
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Performance Tab -->
+      @if (activeTab() === 'performance') {
+        <div class="space-y-6">
+          <!-- Period Selector -->
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Performance Metrics</h3>
+            <select
+              [value]="performancePeriod()"
+              (change)="onPerformancePeriodChange($event)"
+              class="rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 py-2 pl-3 pr-10 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-primary-500">
+              <option value="thisMonth">This Month</option>
+              <option value="lastMonth">Last Month</option>
+              <option value="thisYear">This Year</option>
+            </select>
+          </div>
+
+          @if (loadingPerformance()) {
+            <div class="flex justify-center py-12">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            </div>
+          } @else if (performance()) {
+            <!-- Member Acquisition -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+              <h4 class="text-base font-medium text-gray-900 dark:text-white mb-4">Member Acquisition</h4>
+              <p class="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-4">
+                {{ performance()?.memberAcquisition?.newMembersThisMonth }}
+                <span class="text-base font-normal text-gray-500 dark:text-gray-400">new members</span>
+              </p>
+
+              <!-- Simple Bar Chart -->
+              @if (performance()?.memberAcquisition?.monthlyTrend?.length) {
+                <div class="mt-4">
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Monthly Trend</p>
+                  <div class="flex items-end gap-2 h-32">
+                    @for (item of performance()?.memberAcquisition?.monthlyTrend; track item.month) {
+                      <div class="flex-1 flex flex-col items-center">
+                        <div
+                          class="w-full bg-primary-500 rounded-t"
+                          [style.height.%]="getAcquisitionBarHeight(item.count)">
+                        </div>
+                        <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ item.month }}</span>
+                        <span class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ item.count }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Member Retention -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+              <h4 class="text-base font-medium text-gray-900 dark:text-white mb-4">Member Retention</h4>
+
+              <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="text-center">
+                  <p class="text-3xl font-bold text-green-600 dark:text-green-400">{{ performance()?.retention?.retentionRate }}%</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Retention Rate</p>
+                </div>
+                <div class="text-center">
+                  <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ performance()?.retention?.activeMembers }}</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Active</p>
+                </div>
+                <div class="text-center">
+                  <p class="text-2xl font-semibold text-yellow-600 dark:text-yellow-400">{{ performance()?.retention?.suspendedMembers }}</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Suspended</p>
+                </div>
+                <div class="text-center">
+                  <p class="text-2xl font-semibold text-gray-600 dark:text-gray-400">{{ performance()?.retention?.closedMembers }}</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Closed</p>
+                </div>
+              </div>
+
+              <!-- Retention Progress Bar -->
+              <div>
+                <div class="flex justify-between text-sm mb-1">
+                  <span class="text-gray-500 dark:text-gray-400">Active vs Total</span>
+                  <span class="text-gray-700 dark:text-gray-300">{{ performance()?.retention?.activeMembers }} / {{ performance()?.retention?.totalMembers }}</span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                  <div
+                    class="bg-green-500 h-3 rounded-full transition-all duration-300"
+                    [style.width.%]="performance()?.retention?.retentionRate || 0">
+                  </div>
+                </div>
+              </div>
+            </div>
+          } @else {
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+              </svg>
+              <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No performance data available</p>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Edit Profile Modal -->
+  @if (showEditModal() && profile()) {
+    <app-edit-profile-modal
+      [profile]="profile()!"
+      (closeModal)="closeEditModal()"
+      (profileUpdated)="onProfileUpdated()">
+    </app-edit-profile-modal>
+  }
+</div>
+</div>
