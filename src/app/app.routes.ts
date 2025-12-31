@@ -107,8 +107,34 @@ export const routes: Routes = [
           {
             path: ':memberId/edit',
             loadComponent: () => import('./features/members/member-form/member-form.component').then((m) => m.MemberFormComponent)
+          },
+          {
+            path: ':memberId/wallet',
+            loadComponent: () => import('./features/wallet/member-wallet/member-wallet.component').then((m) => m.MemberWalletComponent)
+          },
+          {
+            path: ':memberId/wallet/transactions',
+            loadComponent: () => import('./features/wallet/wallet-transactions/wallet-transactions.component').then((m) => m.WalletTransactionsComponent)
           }
         ]
+      },
+      // Wallet routes
+      {
+        path: 'my-wallet',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/wallet/my-wallet/my-wallet.component').then((m) => m.MyWalletComponent)
+          },
+          {
+            path: 'transactions',
+            loadComponent: () => import('./features/wallet/wallet-transactions/wallet-transactions.component').then((m) => m.WalletTransactionsComponent)
+          }
+        ]
+      },
+      {
+        path: 'wallet/admin',
+        loadComponent: () => import('./features/wallet/wallet-management/wallet-management.component').then((m) => m.WalletManagementComponent)
       },
       {
         path: 'approvals/workflows',

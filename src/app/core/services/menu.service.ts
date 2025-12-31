@@ -23,10 +23,12 @@ export class MenuService {
         { label: 'Roles', route: '/roles', active: false },
         { label: 'Users', route: '/users', active: false },
         { label: 'Approval Workflows', route: '/approvals/workflows', active: false },
-        { label: 'Approval Requests', route: '/approvals/all-requests', active: false }
+        { label: 'Approval Requests', route: '/approvals/all-requests', active: false },
+        { label: 'Wallet Management', route: '/wallet/admin', active: false }
       ]
     },
     { label: 'My Approvals', route: '/approvals/my-approvals', active: false },
+    { label: 'My Wallet', route: '/my-wallet', active: false },
     { label: 'Forums', route: '/forums', active: false },
     { label: 'Areas', route: '/areas', active: false },
     { label: 'Units', route: '/units', active: false },
