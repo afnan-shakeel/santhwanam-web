@@ -151,7 +151,7 @@ export class MembersComponent {
   private currentPage = signal(1);
 
   onAddMember(): void {
-    this.router.navigate(['/members/new']);
+    this.router.navigate(['/members/add']);
   }
 
   onViewMember(member: Member): void {

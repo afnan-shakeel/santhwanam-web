@@ -16,11 +16,8 @@ import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } fr
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
-import {
-  SearchSelectComponent,
-  SearchSelectOption,
-} from '../../../../shared/components/search-select/search-select.component';
 import { CheckboxComponent } from '../../../../shared/components/checkbox/checkbox.component';
+import { SearchSelectComponent, SearchSelectOption } from '../../../../shared/components/search-select/search-select.component';
 import { ApprovalWorkflowService } from '../../../../core/services/approval-workflow.service';
 import { RoleService } from '../../../../core/services/role.service';
 import { UserService } from '../../../../core/services/user.service';
@@ -44,8 +41,8 @@ import { User } from '../../../../shared/models/user.model';
     ModalComponent,
     InputComponent,
     SelectComponent,
-    SearchSelectComponent,
     CheckboxComponent,
+    SearchSelectComponent,
   ],
   templateUrl: './workflow-form.component.html',
   styleUrls: ['./workflow-form.component.css'],
@@ -85,7 +82,7 @@ export class WorkflowFormComponent implements OnInit, OnChanges {
   });
 
   // Search select options for users (used with app-search-select)
-  userOptions = computed<SearchSelectOption<string>[]>(() => {
+  userSearchOptions = computed<SearchSelectOption<string>[]>(() => {
     return this.users().map((user) => ({
       value: user.userId,
       label: `${user.firstName} ${user.lastName}`,
@@ -228,19 +225,44 @@ export class WorkflowFormComponent implements OnInit, OnChanges {
               autoApprove: [stage.autoApprove],
             });
 
+            // Set initial validators based on current approver type
+            const roleIdControl = stageGroup.get('roleId');
+            const userIdControl = stageGroup.get('userId');
+            const orgBodyControl = stageGroup.get('organizationBody');
+
+            if (stage.approverType === 'Role') {
+              roleIdControl?.setValidators([Validators.required]);
+            } else if (stage.approverType === 'SpecificUser') {
+              userIdControl?.setValidators([Validators.required]);
+            } else if (stage.approverType === 'OrganizationAdmin') {
+              orgBodyControl?.setValidators([Validators.required]);
+            }
+
             // Set up valueChanges subscription for loaded stages
             stageGroup.get('approverType')?.valueChanges.subscribe((type: string | null) => {
-              stageGroup.patchValue(
-                {
-                  roleId: null,
-                  userId: null,
-                  organizationBody: null,
-                },
-                { emitEvent: false }
-              );
-              
-              // Trigger change detection
-              stageGroup.updateValueAndValidity({ emitEvent: false });
+              // Clear all values first
+              roleIdControl?.setValue(null, { emitEvent: false });
+              userIdControl?.setValue(null, { emitEvent: false });
+              orgBodyControl?.setValue(null, { emitEvent: false });
+
+              // Clear all validators
+              roleIdControl?.clearValidators();
+              userIdControl?.clearValidators();
+              orgBodyControl?.clearValidators();
+
+              // Set required validator based on approver type
+              if (type === 'Role') {
+                roleIdControl?.setValidators([Validators.required]);
+              } else if (type === 'SpecificUser') {
+                userIdControl?.setValidators([Validators.required]);
+              } else if (type === 'OrganizationAdmin') {
+                orgBodyControl?.setValidators([Validators.required]);
+              }
+
+              // Update validity
+              roleIdControl?.updateValueAndValidity({ emitEvent: false });
+              userIdControl?.updateValueAndValidity({ emitEvent: false });
+              orgBodyControl?.updateValueAndValidity({ emitEvent: false });
             });
 
             this.stages.push(stageGroup);
@@ -261,27 +283,42 @@ export class WorkflowFormComponent implements OnInit, OnChanges {
       stageName: ['', [Validators.required]],
       stageOrder: [0],
       approverType: ['Role', [Validators.required]],
-      roleId: [null],
+      roleId: [null, [Validators.required]], // Required by default since 'Role' is default
       userId: [null],
       organizationBody: [null],
       isOptional: [false],
       autoApprove: [false],
     });
 
-    // Subscribe to approverType changes to clear related fields
-    // Use startWith to ensure subscription fires immediately
+    // Subscribe to approverType changes to update validators and clear fields
     formGroup.get('approverType')?.valueChanges.subscribe((type: string | null) => {
-      formGroup.patchValue(
-        {
-          roleId: null,
-          userId: null,
-          organizationBody: null,
-        },
-        { emitEvent: false }
-      );
-      
-      // Trigger change detection
-      formGroup.updateValueAndValidity({ emitEvent: false });
+      const roleIdControl = formGroup.get('roleId');
+      const userIdControl = formGroup.get('userId');
+      const orgBodyControl = formGroup.get('organizationBody');
+
+      // Clear all values first
+      roleIdControl?.setValue(null, { emitEvent: false });
+      userIdControl?.setValue(null, { emitEvent: false });
+      orgBodyControl?.setValue(null, { emitEvent: false });
+
+      // Clear all validators
+      roleIdControl?.clearValidators();
+      userIdControl?.clearValidators();
+      orgBodyControl?.clearValidators();
+
+      // Set required validator based on approver type
+      if (type === 'Role') {
+        roleIdControl?.setValidators([Validators.required]);
+      } else if (type === 'SpecificUser') {
+        userIdControl?.setValidators([Validators.required]);
+      } else if (type === 'OrganizationAdmin') {
+        orgBodyControl?.setValidators([Validators.required]);
+      }
+
+      // Update validity
+      roleIdControl?.updateValueAndValidity({ emitEvent: false });
+      userIdControl?.updateValueAndValidity({ emitEvent: false });
+      orgBodyControl?.updateValueAndValidity({ emitEvent: false });
     });
 
     return formGroup;
@@ -484,9 +521,9 @@ export class WorkflowFormComponent implements OnInit, OnChanges {
       entityType: formValue.entityType,
       isActive: formValue.isActive,
       requiresAllStages: formValue.requiresAllStages,
-      stages: formValue.stages.map((stage: any) => ({
+      stages: formValue.stages.map((stage: any, index: number) => ({
         stageName: stage.stageName,
-        stageOrder: stage.stageOrder,
+        stageOrder: index + 1,
         approverType: stage.approverType,
         roleId: stage.roleId,
         userId: stage.userId,
@@ -518,10 +555,10 @@ export class WorkflowFormComponent implements OnInit, OnChanges {
       description: formValue.description,
       isActive: formValue.isActive,
       requiresAllStages: formValue.requiresAllStages,
-      stages: formValue.stages.map((stage: any) => ({
+      stages: formValue.stages.map((stage: any, index: number) => ({
         stageId: stage.stageId || null, // Include existing stageId, or null for new stages
         stageName: stage.stageName,
-        stageOrder: stage.stageOrder,
+        stageOrder: index + 1,
         approverType: stage.approverType,
         roleId: stage.roleId,
         userId: stage.userId,

@@ -61,6 +61,7 @@
           @if (currentStep() === 3) {
             <app-documents-payment-step
               [memberId]="memberId()!"
+              [tierInfo]="memberData()?.tier"
               (back)="onBackToNominees()"
               (submit)="onSubmitRegistration()"
             ></app-documents-payment-step>

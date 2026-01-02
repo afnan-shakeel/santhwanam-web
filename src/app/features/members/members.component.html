@@ -3,10 +3,10 @@
 <div class="px-4 sm:px-6 lg:px-8 py-8">
   <app-listing-page-header
     title="Members"
-    subtitle="Manage and view all members"
-    buttonText="Add Member"
-    (buttonClick)="onAddMember()"
-  ></app-listing-page-header>
+    description="Manage and view all members"
+    actionLabel="Add Member"
+    (actionClick)="onAddMember()">
+  </app-listing-page-header>
 
   <div class="mt-8">
     <app-datatable

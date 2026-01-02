@@ -195,6 +195,8 @@
                 placeholder="0"
                 formControlName="registrationFee"
                 [required]="true"
+                [disabled]="!!tierData()"
+                [hint]="tierData() ? 'Based on membership tier' : ''"
                 [error]="getPaymentFieldError('registrationFee')"
               ></app-input>
 
@@ -204,6 +206,8 @@
                 placeholder="0"
                 formControlName="advanceDeposit"
                 [required]="true"
+                [disabled]="!!tierData()"
+                [hint]="tierData() ? 'Based on membership tier' : ''"
                 [error]="getPaymentFieldError('advanceDeposit')"
               ></app-input>
             </div>
@@ -237,13 +241,14 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <app-input
+              <app-search-select
                 label="Collected By"
-                placeholder="User ID or name"
+                placeholder="Search for a user..."
                 formControlName="collectedBy"
+                [options]="userSearchOptions()"
                 [required]="true"
                 [error]="getPaymentFieldError('collectedBy')"
-              ></app-input>
+              ></app-search-select>
 
               <app-input
                 label="Reference Number"

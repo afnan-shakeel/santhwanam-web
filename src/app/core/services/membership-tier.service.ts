@@ -20,8 +20,8 @@ export class MembershipTierService {
    * Get all membership tiers
    */
   getAllTiers(activeOnly: boolean = false): Observable<MemberTier[]> {
-    return this.http.get<MembershipTierResponse>('/membership/tiers', { params: { activeOnly } })
-      .pipe(map(response => response.data));
+    return this.http.get<MemberTier[]>('/membership/tiers', { params: { activeOnly } })
+      .pipe(map(response => response));
   }
 
   /**
@@ -29,5 +29,12 @@ export class MembershipTierService {
    */
   getActiveTiersForRegistration(): Observable<MemberTier[]> {
     return this.getAllTiers(true);
+  }
+
+  /**
+   * Get a specific tier by ID
+   */
+  getTierById(tierId: string): Observable<MemberTier> {
+    return this.http.get<MemberTier>(`/membership/tiers/${tierId}`);
   }
 }

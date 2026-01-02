@@ -111,6 +111,10 @@ export class PersonalDetailsStepComponent implements OnInit {
             label: `${tier.tierName} (${tier.tierCode})`
           }))
         );
+        // Set first tier as default for new registration (when no initialData)
+        if (!this.initialData && tiers.length > 0 && !this.personalForm.get('tierId')?.value) {
+          this.personalForm.patchValue({ tierId: tiers[0].tierId });
+        }
         this.loadingTiers.set(false);
       },
       error: () => {

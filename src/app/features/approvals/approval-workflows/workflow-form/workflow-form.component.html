@@ -161,9 +161,9 @@
             </div>
           } @else {
             <div formArrayName="stages" class="space-y-4">
-              @for (stage of stages.controls; track $index) {
+              @for (stage of stages.controls; track stage; let i = $index) {
                 <div 
-                  [formGroupName]="$index"
+                  [formGroupName]="i"
                   class="group relative bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl transition-colors duration-200 hover:border-primary/30"
                 >
                   <!-- Stage Number Indicator (Left Side) -->
@@ -175,25 +175,25 @@
                     <div class="flex items-center justify-between mb-5">
                       <div class="flex items-center gap-3">
                         <div class="flex items-center justify-center h-9 w-9 rounded-lg bg-primary text-white text-sm font-bold shadow-sm">
-                          {{ $index + 1 }}
+                          {{ i + 1 }}
                         </div>
                         <div>
                           <span class="text-sm font-semibold text-gray-900 dark:text-white">
-                            Stage {{ $index + 1 }}
+                            Stage {{ i + 1 }}
                           </span>
-                          @if (stages.at($index).get('stageName')?.value) {
+                          @if (stages.at(i).get('stageName')?.value) {
                             <span class="text-gray-400 mx-2">•</span>
-                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ stages.at($index).get('stageName')?.value }}</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ stages.at(i).get('stageName')?.value }}</span>
                           }
                         </div>
                       </div>
 
                       <!-- Stage Actions -->
                       <div class="flex items-center gap-1">
-                        @if ($index > 0) {
+                        @if (i > 0) {
                           <button
                             type="button"
-                            (click)="moveStageUp($index)"
+                            (click)="moveStageUp(i)"
                             class="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors duration-200"
                             title="Move up"
                           >
@@ -202,10 +202,10 @@
                             </svg>
                           </button>
                         }
-                        @if ($index < stages.length - 1) {
+                        @if (i < stages.length - 1) {
                           <button
                             type="button"
-                            (click)="moveStageDown($index)"
+                            (click)="moveStageDown(i)"
                             class="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors duration-200"
                             title="Move down"
                           >
@@ -217,7 +217,7 @@
                         @if (stages.length > 1) {
                           <button
                             type="button"
-                            (click)="removeStage($index)"
+                            (click)="removeStage(i)"
                             class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors duration-200"
                             title="Remove stage"
                           >
@@ -237,7 +237,7 @@
                         placeholder="e.g., Initial Review"
                         [required]="true"
                         formControlName="stageName"
-                        [error]="getStageFieldError($index, 'stageName')"
+                        [error]="getStageFieldError(i, 'stageName')"
                       ></app-input>
 
                       <!-- Approver Type -->
@@ -246,45 +246,42 @@
                         [required]="true"
                         [options]="approverTypeOptions"
                         formControlName="approverType"
-                        [error]="getStageFieldError($index, 'approverType')"
-                        (valueChange)="onApproverTypeChange($index, $event)"
+                        [error]="getStageFieldError(i, 'approverType')"
                       ></app-select>
 
                       <!-- Role Selection (if approverType is Role) -->
-                      @if (stages.at($index).get('approverType')?.value === 'Role') {
+                      @if (stages.at(i).get('approverType')?.value === 'Role') {
                         <app-select
                           label="Select Role"
                           placeholder="Choose a role"
                           [required]="true"
                           [options]="roleSelectOptions()"
                           formControlName="roleId"
-                          [error]="getStageFieldError($index, 'roleId')"
+                          [error]="getStageFieldError(i, 'roleId')"
                         ></app-select>
                       }
 
                       <!-- User Selection (if approverType is SpecificUser) -->
-                      @if (stages.at($index).get('approverType')?.value === 'SpecificUser') {
+                      @if (stages.at(i).get('approverType')?.value === 'SpecificUser') {
                         <app-search-select
                           label="Select User"
-                          placeholder="Search and select user"
+                          placeholder="Search for a user..."
                           [required]="true"
-                          [mode]="'single'"
-                          [options]="userOptions()"
-                          [loading]="usersLoading()"
+                          [options]="userSearchOptions()"
                           formControlName="userId"
-                          [error]="getStageFieldError($index, 'userId')"
-                          (search)="onUserSearch($event)"
+                          [error]="getStageFieldError(i, 'userId')"
                         ></app-search-select>
                       }
 
                       <!-- Organization Body (if approverType is OrganizationAdmin) -->
-                      @if (stages.at($index).get('approverType')?.value === 'OrganizationAdmin') {
+                      @if (stages.at(i).get('approverType')?.value === 'OrganizationAdmin') {
                         <app-select
                           label="Organization Body"
+                          placeholder="Choose organization body"
                           [required]="true"
                           [options]="organizationBodyOptions"
                           formControlName="organizationBody"
-                          [error]="getStageFieldError($index, 'organizationBody')"
+                          [error]="getStageFieldError(i, 'organizationBody')"
                         ></app-select>
                       }
                     </div>

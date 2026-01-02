@@ -1,14 +1,19 @@
-import { Component, Input, Output, EventEmitter, OnInit, inject, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { SearchSelectComponent, SearchSelectOption } from '../../../../shared/components/search-select/search-select.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { MemberService } from '../../../../core/services/member.service';
 import { FileUploadService, FileUploadResult } from '../../../../core/services/file-upload.service';
+import { UserService } from '../../../../core/services/user.service';
+import { MembershipTierService } from '../../../../core/services/membership-tier.service';
+import { User } from '../../../../shared/models/user.model';
 import {
   MemberDocument,
   MemberPayment,
+  MemberTier,
   DocumentType,
   DocumentCategory,
   CollectionMode
@@ -22,6 +27,7 @@ import {
     ReactiveFormsModule,
     InputComponent,
     SelectComponent,
+    SearchSelectComponent,
     ButtonComponent
   ],
   templateUrl: './documents-payment-step.component.html',
@@ -29,6 +35,7 @@ import {
 })
 export class DocumentsPaymentStepComponent implements OnInit {
   @Input() memberId!: string;
+  @Input() tierInfo?: MemberTier;
   
   @Output() back = new EventEmitter<void>();
   @Output() submit = new EventEmitter<void>();
@@ -36,11 +43,24 @@ export class DocumentsPaymentStepComponent implements OnInit {
   private fb = inject(FormBuilder);
   private memberService = inject(MemberService);
   private fileUploadService = inject(FileUploadService);
+  private userService = inject(UserService);
+  private tierService = inject(MembershipTierService);
 
   documents = signal<MemberDocument[]>([]);
   payment = signal<MemberPayment | null>(null);
+  tierData = signal<MemberTier | null>(null);
   loading = signal(false);
   uploadingFile = signal(false);
+
+  // User options for collected by field
+  users = signal<User[]>([]);
+  usersLoading = signal(false);
+  userSearchOptions = computed<SearchSelectOption<string>[]>(() => {
+    return this.users().map((user) => ({
+      value: user.userId,
+      label: `${user.firstName} ${user.lastName}`,
+    }));
+  });
 
   documentForm!: FormGroup;
   paymentForm!: FormGroup;
@@ -56,6 +76,29 @@ export class DocumentsPaymentStepComponent implements OnInit {
     this.loadMetadata();
     this.loadDocuments();
     this.loadPayment();
+    this.loadUsers();
+    this.prefillTierAmounts();
+  }
+
+  private prefillTierAmounts(): void {
+    if (this.tierInfo?.tierId) {
+      this.tierService.getTierById(this.tierInfo.tierId).subscribe({
+        next: (tier) => {
+          this.tierData.set(tier);
+          this.paymentForm.patchValue({
+            registrationFee: tier.registrationFee || 0,
+            advanceDeposit: tier.advanceDeposit || 0
+          });
+          // Disable the fields since they come from tier
+          this.paymentForm.get('registrationFee')?.disable();
+          this.paymentForm.get('advanceDeposit')?.disable();
+        },
+        error: () => {
+          // If fetch fails, keep fields editable
+          console.error('Failed to load tier details');
+        }
+      });
+    }
   }
 
   private initializeForms(): void {
@@ -97,6 +140,19 @@ export class DocumentsPaymentStepComponent implements OnInit {
         this.collectionModeOptions.set(options as SelectOption<CollectionMode>[]);
       },
       error: () => {}
+    });
+  }
+
+  private loadUsers(): void {
+    this.usersLoading.set(true);
+    this.userService.searchUsers({ page: 1, pageSize: 100 }).subscribe({
+      next: (response: { items: User[] }) => {
+        this.users.set(response.items);
+        this.usersLoading.set(false);
+      },
+      error: () => {
+        this.usersLoading.set(false);
+      }
     });
   }
 
@@ -235,16 +291,8 @@ export class DocumentsPaymentStepComponent implements OnInit {
       return;
     }
 
-    this.loading.set(true);
-    this.memberService.submitRegistration(this.memberId).subscribe({
-      next: () => {
-        this.loading.set(false);
-        this.submit.emit();
-      },
-      error: () => {
-        this.loading.set(false);
-      }
-    });
+    // Emit event to parent - parent will call the submit API
+    this.submit.emit();
   }
 
   onBack(): void {
