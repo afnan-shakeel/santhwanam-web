@@ -243,3 +243,136 @@ export interface MemberMetadata {
   documentCategories: MetadataOption[];
   collectionModes: MetadataOption[];
 }
+
+// ==================== MEMBER PROFILE ====================
+
+export interface ProfileTier {
+  tierId: string;
+  tierName: string;
+  deathBenefitAmount: number;
+  contributionAmount: number;
+}
+
+export interface ProfileAgent {
+  agentId: string;
+  agentCode: string;
+  fullName: string;
+}
+
+export interface ProfileUnit {
+  unitId: string;
+  unitName: string;
+}
+
+export interface ProfileArea {
+  areaId: string;
+  areaName: string;
+}
+
+export interface ProfileForum {
+  forumId: string;
+  forumName: string;
+}
+
+export interface ProfileWallet {
+  walletId: string;
+  currentBalance: number;
+}
+
+export interface ProfilePaymentCollector {
+  userId: string;
+  fullName: string;
+}
+
+export interface ProfileRegistrationPayment {
+  registrationFee: number;
+  advanceDeposit: number;
+  totalAmount: number;
+  collectionDate: string;
+  paymentMethod: string;
+  collectedBy: ProfilePaymentCollector;
+}
+
+export interface ProfileNomineeDocument {
+  documentId: string;
+  documentType: string;
+  fileName: string;
+  fileUrl: string;
+  verified: boolean;
+}
+
+export interface ProfileNominee {
+  nomineeId: string;
+  name: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  relationship: string;
+  contactNumber: string;
+  idNumber: string;
+  dateOfBirth: string;
+  addressLine1: string;
+  addressLine2?: string;
+  postalCode: string;
+  state: string;
+  country: string;
+  documents: ProfileNomineeDocument[];
+}
+
+export interface ProfileDocument {
+  documentId: string;
+  documentType: string;
+  fileName: string;
+  fileSize: number;
+  fileUrl: string;
+  uploadedAt: string;
+  category: string;
+}
+
+export interface MemberProfile {
+  memberId: string;
+  memberCode: string;
+  fullName: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  dateOfBirth: string;
+  gender: string;
+  idNumber: string;
+  contactNumber: string;
+  email: string;
+  addressLine1: string;
+  addressLine2?: string;
+  postalCode: string;
+  state: string;
+  country: string;
+  memberStatus: MemberStatus;
+  registrationStatus: RegistrationStatus;
+  registrationDate: string;
+  tier: ProfileTier;
+  agent: ProfileAgent;
+  unit: ProfileUnit;
+  area: ProfileArea;
+  forum: ProfileForum;
+  wallet: ProfileWallet;
+  registrationPayment: ProfileRegistrationPayment;
+  nominees: ProfileNominee[];
+  documents: ProfileDocument[];
+  createdAt: string;
+  registeredAt?: string;
+}
+
+export interface UpdateMemberProfileRequest {
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  contactNumber?: string;
+  email?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  postalCode?: string;
+  country?: string;
+}

@@ -17,7 +17,9 @@ import {
   RecordPaymentRequest,
   SubmitRegistrationResponse,
   MemberMetadata,
-  MetadataOption
+  MetadataOption,
+  MemberProfile,
+  UpdateMemberProfileRequest
 } from '../../shared/models/member.model';
 
 @Injectable({
@@ -178,5 +180,24 @@ export class MemberService {
 
   deleteMember(memberId: string): Observable<void> {
     return this.http.delete<void>(`/members/${memberId}`);
+  }
+
+  // ==================== MEMBER PROFILE ====================
+
+  /**
+   * Get member profile with wallet information
+   */
+  getMemberProfile(memberId: string): Observable<MemberProfile> {
+    return this.http.get<MemberProfile>(`/members/${memberId}/profile`);
+  }
+
+  /**
+   * Update member profile (approved members only)
+   */
+  updateMemberProfile(
+    memberId: string,
+    request: UpdateMemberProfileRequest
+  ): Observable<void> {
+    return this.http.put<void>(`/members/${memberId}/profile`, request);
   }
 }

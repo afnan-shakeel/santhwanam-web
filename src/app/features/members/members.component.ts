@@ -155,7 +155,8 @@ export class MembersComponent {
   }
 
   onViewMember(member: Member): void {
-    this.router.navigate(['/members', member.memberId]);
+    
+    this.router.navigate(['/members', member.memberId, 'profile']);
   }
 
   onEditMember(member: Member): void {

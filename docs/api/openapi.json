@@ -2942,6 +2942,149 @@
         }
       }
     },
+    "/api/members/{memberId}/profile": {
+      "get": {
+        "tags": ["Members - Profile"],
+        "summary": "Get member profile with wallet information",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Member profile with wallet details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "memberId": { "type": "string", "format": "uuid" },
+                    "memberCode": { "type": "string" },
+                    "firstName": { "type": "string" },
+                    "lastName": { "type": "string" },
+                    "wallet": {
+                      "type": "object",
+                      "properties": {
+                        "walletId": { "type": "string", "format": "uuid" },
+                        "currentBalance": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Members - Profile"],
+        "summary": "Update member profile (approved members only)",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "firstName": { "type": "string" },
+                  "middleName": { "type": "string" },
+                  "lastName": { "type": "string" },
+                  "dateOfBirth": { "type": "string", "format": "date" },
+                  "gender": { "type": "string", "enum": ["Male", "Female", "Other"] },
+                  "contactNumber": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "addressLine1": { "type": "string" },
+                  "addressLine2": { "type": "string" },
+                  "city": { "type": "string" },
+                  "state": { "type": "string" },
+                  "postalCode": { "type": "string" },
+                  "country": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Profile updated successfully" },
+          "400": { "description": "Profile can only be updated for approved members" }
+        }
+      }
+    },
+    "/api/my-profile": {
+      "get": {
+        "tags": ["Members - Profile"],
+        "summary": "Get logged-in member's profile",
+        "responses": {
+          "200": {
+            "description": "Current member's profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "memberId": { "type": "string", "format": "uuid" },
+                    "memberCode": { "type": "string" },
+                    "firstName": { "type": "string" },
+                    "lastName": { "type": "string" },
+                    "wallet": {
+                      "type": "object",
+                      "properties": {
+                        "walletId": { "type": "string", "format": "uuid" },
+                        "currentBalance": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Member profile not found" }
+        }
+      }
+    },
+    "/api/members/{memberId}/documents/{documentId}/download": {
+      "get": {
+        "tags": ["Members - Profile"],
+        "summary": "Download member document",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File stream",
+            "content": {
+              "application/pdf": {},
+              "image/jpeg": {},
+              "image/png": {}
+            }
+          },
+          "404": { "description": "Document not found" }
+        }
+      }
+    },
     "/api/membership/tiers": {
       "get": {
         "tags": ["Membership"],

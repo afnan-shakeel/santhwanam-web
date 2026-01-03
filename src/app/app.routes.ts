@@ -126,6 +126,10 @@ export const routes: Routes = [
             loadComponent: () => import('./features/members/member-form/member-form.component').then((m) => m.MemberFormComponent)
           },
           {
+            path: ':memberId/profile',
+            loadComponent: () => import('./features/members/member-profile/member-profile.component').then((m) => m.MemberProfileComponent)
+          },
+          {
             path: ':memberId/wallet',
             loadComponent: () => import('./features/wallet/member-wallet/member-wallet.component').then((m) => m.MemberWalletComponent)
           },
