@@ -56,7 +56,11 @@ export class MemberProfileComponent implements OnInit {
     if (!profile) return '';
     return [profile.firstName, profile.middleName, profile.lastName].filter(Boolean).join(' ');
   });
-
+  agentFullName = computed(() => {
+    const profile = this.profile();
+    if (!profile) return '';
+    return [profile.agent?.firstName, profile.agent?.middleName, profile.agent?.lastName].filter(Boolean).join(' ');
+  });
   initials = computed(() => {
     const name = this.fullName();
     if (!name) return '';
@@ -249,7 +253,7 @@ export class MemberProfileComponent implements OnInit {
   onProfileUpdated(): void {
     this.closeEditModal();
     this.loadProfile(this.memberId());
-    this.toastService.success('Profile updated', 'Member profile has been updated successfully');
+    // this.toastService.success('Profile updated', 'Member profile has been updated successfully');
   }
 
   navigateToWallet(): void {

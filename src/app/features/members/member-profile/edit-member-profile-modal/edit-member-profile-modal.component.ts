@@ -6,6 +6,7 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { MemberService } from '../../../../core/services/member.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { MemberProfile, UpdateMemberProfileRequest } from '../../../../shared/models/member.model';
 
 @Component({
@@ -24,6 +25,7 @@ import { MemberProfile, UpdateMemberProfileRequest } from '../../../../shared/mo
 export class EditMemberProfileModalComponent implements OnInit {
   private fb = inject(FormBuilder);
   private memberService = inject(MemberService);
+  private toastService = inject(ToastService);
 
   @Input({ required: true }) profile!: MemberProfile;
   @Output() closeModal = new EventEmitter<void>();
@@ -95,6 +97,7 @@ export class EditMemberProfileModalComponent implements OnInit {
     this.memberService.updateMemberProfile(this.profile.memberId, request).subscribe({
       next: () => {
         this.submitting.set(false);
+        this.toastService.success('Profile Updated', 'Your profile has been updated successfully.');
         this.profileUpdated.emit();
       },
       error: (err) => {

@@ -394,7 +394,7 @@ Member profile should show:
 
 ### **Member Profile Response:**
 
-```typescript
+```json
 {
   "memberId": "e813645e-94f4-4aae-a982-9e04572a0e8e",
   "memberCode": "MEM-2026-00002",

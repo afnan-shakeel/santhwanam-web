@@ -112,7 +112,7 @@ export class MemberWalletComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/members', this.memberId(), 'edit']);
+    this.router.navigate(['/members', this.memberId(), 'profile']);
   }
 
   // Helper methods for template

@@ -158,7 +158,7 @@
             @if (profile()?.agent) {
               <div>
                 <span class="text-gray-500 dark:text-gray-400">Agent:</span>
-                <span class="ml-2 text-gray-900 dark:text-white">{{ profile()?.agent?.fullName }} ({{ profile()?.agent?.agentCode }})</span>
+                <span class="ml-2 text-gray-900 dark:text-white">{{ agentFullName() }} ({{ profile()?.agent?.agentCode }})</span>
               </div>
             }
             @if (profile()?.unit) {
@@ -384,7 +384,7 @@
                     <!-- Nominee Details -->
                     <div class="flex-1 min-w-0">
                       <h4 class="text-base font-medium text-gray-900 dark:text-white">{{nominee.name }}</h4>
-                      <p class="text-sm text-gray-500 dark:text-gray-400">{{ nominee.relationship }}</p>
+                      <p class="text-sm text-gray-500 dark:text-gray-400">{{ nominee.relationType }}</p>
                       
                       <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
@@ -457,14 +457,14 @@
                         <div class="min-w-0">
                           <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ doc.documentType }}</p>
                           <p class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ doc.fileName }} ({{ formatFileSize(doc.fileSize) }}) • Uploaded {{ formatDate(doc.uploadedAt) }}
+                            {{ doc.documentName }} ({{ formatFileSize(doc.fileSize) }}) • Uploaded {{ formatDate(doc.uploadedAt) }}
                           </p>
                         </div>
                       </div>
                       <div class="flex items-center gap-2 shrink-0">
                         <button
                           type="button"
-                          (click)="downloadDocument(doc.fileUrl, doc.fileName)"
+                          (click)="downloadDocument(doc.fileUrl, doc.documentName)"
                           class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
                           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -506,12 +506,12 @@
                               </div>
                               <div class="min-w-0">
                                 <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ doc.documentType }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ doc.fileName }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ doc.documentName }}</p>
                               </div>
                             </div>
                             <button
                               type="button"
-                              (click)="downloadDocument(doc.fileUrl, doc.fileName)"
+                              (click)="downloadDocument(doc.fileUrl, doc.documentName)"
                               class="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
                               Download
                             </button>

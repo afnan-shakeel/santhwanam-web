@@ -7,7 +7,7 @@
 
       <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="flex items-center gap-3">
-          <div class="p-3 bg-linear-to-br from-primary to-primary-dark rounded-xl shadow-lg">
+          <div class="p-3 bg-gradient-to-br from-primary-600 to-primary-800 rounded-xl shadow-lg">
             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -55,23 +55,23 @@
     @if (!loading() && !error() && wallet(); as w) {
       <div class="space-y-6">
         <!-- Balance Card -->
-        <div class="bg-linear-to-br from-primary via-primary-dark to-secondary rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-gradient-to-br from-primary-700 via-primary-800 to-primary-900 rounded-2xl shadow-xl overflow-hidden">
           <div class="p-6 sm:p-8">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <!-- Balance Info -->
-              <div class="text-white">
-                <p class="text-sm font-medium text-white/80 uppercase tracking-wider">Current Balance</p>
-                <p class="text-4xl sm:text-5xl font-bold mt-2">{{ formatCurrency(w.currentBalance) }}</p>
+              <div>
+                <p class="text-sm font-medium text-primary-200 uppercase tracking-wider">Current Balance</p>
+                <p class="text-4xl sm:text-5xl font-bold mt-2 text-white">{{ formatCurrency(w.currentBalance) }}</p>
 
                 <!-- Low Balance Warning -->
                 @if (isLowBalance()) {
-                  <div class="mt-4 flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2.5 w-fit">
-                    <svg class="w-5 h-5 text-yellow-300" fill="currentColor" viewBox="0 0 20 20">
+                  <div class="mt-4 flex items-center gap-2 bg-amber-500/20 border border-amber-400/30 rounded-lg px-4 py-2.5 w-fit">
+                    <svg class="w-5 h-5 text-amber-300" fill="currentColor" viewBox="0 0 20 20">
                       <path fill-rule="evenodd"
                         d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
                         clip-rule="evenodd" />
                     </svg>
-                    <span class="text-sm font-medium">
+                    <span class="text-sm font-medium text-amber-100">
                       Low Balance! Add {{ formatCurrency(recommendedTopUp()) }} to maintain coverage
                     </span>
                   </div>
@@ -81,7 +81,7 @@
               <!-- Request Deposit Button -->
               <div class="flex flex-col gap-3">
                 <button (click)="openDepositModal()"
-                  class="flex items-center justify-center gap-2 bg-white text-primary font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
+                  class="flex items-center justify-center gap-2 bg-white text-primary-700 font-semibold px-6 py-3 rounded-xl shadow-lg hover:bg-primary-50 hover:shadow-xl transition-all duration-200">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
@@ -91,11 +91,11 @@
             </div>
           </div>
 
-          <!-- Wave Pattern -->
-          <div class="h-16 bg-white/10">
-            <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 1200 120">
+          <!-- Decorative Pattern -->
+          <div class="h-12 bg-gradient-to-r from-primary-600/20 via-primary-500/10 to-primary-600/20">
+            <svg class="w-full h-full opacity-30" preserveAspectRatio="none" viewBox="0 0 1200 120">
               <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"
-                fill="rgba(255,255,255,0.1)" />
+                fill="currentColor" class="text-white" />
             </svg>
           </div>
         </div>

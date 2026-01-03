@@ -1,3 +1,9 @@
+import { Agent } from "./agent.model";
+import { Area } from "./area.model";
+import { Forum } from "./forum.model";
+import { Unit } from "./unit.model";
+import { Wallet } from "./wallet.model";
+
 // Base Types
 export type RegistrationStatus = 'Draft' | 'PendingApproval' | 'Approved' | 'Rejected';
 export type MemberStatus = 'Active' | 'Frozen' | 'Suspended' | 'Closed' | 'Deceased';
@@ -28,6 +34,8 @@ export interface MemberTier {
   description?: string;
   registrationFee?: number;
   advanceDeposit?: number;
+  contributionAmount: number;
+  deathBenefitAmount: number;
 }
 
 export interface MemberAgent {
@@ -141,6 +149,7 @@ export interface Nominee {
   idProofNumber: string;
   createdAt?: string;
   updatedAt?: string;
+  documents?: MemberDocument[];
 }
 
 export interface AddNomineeRequest {
@@ -349,15 +358,15 @@ export interface MemberProfile {
   memberStatus: MemberStatus;
   registrationStatus: RegistrationStatus;
   registrationDate: string;
-  tier: ProfileTier;
-  agent: ProfileAgent;
-  unit: ProfileUnit;
-  area: ProfileArea;
-  forum: ProfileForum;
-  wallet: ProfileWallet;
+  tier: MemberTier;
+  agent: Agent;
+  unit: Unit;
+  area: Area;
+  forum: Forum;
+  wallet: Wallet;
   registrationPayment: ProfileRegistrationPayment;
-  nominees: ProfileNominee[];
-  documents: ProfileDocument[];
+  nominees: Nominee[];
+  documents: MemberDocument[];
   createdAt: string;
   registeredAt?: string;
 }

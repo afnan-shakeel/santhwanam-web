@@ -28,8 +28,8 @@ export class MenuService {
       ]
     },
     { label: 'My Approvals', route: '/approvals/my-approvals', active: false },
-    { label: 'My Wallet', route: '/my-wallet', active: false },
-    { label: 'My Agent Profile', route: '/agents/my-profile', active: false },
+    // { label: 'My Wallet', route: '/my-wallet', active: false },
+    // { label: 'My Agent Profile', route: '/agents/my-profile', active: false },
     { label: 'Forums', route: '/forums', active: false },
     { label: 'Areas', route: '/areas', active: false },
     { label: 'Units', route: '/units', active: false },
