@@ -157,6 +157,15 @@ export interface DeathClaim {
   };
   documents?: DeathClaimDocument[];
   contributionCycle?: ContributionCycle;
+  approvalRequest?: {
+    requestId: string;
+    status: 'Pending' | 'Approved' | 'Rejected' | 'Cancelled';
+    requestedBy: string;
+    requestedByUserName?: string;
+    requestedAt: string;
+    currentStageName?: string;
+    completedAt?: string;
+  };
 }
 
 // Death Claim Document

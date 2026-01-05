@@ -1,0 +1,73 @@
+<app-modal 
+  id="submit-approval-modal"
+  title="Confirm your decision to send for approval"
+  size="md"
+  [open]="true"
+  (closed)="onClose()">
+  
+  <div class="space-y-4">
+    <!-- Claim Info -->
+    <p class="text-sm text-gray-600">You are about to submit this claim for approval:</p>
+    
+    <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+      <div class="flex justify-between">
+        <span class="text-sm text-gray-500">Claim:</span>
+        <span class="text-sm font-medium text-gray-900">{{ claim.claimNumber }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-sm text-gray-500">Member:</span>
+        <span class="text-sm font-medium text-gray-900">{{ memberName }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-sm text-gray-500">Benefit:</span>
+        <span class="text-sm font-medium text-gray-900">{{ benefitAmount }}</span>
+      </div>
+    </div>
+
+    <!-- What will happen -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <p class="text-sm font-medium text-blue-800 mb-2">This will:</p>
+      <ul class="text-sm text-blue-700 space-y-1">
+        <li class="flex items-center gap-2">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          Create contribution cycle
+        </li>
+        <li class="flex items-center gap-2">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          Notify members for contribution
+        </li>
+      </ul>
+    </div>
+
+    <!-- Warning -->
+    <p class="text-sm text-gray-500 italic">This action cannot be undone.</p>
+  </div>
+
+  <!-- Footer -->
+  <div footer class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+    <button
+      type="button"
+      (click)="onClose()"
+      [disabled]="submitting()"
+      class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50">
+      Cancel
+    </button>
+    <button
+      type="button"
+      (click)="onSubmit()"
+      [disabled]="submitting()"
+      class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50">
+      @if (submitting()) {
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      }
+      Confirm Decision
+    </button>
+  </div>
+</app-modal>

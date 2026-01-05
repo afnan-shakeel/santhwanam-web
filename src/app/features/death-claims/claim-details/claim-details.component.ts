@@ -10,6 +10,7 @@ import { ToastService } from '../../../core/services/toast.service';
 import { DocumentUploadModalComponent } from './document-upload-modal/document-upload-modal.component';
 import { AcknowledgeContributionModalComponent } from './acknowledge-contribution-modal/acknowledge-contribution-modal.component';
 import { RecordCashModalComponent } from './record-cash-modal/record-cash-modal.component';
+import { SubmitApprovalModalComponent } from './submit-approval-modal/submit-approval-modal.component';
 import {
   DeathClaim,
   DeathClaimDocument,
@@ -37,7 +38,8 @@ interface Tab {
     BreadcrumbsComponent,
     DocumentUploadModalComponent,
     AcknowledgeContributionModalComponent,
-    RecordCashModalComponent
+    RecordCashModalComponent,
+    SubmitApprovalModalComponent
   ],
   templateUrl: './claim-details.component.html',
   styleUrls: ['./claim-details.component.css']
@@ -72,6 +74,7 @@ export class ClaimDetailsComponent implements OnInit {
   showUploadModal = signal(false);
   showAcknowledgeModal = signal(false);
   showRecordCashModal = signal(false);
+  showSubmitApprovalModal = signal(false);
   selectedContribution = signal<MemberContribution | null>(null);
 
   // Tabs
@@ -517,5 +520,19 @@ export class ClaimDetailsComponent implements OnInit {
       contribs.map(c => c.contributionId === contribution.contributionId ? contribution : c)
     );
     this.closeRecordCashModal();
+  }
+
+  // Submit for Approval Modal
+  openSubmitApprovalModal(): void {
+    this.showSubmitApprovalModal.set(true);
+  }
+
+  closeSubmitApprovalModal(): void {
+    this.showSubmitApprovalModal.set(false);
+  }
+
+  onClaimSubmitted(updatedClaim: DeathClaim): void {
+    this.claim.set(updatedClaim);
+    this.closeSubmitApprovalModal();
   }
 }
