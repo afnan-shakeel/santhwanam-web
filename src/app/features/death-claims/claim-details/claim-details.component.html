@@ -1,0 +1,596 @@
+<app-breadcrumbs [items]="breadcrumbs()"></app-breadcrumbs>
+
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Back Button & Header -->
+  <div class="mb-6">
+    <button
+      (click)="goBack()"
+      class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-4">
+      <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      Back to Claims
+    </button>
+
+    @if (claimLoading()) {
+      <div class="animate-pulse">
+        <div class="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
+        <div class="h-6 bg-gray-200 rounded w-1/4"></div>
+      </div>
+    } @else if (claim()) {
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Claim {{ claim()!.claimNumber }}</h1>
+          <div class="mt-1 flex items-center gap-3">
+            <span [class]="'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ' + getStatusColor(claim()!.claimStatus)">
+              {{ getStatusLabel(claim()!.claimStatus) }}
+            </span>
+            @if (claim()!.benefitAmount) {
+              <span class="text-gray-600">Benefit: <span class="font-semibold text-gray-900">₹{{ claim()!.benefitAmount!.toLocaleString() }}</span></span>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Tabs -->
+  <div class="border-b border-gray-200">
+    <nav class="-mb-px flex space-x-8">
+      @for (tab of tabs; track tab.id) {
+        <button
+          (click)="setActiveTab(tab.id)"
+          [class]="activeTab() === tab.id 
+            ? 'border-primary-500 text-primary-600' 
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="tab.icon"/>
+          </svg>
+          {{ tab.label }}
+        </button>
+      }
+    </nav>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="mt-6">
+    @if (claimLoading()) {
+      <div class="animate-pulse space-y-4">
+        <div class="h-32 bg-gray-200 rounded"></div>
+        <div class="h-32 bg-gray-200 rounded"></div>
+      </div>
+    } @else if (claim()) {
+      <!-- Overview Tab -->
+      @if (activeTab() === 'overview') {
+        <div class="space-y-6">
+          <!-- Claim Information -->
+          <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Claim Information</h3>
+            <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Claim Code</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ claim()!.claimNumber }}</dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Submission Date</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ claim()!.reportedDate | date:'mediumDate' }}</dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Reported By</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ claim()!.reportedByRole }}</dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Benefit Amount</dt>
+                <dd class="mt-1 text-sm text-gray-900 font-semibold">₹{{ claim()!.benefitAmount?.toLocaleString() || '-' }}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <!-- Deceased Member Details -->
+          <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Deceased Member Details</h3>
+            <div class="flex items-start gap-4">
+              <div class="shrink-0">
+                <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
+                  <span class="text-xl font-semibold text-primary-700">{{ getInitials(claim()!.memberName) }}</span>
+                </div>
+              </div>
+              <div class="flex-1">
+                <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div>
+                    <dt class="text-sm font-medium text-gray-500">Full Name</dt>
+                    <dd class="mt-1 text-sm text-gray-900 font-medium">{{ claim()!.memberName }}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-sm font-medium text-gray-500">Member Code</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ claim()!.memberCode }}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-sm font-medium text-gray-500">Date of Death</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ claim()!.deathDate | date:'mediumDate' }}</dd>
+                  </div>
+                  @if (claim()!.tier) {
+                    <div>
+                      <dt class="text-sm font-medium text-gray-500">Tier</dt>
+                      <dd class="mt-1 text-sm text-gray-900">{{ claim()!.tier!.tierName }}</dd>
+                    </div>
+                  }
+                  @if (claim()!.agent) {
+                    <div>
+                      <dt class="text-sm font-medium text-gray-500">Agent</dt>
+                      <dd class="mt-1 text-sm text-gray-900">{{ claim()!.agent!.firstName }} {{ claim()!.agent!.lastName }} ({{ claim()!.agent!.agentCode }})</dd>
+                    </div>
+                  }
+                  @if (claim()!.unit) {
+                    <div>
+                      <dt class="text-sm font-medium text-gray-500">Unit</dt>
+                      <dd class="mt-1 text-sm text-gray-900">{{ claim()!.unit!.unitName }}</dd>
+                    </div>
+                  }
+                </dl>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cause of Death -->
+          @if (claim()!.causeOfDeath || claim()!.deathPlace) {
+            <div class="bg-white shadow rounded-lg p-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Cause of Death</h3>
+              <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                @if (claim()!.causeOfDeath) {
+                  <div>
+                    <dt class="text-sm font-medium text-gray-500">Cause</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ claim()!.causeOfDeath }}</dd>
+                  </div>
+                }
+                @if (claim()!.deathPlace) {
+                  <div>
+                    <dt class="text-sm font-medium text-gray-500">Place</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ claim()!.deathPlace }}</dd>
+                  </div>
+                }
+              </dl>
+            </div>
+          }
+
+          <!-- Nominee Information -->
+          <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Nominee Information</h3>
+            <div class="flex items-start gap-4">
+              <div class="shrink-0">
+                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                  <span class="text-lg font-semibold text-gray-600">{{ getInitials(claim()!.nomineeName) }}</span>
+                </div>
+              </div>
+              <div class="flex-1">
+                <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div>
+                    <dt class="text-sm font-medium text-gray-500">Name</dt>
+                    <dd class="mt-1 text-sm text-gray-900 font-medium">{{ claim()!.nomineeName }}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-sm font-medium text-gray-500">Relationship</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ claim()!.nomineeRelation }}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-sm font-medium text-gray-500">Contact</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ claim()!.nomineeContactNumber }}</dd>
+                  </div>
+                  @if (claim()!.nomineeAddress) {
+                    <div class="sm:col-span-2 lg:col-span-3">
+                      <dt class="text-sm font-medium text-gray-500">Address</dt>
+                      <dd class="mt-1 text-sm text-gray-900">
+                        {{ claim()!.nomineeAddress!.addressLine1 }}
+                        @if (claim()!.nomineeAddress!.addressLine2) {, {{ claim()!.nomineeAddress!.addressLine2 }}}
+                        @if (claim()!.nomineeAddress!.city) {, {{ claim()!.nomineeAddress!.city }}}
+                        @if (claim()!.nomineeAddress!.state) {, {{ claim()!.nomineeAddress!.state }}}
+                        @if (claim()!.nomineeAddress!.postalCode) { {{ claim()!.nomineeAddress!.postalCode }}}
+                      </dd>
+                    </div>
+                  }
+                </dl>
+              </div>
+            </div>
+          </div>
+
+          <!-- Verification Section -->
+          @if (claim()!.claimStatus === 'Reported' || claim()!.claimStatus === 'UnderVerification') {
+            <div class="bg-yellow-50 border border-yellow-200 shadow rounded-lg p-6">
+              <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-yellow-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <div class="flex-1">
+                  <h3 class="text-lg font-medium text-yellow-800">Verification Required</h3>
+                  <p class="mt-1 text-sm text-yellow-700">Select documents to verify and approve.</p>
+                  
+                  <!-- Document checklist -->
+                  <div class="mt-4 space-y-2">
+                    @if (documentsLoading()) {
+                      <div class="animate-pulse space-y-2">
+                        @for (i of [1, 2, 3]; track i) {
+                          <div class="h-6 bg-yellow-100 rounded w-1/2"></div>
+                        }
+                      </div>
+                    } @else {
+                      @for (doc of pendingDocuments(); track doc.documentId) {
+                        <label class="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            [checked]="isDocumentSelected(doc.documentId)"
+                            (change)="toggleDocumentSelection(doc.documentId)"
+                            class="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+                          <span class="text-sm text-yellow-800">{{ getDocumentTypeLabel(doc.documentType) }}</span>
+                          <span class="text-xs text-yellow-600">({{ doc.documentName }})</span>
+                        </label>
+                      }
+                      @if (pendingDocuments().length === 0) {
+                        <p class="text-sm text-yellow-700">No pending documents to verify.</p>
+                      }
+                    }
+                  </div>
+
+                  <!-- Verification Notes -->
+                  @if (pendingDocuments().length > 0) {
+                    <div class="mt-4">
+                      <label class="block text-sm font-medium text-yellow-800 mb-1">Verification Notes (Optional)</label>
+                      <textarea
+                        [(ngModel)]="verificationNotes"
+                        rows="2"
+                        class="block w-full rounded-md border-yellow-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                        placeholder="Add any verification notes..."></textarea>
+                    </div>
+
+                    <div class="mt-4 flex items-center gap-3">
+                      <button
+                        (click)="selectAllPendingDocuments()"
+                        class="text-sm text-yellow-700 hover:text-yellow-900 underline">
+                        Select All
+                      </button>
+                      <button
+                        (click)="clearDocumentSelection()"
+                        class="text-sm text-yellow-700 hover:text-yellow-900 underline">
+                        Clear Selection
+                      </button>
+                      <div class="flex-1"></div>
+                      <button
+                        [disabled]="!canBulkVerify() || actionLoading()"
+                        (click)="bulkVerifyDocuments()"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                        @if (actionLoading()) {
+                          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        }
+                        Verify & Approve ({{ selectedDocuments().size }})
+                      </button>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Documents Tab -->
+      @if (activeTab() === 'documents') {
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-lg font-medium text-gray-900">Claim Documents</h3>
+            <div class="flex items-center gap-4">
+              <div class="flex items-center gap-4 text-sm">
+                <span class="text-green-600">✓ {{ verifiedDocuments().length }} Verified</span>
+                <span class="text-yellow-600">⏳ {{ pendingDocuments().length }} Pending</span>
+                @if (rejectedDocuments().length > 0) {
+                  <span class="text-red-600">✕ {{ rejectedDocuments().length }} Rejected</span>
+                }
+              </div>
+              <button
+                (click)="openUploadModal()"
+                class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Upload Document
+              </button>
+            </div>
+          </div>
+
+          @if (documentsLoading()) {
+            <div class="p-6 animate-pulse space-y-4">
+              @for (i of [1, 2, 3]; track i) {
+                <div class="h-20 bg-gray-100 rounded"></div>
+              }
+            </div>
+          } @else if (documents().length === 0) {
+            <div class="p-6 text-center">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">No documents</h3>
+              <p class="mt-1 text-sm text-gray-500">No documents have been uploaded for this claim.</p>
+            </div>
+          } @else {
+            <ul class="divide-y divide-gray-200">
+              @for (doc of documents(); track doc.documentId) {
+                <li class="px-6 py-4">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                      <div class="shrink-0">
+                        @if (doc.mimeType.includes('pdf')) {
+                          <div class="w-10 h-10 bg-red-100 rounded flex items-center justify-center">
+                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                          </div>
+                        } @else {
+                          <div class="w-10 h-10 bg-blue-100 rounded flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                          </div>
+                        }
+                      </div>
+                      <div>
+                        <div class="flex items-center gap-2">
+                          <span class="text-sm font-medium text-gray-900">{{ getDocumentTypeLabel(doc.documentType) }}</span>
+                          <span [class]="'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ' + getDocumentStatusColor(doc.verificationStatus)">
+                            {{ doc.verificationStatus }}
+                          </span>
+                        </div>
+                        <p class="text-sm text-gray-500">{{ doc.documentName }} ({{ formatFileSize(doc.fileSize) }})</p>
+                        <p class="text-xs text-gray-400">Uploaded {{ doc.uploadedAt | date:'medium' }}</p>
+                        @if (doc.verificationStatus === 'Verified' && doc.verifiedAt) {
+                          <p class="text-xs text-green-600">Verified {{ doc.verifiedAt | date:'medium' }}</p>
+                        }
+                        @if (doc.verificationStatus === 'Rejected' && doc.rejectionReason) {
+                          <p class="text-xs text-red-600">Reason: {{ doc.rejectionReason }}</p>
+                        }
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button
+                        (click)="downloadDocument(doc)"
+                        class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Download
+                      </button>
+                      @if (doc.verificationStatus === 'Pending') {
+                        <button
+                          [disabled]="actionLoading()"
+                          (click)="verifyDocument(doc)"
+                          class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50">
+                          Verify
+                        </button>
+                        <button
+                          [disabled]="actionLoading()"
+                          (click)="rejectDocument(doc)"
+                          class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:opacity-50">
+                          Reject
+                        </button>
+                      }
+                    </div>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      }
+
+      <!-- Contribution Cycle Tab -->
+      @if (activeTab() === 'contribution-cycle') {
+        @if (!contributionCycle()) {
+          <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+            <div class="flex items-start gap-3">
+              <svg class="w-6 h-6 text-yellow-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+              <div>
+                <h3 class="text-lg font-medium text-yellow-800">Contribution cycle not yet created</h3>
+                <p class="mt-1 text-sm text-yellow-700">Complete verification and approval to create the contribution cycle.</p>
+                
+                @if (claim()!.benefitAmount && claim()!.tier) {
+                  <div class="mt-4 bg-white rounded-lg p-4">
+                    <h4 class="text-sm font-medium text-gray-900 mb-2">Expected Cycle Details:</h4>
+                    <dl class="grid grid-cols-2 gap-2 text-sm">
+                      <dt class="text-gray-500">Total Benefit Amount:</dt>
+                      <dd class="text-gray-900 font-medium">₹{{ claim()!.benefitAmount?.toLocaleString() }}</dd>
+                      <dt class="text-gray-500">Tier:</dt>
+                      <dd class="text-gray-900">{{ claim()!.tier!.tierName }}</dd>
+                    </dl>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        } @else {
+          <!-- Cycle exists -->
+          <div class="space-y-6">
+            <!-- Cycle Info & Progress -->
+            <div class="bg-white shadow rounded-lg p-6">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-lg font-medium text-gray-900">Cycle {{ contributionCycle()!.cycleNumber }}</h3>
+                  <span [class]="contributionCycle()!.cycleStatus === 'Active' ? 'text-green-600' : 'text-gray-600'" class="text-sm">
+                    {{ contributionCycle()!.cycleStatus }}
+                  </span>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm text-gray-500">Deadline</p>
+                  <p class="text-sm font-medium text-gray-900">{{ contributionCycle()!.gracePeriodEnds | date:'mediumDate' }}</p>
+                </div>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="mb-4">
+                <div class="flex items-center justify-between text-sm mb-1">
+                  <span class="text-gray-600">Collection Progress: {{ cycleProgress() }}%</span>
+                  <span class="text-gray-900 font-medium">
+                    ₹{{ contributionCycle()!.totalCollected.toLocaleString() }} / ₹{{ (contributionCycle()!.contributionAmount * contributionCycle()!.totalMembers).toLocaleString() }}
+                  </span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    class="bg-primary-600 h-3 rounded-full transition-all duration-300"
+                    [style.width.%]="cycleProgress()">
+                  </div>
+                </div>
+                <p class="mt-1 text-sm text-gray-500">
+                  {{ contributionCycle()!.collectedCount }} / {{ contributionCycle()!.totalMembers }} members paid
+                </p>
+              </div>
+
+              <!-- Stats Cards -->
+              <div class="grid grid-cols-3 gap-4">
+                <div class="bg-green-50 rounded-lg p-4 text-center">
+                  <p class="text-2xl font-semibold text-green-700">{{ contributionCycle()!.collectedCount }}</p>
+                  <p class="text-sm text-green-600">Paid</p>
+                  <p class="text-xs text-green-500">{{ ((contributionCycle()!.collectedCount / contributionCycle()!.totalMembers) * 100).toFixed(0) }}%</p>
+                </div>
+                <div class="bg-yellow-50 rounded-lg p-4 text-center">
+                  <p class="text-2xl font-semibold text-yellow-700">{{ contributionCycle()!.pendingCount }}</p>
+                  <p class="text-sm text-yellow-600">Pending</p>
+                  <p class="text-xs text-yellow-500">{{ ((contributionCycle()!.pendingCount / contributionCycle()!.totalMembers) * 100).toFixed(0) }}%</p>
+                </div>
+                <div class="bg-red-50 rounded-lg p-4 text-center">
+                  <p class="text-2xl font-semibold text-red-700">{{ contributionCycle()!.missedCount }}</p>
+                  <p class="text-sm text-red-600">Missed</p>
+                  <p class="text-xs text-red-500">{{ ((contributionCycle()!.missedCount / contributionCycle()!.totalMembers) * 100).toFixed(0) }}%</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Member Contributions Table -->
+            <div class="bg-white shadow rounded-lg">
+              <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Member Contribution Status</h3>
+              </div>
+
+              @if (contributionsLoading()) {
+                <div class="p-6 animate-pulse space-y-4">
+                  @for (i of [1, 2, 3, 4, 5]; track i) {
+                    <div class="h-12 bg-gray-100 rounded"></div>
+                  }
+                </div>
+              } @else if (contributions().length === 0) {
+                <div class="p-6 text-center text-gray-500">
+                  No contribution records found.
+                </div>
+              } @else {
+                <div class="overflow-x-auto">
+                  <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agent</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                      @for (contrib of contributions(); track contrib.contributionId) {
+                        <tr class="hover:bg-gray-50">
+                          <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">
+                              {{ contrib.member?.firstName }} {{ contrib.member?.lastName }}
+                            </div>
+                            <div class="text-sm text-gray-500">{{ contrib.member?.memberCode }}</div>
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">
+                              {{ contrib.agent?.firstName }} {{ contrib.agent?.lastName }}
+                            </div>
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ₹{{ contrib.contributionAmount.toLocaleString() }}
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                            <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getContributionStatusColor(contrib.contributionStatus)">
+                              {{ contrib.contributionStatus }}
+                            </span>
+                            @if (contrib.collectedAt) {
+                              <p class="text-xs text-gray-500 mt-1">{{ contrib.collectedAt | date:'short' }}</p>
+                            }
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            @if (contrib.contributionStatus === 'WalletDebitRequested') {
+                              <button
+                                [disabled]="actionLoading()"
+                                (click)="openAcknowledgeModal(contrib)"
+                                class="text-primary-600 hover:text-primary-900 mr-3">
+                                Acknowledge
+                              </button>
+                            }
+                            @if (contrib.contributionStatus === 'Pending' || contrib.contributionStatus === 'WalletDebitRequested') {
+                              <button
+                                [disabled]="actionLoading()"
+                                (click)="openRecordCashModal(contrib)"
+                                class="text-green-600 hover:text-green-900 mr-3">
+                                Record Cash
+                              </button>
+                              <button
+                                [disabled]="actionLoading()"
+                                (click)="markContributionMissed(contrib)"
+                                class="text-red-600 hover:text-red-900">
+                                Mark Missed
+                              </button>
+                            }
+                            @if (contrib.contributionStatus === 'Collected' || contrib.contributionStatus === 'Missed' || contrib.contributionStatus === 'Exempted') {
+                              <span class="text-gray-400">—</span>
+                            }
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+
+      <!-- Timeline Tab (Placeholder) -->
+      @if (activeTab() === 'timeline') {
+        <div class="bg-white shadow rounded-lg p-6">
+          <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">Timeline Coming Soon</h3>
+            <p class="mt-1 text-sm text-gray-500">The timeline feature showing claim history and audit trail will be available in a future update.</p>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+<!-- Modals -->
+@if (showUploadModal()) {
+  <app-document-upload-modal
+    [claimId]="claimId()"
+    (closeModal)="closeUploadModal()"
+    (documentUploaded)="onDocumentUploaded($event)">
+  </app-document-upload-modal>
+}
+
+@if (showAcknowledgeModal() && selectedContribution()) {
+  <app-acknowledge-contribution-modal
+    [contribution]="selectedContribution()!"
+    (closeModal)="closeAcknowledgeModal()"
+    (contributionAcknowledged)="onContributionAcknowledged($event)">
+  </app-acknowledge-contribution-modal>
+}
+
+@if (showRecordCashModal() && selectedContribution()) {
+  <app-record-cash-modal
+    [contribution]="selectedContribution()!"
+    (closeModal)="closeRecordCashModal()"
+    (cashRecorded)="onCashRecorded($event)">
+  </app-record-cash-modal>
+}

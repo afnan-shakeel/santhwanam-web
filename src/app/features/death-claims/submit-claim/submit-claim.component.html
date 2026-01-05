@@ -1,0 +1,355 @@
+<app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
+
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">Submit Death Claim</h1>
+    <p class="mt-1 text-sm text-gray-500">Complete the following steps to submit a new death claim</p>
+  </div>
+
+  <!-- Stepper -->
+  <nav aria-label="Progress" class="mb-8">
+    <ol class="flex items-center justify-center">
+      @for (step of steps; track step.id; let isLast = $last) {
+        <li [class]="'relative ' + (isLast ? '' : 'pr-20 sm:pr-32')">
+          <!-- Step Circle -->
+          <div class="flex items-center">
+            <div [class]="'relative flex h-10 w-10 items-center justify-center rounded-full border-2 ' + 
+              (getStepStatus(step.id) === 'completed' ? 'bg-primary-600 border-primary-600' :
+               getStepStatus(step.id) === 'current' ? 'border-primary-600 bg-white' :
+               'border-gray-300 bg-white')">
+              @if (getStepStatus(step.id) === 'completed') {
+                <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              } @else {
+                <span [class]="'text-sm font-semibold ' + 
+                  (getStepStatus(step.id) === 'current' ? 'text-primary-600' : 'text-gray-500')">
+                  {{ step.number }}
+                </span>
+              }
+            </div>
+            <span [class]="'ml-4 text-sm font-medium ' + 
+              (getStepStatus(step.id) === 'current' ? 'text-primary-600' : 
+               getStepStatus(step.id) === 'completed' ? 'text-gray-900' : 'text-gray-500')">
+              {{ step.label }}
+            </span>
+          </div>
+
+          <!-- Connector Line -->
+          @if (!isLast) {
+            <div class="absolute top-5 left-10 -ml-px mt-0.5 h-0.5 w-20 sm:w-32 bg-gray-300" 
+                 [class.bg-primary-600]="getStepStatus(steps[$index + 1].id) === 'completed'">
+            </div>
+          }
+        </li>
+      }
+    </ol>
+  </nav>
+
+  <!-- Error Message -->
+  @if (error()) {
+    <div class="mb-6 rounded-md bg-red-50 p-4">
+      <div class="flex">
+        <div class="shrink-0">
+          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm font-medium text-red-800">{{ error() }}</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Form Container -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-6 py-8">
+      <!-- Step 1: Member Information -->
+      @if (currentStep() === 'member-info') {
+        <div class="space-y-6">
+          <div>
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Search Deceased Member</h2>
+            <app-member-search-select
+              placeholder="Search by member code or name..."
+              [required]="true"
+              (memberSelected)="onMemberSelected($event)">
+            </app-member-search-select>
+          </div>
+
+          @if (selectedMember()) {
+            <!-- Selected Member Details -->
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-6">
+              <h3 class="text-sm font-medium text-gray-900 mb-4">Selected Member</h3>
+              <div class="flex items-start gap-4">
+                <div class="shrink-0">
+                  @if (selectedMember()!.photoUrl) {
+                    <img [src]="selectedMember()!.photoUrl" alt="Member photo" class="h-16 w-16 rounded-full object-cover">
+                  } @else {
+                    <div class="h-16 w-16 rounded-full bg-linear-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-semibold text-lg">
+                      {{ selectedMember()!.firstName[0] }}{{ selectedMember()!.lastName[0] }}
+                    </div>
+                  }
+                </div>
+                <div class="flex-1 grid grid-cols-2 gap-x-4 gap-y-2">
+                  <div>
+                    <dt class="text-sm font-medium text-gray-500">Full Name</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ selectedMember()!.firstName }} {{ selectedMember()!.middleName }} {{ selectedMember()!.lastName }}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-sm font-medium text-gray-500">Member Code</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ selectedMember()!.memberCode }}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-sm font-medium text-gray-500">Tier</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ selectedMember()!.tierName || 'N/A' }}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-sm font-medium text-gray-500">Status</dt>
+                    <dd class="mt-1">
+                      <span [class]="'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ' + 
+                        (selectedMember()!.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')">
+                        {{ selectedMember()!.status }}
+                      </span>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-sm font-medium text-gray-500">Agent</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ selectedMember()!.agentName || 'N/A' }}</dd>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Death Information Form -->
+            <form [formGroup]="step1Form" class="space-y-4">
+              <h3 class="text-lg font-medium text-gray-900">Death Information</h3>
+              
+              <app-input
+                label="Date of Death"
+                type="date"
+                formControlName="deathDate"
+                [required]="true">
+              </app-input>
+
+              <app-input
+                label="Place of Death"
+                type="text"
+                formControlName="deathPlace"
+                placeholder="e.g., Royal Hospital, Muscat">
+              </app-input>
+
+              <div>
+                <label for="causeOfDeath" class="block text-sm font-medium text-gray-700 mb-1">
+                  Cause of Death
+                </label>
+                <textarea
+                  id="causeOfDeath"
+                  formControlName="causeOfDeath"
+                  rows="3"
+                  placeholder="e.g., Natural causes - Heart attack"
+                  class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"></textarea>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <app-input
+                  label="Hospital/Location"
+                  type="text"
+                  formControlName="hospitalName"
+                  placeholder="Hospital name">
+                </app-input>
+
+                <app-input
+                  label="Doctor Name"
+                  type="text"
+                  formControlName="doctorName"
+                  placeholder="Attending doctor">
+                </app-input>
+              </div>
+
+              <div>
+                <label for="additionalNotes" class="block text-sm font-medium text-gray-700 mb-1">
+                  Additional Notes (Optional)
+                </label>
+                <textarea
+                  id="additionalNotes"
+                  formControlName="additionalNotes"
+                  rows="3"
+                  placeholder="Add any additional notes or information..."
+                  class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"></textarea>
+              </div>
+            </form>
+          }
+        </div>
+      }
+
+      <!-- Step 2: Nominee & Payout -->
+      @if (currentStep() === 'nominee-payout') {
+        <div class="space-y-6">
+          <div>
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Nominee & Payout Details</h2>
+            <p class="text-sm text-gray-500 mb-4">Select the registered nominee and provide bank details for benefit payout.</p>
+          </div>
+
+          <form [formGroup]="step2Form" class="space-y-6">
+            <!-- Placeholder for nominee selection - will be enhanced in next iteration -->
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-6">
+              <p class="text-sm text-gray-600">Nominee selection from member's registered nominees will be implemented here.</p>
+              <p class="text-sm text-gray-500 mt-2">For now, please enter nominee ID manually:</p>
+              <div class="mt-2">
+                <app-input
+                  label=""
+                  type="text"
+                  formControlName="nomineeId"
+                  placeholder="Nominee ID"
+                  [required]="true">
+                </app-input>
+              </div>
+            </div>
+
+            <!-- Bank Details -->
+            <div class="space-y-4">
+              <h3 class="text-sm font-medium text-gray-900">Payout Bank Details</h3>
+              
+              <app-input
+                label="Bank Name"
+                type="text"
+                formControlName="bankName"
+                placeholder="e.g., Bank Muscat"
+                [required]="true">
+              </app-input>
+
+              <app-input
+                label="Account Number"
+                type="text"
+                formControlName="accountNumber"
+                placeholder="1234567890"
+                [required]="true">
+              </app-input>
+
+              <app-input
+                label="IBAN"
+                type="text"
+                formControlName="iban"
+                placeholder="OM12345678901234567890">
+              </app-input>
+
+              <app-input
+                label="Account Holder Name"
+                type="text"
+                formControlName="accountHolderName"
+                placeholder="Full name as per bank account"
+                [required]="true">
+              </app-input>
+            </div>
+          </form>
+
+          <div class="rounded-md bg-yellow-50 p-4 border border-yellow-200">
+            <div class="flex">
+              <div class="shrink-0">
+                <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-yellow-800">Important Notes</h3>
+                <div class="mt-2 text-sm text-yellow-700">
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>Ensure bank details match the nominee's name</li>
+                    <li>Bank account proof will be required in the next step</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Step 3: Upload Documents -->
+      @if (currentStep() === 'documents') {
+        <div class="space-y-6">
+          <div>
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Upload Documents</h2>
+            <p class="text-sm text-gray-500 mb-4">Upload required documents to support the death claim.</p>
+          </div>
+
+          <!-- Document upload will be enhanced in next iteration -->
+          <div class="rounded-lg border border-gray-200 bg-gray-50 p-6">
+            <p class="text-sm text-gray-600">Document upload interface will be fully implemented here.</p>
+            <p class="text-sm text-gray-500 mt-2">Required documents:</p>
+            <ul class="mt-2 text-sm text-gray-600 list-disc list-inside space-y-1">
+              <li>Death Certificate *</li>
+              <li>Medical Report *</li>
+              <li>Bank Account Proof *</li>
+            </ul>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Form Actions -->
+    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between rounded-b-lg">
+      <button
+        type="button"
+        (click)="cancel()"
+        class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+        [disabled]="submitting()">
+        Cancel
+      </button>
+
+      <div class="flex gap-3">
+        @if (currentStepIndex() > 0) {
+          <button
+            type="button"
+            (click)="previousStep()"
+            class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+            [disabled]="submitting()">
+            ← Back
+          </button>
+        }
+
+        @if (currentStep() === 'member-info') {
+          <button
+            type="button"
+            (click)="submitStep1()"
+            [disabled]="!selectedMember() || step1Form.invalid || submitting()"
+            class="inline-flex justify-center rounded-md border border-transparent bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            @if (submitting()) {
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Submitting...
+            } @else {
+              Report Claim →
+            }
+          </button>
+        } @else if (currentStep() === 'nominee-payout') {
+          <button
+            type="button"
+            (click)="submitStep2()"
+            [disabled]="step2Form.invalid || submitting()"
+            class="inline-flex justify-center rounded-md border border-transparent bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            @if (submitting()) {
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Saving...
+            } @else {
+              Save & Continue →
+            }
+          </button>
+        } @else if (currentStep() === 'documents') {
+          <button
+            type="button"
+            (click)="done()"
+            class="inline-flex justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+            Done
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>

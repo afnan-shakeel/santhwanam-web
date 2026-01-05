@@ -35,7 +35,7 @@ export class MenuService {
     { label: 'Units', route: '/units', active: false },
     { label: 'Agents', route: '/agents', active: false },
     { label: 'Members', route: '/members', active: false },
-    { label: 'Death Claims', route: '/claims', active: false },
+    { label: 'Death Claims', route: '/death-claims', active: false },
     { label: 'Contributions', route: '/contributions', active: false },
   ]);
 

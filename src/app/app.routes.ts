@@ -157,6 +157,24 @@ export const routes: Routes = [
         path: 'wallet/admin',
         loadComponent: () => import('./features/wallet/wallet-management/wallet-management.component').then((m) => m.WalletManagementComponent)
       },
+      // Death Claims routes
+      {
+        path: 'death-claims',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/death-claims/claims-dashboard/claims-dashboard.component').then((m) => m.ClaimsDashboardComponent)
+          },
+          {
+            path: 'new',
+            loadComponent: () => import('./features/death-claims/submit-claim/submit-claim.component').then((m) => m.SubmitClaimComponent)
+          },
+          {
+            path: ':claimId',
+            loadComponent: () => import('./features/death-claims/claim-details/claim-details.component').then((m) => m.ClaimDetailsComponent)
+          }
+        ]
+      },
       {
         path: 'approvals/workflows',
         loadComponent: () => import('./features/approvals/approval-workflows/approval-workflows.component').then((m) => m.ApprovalWorkflowsComponent)
