@@ -9,6 +9,13 @@ import {
   RecordCashRequest,
   AcknowledgeContributionRequest
 } from '../../shared/models/death-claim.model';
+import {
+  MyContributionsSummaryResponse,
+  MyPendingContributionsResponse,
+  MyContributionsHistoryResponse,
+  ActiveCyclesSummaryResponse,
+  ContributionHistoryStatus
+} from '../../shared/models/contribution.model';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -123,5 +130,56 @@ export class ContributionsService {
       `${this.basePath}/member/${memberId}/history`,
       { params: queryParams }
     );
+  }
+
+  // ==========================================
+  // My Contributions APIs (for authenticated member)
+  // ==========================================
+
+  /**
+   * Get authenticated member's contribution summary
+   */
+  getMyContributionsSummary(): Observable<MyContributionsSummaryResponse> {
+    return this.http.get<MyContributionsSummaryResponse>(`${this.basePath}/my-contributions/summary`);
+  }
+
+  /**
+   * Get authenticated member's pending contributions
+   */
+  getMyPendingContributions(): Observable<MyPendingContributionsResponse> {
+    return this.http.get<MyPendingContributionsResponse>(`${this.basePath}/my-contributions/pending`);
+  }
+
+  /**
+   * Get authenticated member's contribution history
+   */
+  getMyContributionsHistory(
+    params?: {
+      status?: ContributionHistoryStatus;
+      page?: number;
+      limit?: number;
+    }
+  ): Observable<MyContributionsHistoryResponse> {
+    const queryParams: Record<string, string> = {};
+    
+    if (params?.status) queryParams['status'] = params.status;
+    if (params?.page) queryParams['page'] = params.page.toString();
+    if (params?.limit) queryParams['limit'] = params.limit.toString();
+
+    return this.http.get<MyContributionsHistoryResponse>(
+      `${this.basePath}/my-contributions/history`,
+      { params: queryParams }
+    );
+  }
+
+  // ==========================================
+  // Admin APIs
+  // ==========================================
+
+  /**
+   * Get active cycles summary for admin dashboard
+   */
+  getActiveCyclesSummary(): Observable<ActiveCyclesSummaryResponse> {
+    return this.http.get<ActiveCyclesSummaryResponse>(`${this.basePath}/cycles/summary`);
   }
 }

@@ -157,6 +157,11 @@ export const routes: Routes = [
         path: 'wallet/admin',
         loadComponent: () => import('./features/wallet/wallet-management/wallet-management.component').then((m) => m.WalletManagementComponent)
       },
+      // Contributions routes
+      { 
+        path: 'contributions',
+        loadComponent: () => import('./features/contributions/my-contributions/my-contributions.component').then((m) => m.MyContributionsComponent)
+      },
       // Death Claims routes
       {
         path: 'death-claims',

@@ -243,16 +243,17 @@ export interface ContributionCycle {
   deathClaimId: string;
   membershipTierId: string;
   forumId: string;
-  contributionAmount: number;
+  benefitAmount: number;
   totalMembers: number;
-  totalCollected: number;
-  totalMissed: number;
-  collectedCount: number;
-  missedCount: number;
-  pendingCount: number;
+  totalCollectedAmount: number;
+  totalExpectedAmount: number;
+  totalMissed?: number;
+  membersCollected: number;
+  membersPending: number;
+  membersMissed: number;
   startDate: string;
   endDate?: string;
-  gracePeriodEnds: string;
+  collectionDeadline: Date;
   createdAt: string;
   updatedAt: string;
 
@@ -283,7 +284,7 @@ export interface MemberContribution {
   cycleId: string;
   memberId: string;
   agentId: string;
-  contributionAmount: number;
+  expectedAmount: number;
   contributionStatus: ContributionStatus;
   paymentMethod?: ContributionPaymentMethod;
   walletDebitRequestId?: string;

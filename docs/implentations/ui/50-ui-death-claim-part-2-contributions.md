@@ -2,36 +2,7 @@
 
 ---
 
-## **Current Coverage (Part 1 - Death Claims)**
-
-From Part 1, we already have:
-
-✅ **Claims Dashboard** - Shows claims with contribution status
-✅ **Claim Details > Contribution Cycle Tab** - Full cycle details, progress, member list
-✅ **Contribution progress tracking** - Visual progress bars, stats
-✅ **Member contribution status** - Who paid, pending, failed
-
----
-
-## **Question: Do we need separate Contribution pages?**
-
-### **Answer: NO - But with 2 small additions**
-
-**Reason:**
-- Contributions are **tightly coupled** to death claims
-- Every contribution cycle is created FROM a claim
-- Viewing contributions in isolation doesn't make sense
-- All necessary contribution management is already in Claim Details
-
----
-
-## **Recommended Approach: Enhance Existing + Add 2 Small Views**
-
-### **What we have (sufficient):**
-1. ✅ Claims Dashboard shows cycles under contribution
-2. ✅ Claim Details > Cycle Tab shows full contribution management
-3. ✅ Agents can track member contributions
-4. ✅ Admins can monitor progress
+## **Approach: Enhance Existing and Add 2 Small Views**
 
 ### **What to add (2 small pages):**
 
@@ -102,120 +73,6 @@ From Part 1, we already have:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ My Contributions                                            │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  Summary                                                    │
-│  ┌──────────────┬──────────────┬──────────────┐           │
-│  │ Total        │ Pending      │ This         │           │
-│  │ Contributed  │ Payments     │ Year         │           │
-│  │              │              │              │           │
-│  │ ₹1,200       │      1       │ ₹1,200       │           │
-│  └──────────────┴──────────────┴──────────────┘           │
-│                                                             │
-│  Pending Contributions                                      │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │ 🔴 Contribution Required                            │   │
-│  │                                                      │   │
-│  │ Cycle: CC-2025-00015                                │   │
-│  │ Deceased: Jane Doe (MEM-2025-00455)                 │   │
-│  │ Amount: ₹100                                        │   │
-│  │ Deadline: Jan 25, 2025 (5 days left)                │   │
-│  │                                                      │   │
-│  │ Your wallet balance: ₹2,500 ✅ Sufficient          │   │
-│  │                                                      │   │
-│  │ Status: Pending - Waiting for agent collection      │   │
-│  │                                                      │   │
-│  │                            [Mark as Paid (Agent)]   │   │
-│  └─────────────────────────────────────────────────────┘   │
-│                                                             │
-│  Contribution History                   [Download]          │
-│  Filters: [Year ▾] [Status ▾]                              │
-│                                                             │
-│  ┌──────┬──────────────┬────────────┬─────────┬────────┐   │
-│  │ Date │ Cycle        │ Deceased   │ Amount  │ Status │   │
-│  ├──────┼──────────────┼────────────┼─────────┼────────┤   │
-│  │Jan 20│ CC-2025-0014 │ John Smith │ ₹100    │ ✅ Paid│   │
-│  │      │              │ MEM-00456  │         │        │   │
-│  ├──────┼──────────────┼────────────┼─────────┼────────┤   │
-│  │Jan 15│ CC-2025-0013 │ Bob Wilson │ ₹100    │ ✅ Paid│   │
-│  │      │              │ MEM-00457  │         │        │   │
-│  ├──────┼──────────────┼────────────┼─────────┼────────┤   │
-│  │Jan 10│ CC-2025-0012 │ Mary Jones │ ₹100    │ ✅ Paid│   │
-│  │      │              │ MEM-00458  │         │        │   │
-│  └──────┴──────────────┴────────────┴─────────┴────────┘   │
-│                                                             │
-│  Showing 10 of 12 contributions        [1] [2]             │
-│                                                             │
-│  💡 Contributions are automatically deducted from your      │
-│     wallet when a death claim cycle is created.             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Value:**
-- ✅ **ESSENTIAL** - Members need to see their contributions
-- Transparency - what they've paid and for whom
-- Pending contributions - what's due
-- History - track all past contributions
-
-**Is it necessary?** 
-- ✅ **YES** - Critical for member transparency
-
----
-
-## **Updated Page Structure**
-
-### **Complete Death Claims & Contributions Module:**
-
-1. **Claims Dashboard** (`/claims`)
-   - Shows all claims
-   - Includes contribution cycle status
-   - Filters by status
-
-2. **Claim Details** (`/claims/:claimId`)
-   - Tab 1: Overview
-   - Tab 2: Documents
-   - Tab 3: Contribution Cycle (full management)
-   - Tab 4: Timeline
-
-3. **Submit New Claim** (`/claims/new`)
-   - 3-step wizard
-
-4. **My Claims** (`/my-claims`)
-   - For nominees to track their claims
-
-5. **My Contributions** (`/my-contributions`) ✨ **NEW - ESSENTIAL**
-   - For members to see their contribution history
-   - Pending contributions
-   - Payment status
-
-6. **Contribution Cycles Overview** (`/contribution-cycles`) ⚠️ **OPTIONAL**
-   - Quick view of all active cycles
-   - Admin convenience
-   - Can be skipped for MVP
-
----
-
-## **Final Recommendation**
-
-### **Must Have:**
-1. ✅ Claims Dashboard (already designed)
-2. ✅ Claim Details with Cycle tab (already designed)
-3. ✅ Submit Claim (already designed)
-4. ✅ My Claims for nominees (already designed)
-5. ✅ **My Contributions** (NEW - must add)
-
-### **Optional/Future:**
-6. ⚠️ Contribution Cycles Overview (skip for MVP)
-
----
-
-## **My Contributions - Full Design**
-
-Let me provide the complete UI for this essential page:
-
-```
-┌─────────────────────────────────────────────────────────────┐
 │ My Contributions                          MEM-2025-00456    │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
@@ -228,7 +85,6 @@ Let me provide the complete UI for this essential page:
 │  └──────────────┴──────────────┴──────────────┴─────────┘  │
 │                                                             │
 │  Your Wallet Balance: ₹2,500                                │
-│  Next Expected Contribution: ₹100 (when next cycle starts) │
 │                                                             │
 │  Pending Contributions                                      │
 │  ┌─────────────────────────────────────────────────────┐   │
@@ -285,9 +141,14 @@ Let me provide the complete UI for this essential page:
 │  • You'll receive SMS notification for each contribution    │
 │  • All contributions support death benefit payouts to       │
 │    fellow members' families                                 │
-│  • Download your contribution statement for tax purposes    │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+**Value:**
+- ✅ **ESSENTIAL** - Members need to see their contributions
+- Transparency - what they've paid and for whom
+- Pending contributions - what's due
+- History - track all past contributions
 
 ---
 
@@ -328,103 +189,4 @@ Let me provide the complete UI for this essential page:
 
 ---
 
-## **APIs for My Contributions**
-
-### **1. Get Member's Contribution Summary**
-```
-GET /api/members/:memberId/contributions/summary
-GET /api/my-contributions/summary
-```
-Returns:
-```json
-{
-  totalContributed: 1200,
-  thisYear: 1200,
-  pendingCount: 1,
-  averagePerMonth: 100,
-  walletBalance: 2500
-}
-```
-
----
-
-### **2. Get Member's Pending Contributions**
-```
-GET /api/members/:memberId/contributions/pending
-GET /api/my-contributions/pending
-```
-Returns:
-```json
-{
-  pendingContributions: [
-    {
-      contributionId: "uuid",
-      cycleCode: "CC-2025-00015",
-      claimId: "uuid",
-      deceasedMember: {
-        memberCode: "MEM-2025-00455",
-        fullName: "Jane Doe"
-      },
-      contributionAmount: 100,
-      dueDate: "2025-01-25",
-      daysLeft: 5,
-      contributionStatus: "Pending"
-    }
-  ]
-}
-```
-
----
-
-### **3. Get Member's Contribution History**
-```
-GET /api/members/:memberId/contributions/history
-GET /api/my-contributions/history
-Query params: ?page=1&limit=20&status=&year=&startDate=&endDate=
-```
-Returns: Paginated contribution history
-
----
-
-### **4. Download Contribution Statement**
-```
-GET /api/members/:memberId/contributions/statement
-GET /api/my-contributions/statement
-Query params: ?format=pdf&year=2025
-```
-Returns: PDF download
-
----
-
-## **Final Answer**
-
-### **Do we need extra pages for contributions?**
-
-**YES - But only 1 essential page:**
-
-✅ **My Contributions** (Member view) - **MUST HAVE**
-- Essential for member transparency
-- Shows pending and history
-- Download statements
-
-⚠️ **Contribution Cycles Overview** (Admin) - **OPTIONAL**
-- Nice to have for admins
-- Not critical (Claims Dashboard covers this)
-- Can be added later
-
----
-
-**Total New Pages Needed: 1 (My Contributions)**
-
-**Total Module Pages:**
-1. Claims Dashboard
-2. Claim Details (with Cycle tab)
-3. Submit Claim
-4. My Claims (Nominee)
-5. **My Contributions (Member)** ← NEW
-
----
-
-**This completes the Death Claims & Contributions UI!** 🎯
-
-Would you like me to design any other module next?
+**This completes the Death Claims & Contributions UI!** 

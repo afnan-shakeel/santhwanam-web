@@ -114,7 +114,7 @@ export class ClaimDetailsComponent implements OnInit {
   cycleProgress = computed(() => {
     const cycle = this.contributionCycle();
     if (!cycle || cycle.totalMembers === 0) return 0;
-    return Math.round((cycle.collectedCount / cycle.totalMembers) * 100);
+    return Math.round((cycle.totalCollectedAmount / cycle.totalExpectedAmount) * 100);
   });
 
   canBulkVerify = computed(() => {
