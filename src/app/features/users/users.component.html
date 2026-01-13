@@ -19,4 +19,11 @@
       (searchChange)="onSearchChange($event)">
     </app-datatable>
   </div>
-</div>  
+</div>
+
+<!-- Manage Roles Modal -->
+<app-manage-roles-modal
+  [user]="selectedUserForRoles()"
+  [open]="showManageRolesModal()"
+  (openChange)="onManageRolesModalChange($event)"
+/>  

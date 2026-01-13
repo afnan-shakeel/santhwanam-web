@@ -1,4 +1,4 @@
-export type ScopeType = 'None' | 'Forum' | 'Area' | 'Unit' | 'Agent';
+export type ScopeType = 'None' | 'Forum' | 'Area' | 'Unit' | 'Agent' | 'Member';
 
 export interface Role {
   roleId: string;

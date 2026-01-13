@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ListingPageHeaderComponent } from '../../shared/components/listing-page-header/listing-page-header.component';
 import { BreadcrumbsComponent, BreadcrumbItem } from '../../shared/components/breadcrumbs/breadcrumbs.component';
 import { DatatableComponent } from '../../shared/components/datatable/datatable.component';
+import { ManageRolesModalComponent } from './manage-roles-modal/manage-roles-modal.component';
 import { DataTableConfig, DataTableColumn, DataTableAction } from '../../shared/models/datatable.model';
 import { SearchRequest, SearchResponse } from '../../shared/models/search.model';
 import { User } from '../../shared/models/user.model';
@@ -13,7 +14,7 @@ import { UserService } from '../../core/services/user.service';
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, ListingPageHeaderComponent, BreadcrumbsComponent, DatatableComponent],
+  imports: [CommonModule, ListingPageHeaderComponent, BreadcrumbsComponent, DatatableComponent, ManageRolesModalComponent],
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.css']
 })
@@ -67,6 +68,10 @@ export class UsersComponent {
         callback: (user) => this.onViewUser(user)
       },
       {
+        label: 'Manage Roles',
+        callback: (user) => this.onManageRoles(user)
+      },
+      {
         label: 'Edit',
         callback: (user) => this.onEditUser(user)
       }
@@ -116,6 +121,22 @@ export class UsersComponent {
   onEditUser(user: User): void {
     console.log('Edit user:', user);
     this.router.navigate(['/users', user.userId, 'edit']);
+  }
+
+  // Manage Roles Modal
+  showManageRolesModal = signal(false);
+  selectedUserForRoles = signal<User | null>(null);
+
+  onManageRoles(user: User): void {
+    this.selectedUserForRoles.set(user);
+    this.showManageRolesModal.set(true);
+  }
+
+  onManageRolesModalChange(open: boolean): void {
+    this.showManageRolesModal.set(open);
+    if (!open) {
+      this.selectedUserForRoles.set(null);
+    }
   }
 
   protected onAddUser(): void {

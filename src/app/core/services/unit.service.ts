@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { HttpService } from '../http/http.service';
-import { SearchRequest, SearchResponse } from '../../shared/models/search.model';
+import { SearchRequest, SearchResponse, Filter } from '../../shared/models/search.model';
 import { Unit, CreateUnitRequest, UpdateUnitRequest } from '../../shared/models/unit.model';
 
 @Injectable({
@@ -29,5 +30,24 @@ export class UnitService {
 
   deleteUnit(unitId: string): Observable<void> {
     return this.http.delete<void>(`/organization-bodies/units/${unitId}`);
+  }
+
+  /**
+   * Search units for select/autocomplete components
+   */
+  searchUnitsForSelect(
+    searchTerm: string = '',
+    additionalFilters: Filter[] = []
+  ): Observable<Unit[]> {
+    const request: SearchRequest = {
+      searchTerm,
+      filters: additionalFilters,
+      page: 1,
+      pageSize: 50,
+      sortBy: 'unitName',
+      sortOrder: 'asc',
+    };
+
+    return this.searchUnits(request).pipe(map((response) => response.items));
   }
 }

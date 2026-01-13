@@ -245,6 +245,100 @@
         }
       }
     },
+    "/api/iam/users/{userId}/roles": {
+      "post": {
+        "tags": ["IAM - User Roles"],
+        "summary": "Assign role to user",
+        "description": "Assigns a role to a user with optional scope (Forum, Area, Unit, Agent). The role's scopeType must match the provided scopeEntityType.",
+        "parameters": [
+          { "name": "userId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "User ID to assign role to" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["roleId"],
+                "properties": {
+                  "roleId": { 
+                    "type": "string",
+                    "description": "Role ID to assign"
+                  },
+                  "scopeEntityType": { 
+                    "type": "string", 
+                    "enum": ["None", "Forum", "Area", "Unit", "Agent"],
+                    "description": "Type of entity this role is scoped to (must match role's scopeType)"
+                  },
+                  "scopeEntityId": { 
+                    "type": ["string", "null"],
+                    "description": "ID of the forum/area/unit/agent entity (required if scopeEntityType is not 'None')"
+                  }
+                }
+              },
+              "examples": {
+                "unitAdmin": {
+                  "summary": "Assign Unit Admin role",
+                  "value": {
+                    "roleId": "role-unit-admin",
+                    "scopeEntityType": "Unit",
+                    "scopeEntityId": "unit-001"
+                  }
+                },
+                "superAdmin": {
+                  "summary": "Assign Super Admin role (no scope)",
+                  "value": {
+                    "roleId": "role-super-admin"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Role assigned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid request (role not found, scope mismatch, etc.)" },
+          "401": { "description": "Unauthenticated" },
+          "404": { "description": "User not found" },
+          "409": { "description": "User already has this role in the given scope" }
+        }
+      }
+    },
+    "/api/iam/users/{userId}/roles/{userRoleId}": {
+      "delete": {
+        "tags": ["IAM - User Roles"],
+        "summary": "Revoke role from user",
+        "description": "Revokes a previously assigned role from a user. Sets isActive to false and records who revoked it and when.",
+        "parameters": [
+          { "name": "userId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "User ID" },
+          { "name": "userRoleId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "UserRole assignment ID to revoke" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role revoked successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRoleResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "UserRole already revoked" },
+          "401": { "description": "Unauthenticated" },
+          "404": { "description": "UserRole not found" }
+        }
+      }
+    },
     "/api/iam/permissions/search": {
       "post": {
         "tags": ["IAM - Permissions"],
@@ -6083,6 +6177,41 @@
   },
   "components": {
     "schemas": {
+      "UserRoleResponse": {
+        "type": "object",
+        "description": "User role assignment response",
+        "properties": {
+          "userRoleId": { "type": "string", "format": "uuid", "description": "Unique ID of the user role assignment" },
+          "userId": { "type": "string", "format": "uuid", "description": "User ID" },
+          "roleId": { "type": "string", "format": "uuid", "description": "Role ID" },
+          "scopeEntityType": { 
+            "type": ["string", "null"], 
+            "enum": ["None", "Forum", "Area", "Unit", "Agent", null],
+            "description": "Type of entity this role is scoped to" 
+          },
+          "scopeEntityId": { 
+            "type": ["string", "null"], 
+            "format": "uuid",
+            "description": "ID of the forum/area/unit/agent entity" 
+          },
+          "isActive": { "type": "boolean", "description": "Whether the role assignment is active" },
+          "assignedAt": { "type": "string", "format": "date-time", "description": "When the role was assigned" },
+          "assignedBy": { "type": ["string", "null"], "format": "uuid", "description": "User ID who assigned the role" },
+          "revokedAt": { "type": ["string", "null"], "format": "date-time", "description": "When the role was revoked (null if still active)" },
+          "revokedBy": { "type": ["string", "null"], "format": "uuid", "description": "User ID who revoked the role (null if still active)" },
+          "role": {
+            "type": "object",
+            "nullable": true,
+            "description": "Role details (optional, included when eager loaded)",
+            "properties": {
+              "roleId": { "type": "string", "format": "uuid" },
+              "roleCode": { "type": "string" },
+              "roleName": { "type": "string" },
+              "scopeType": { "type": "string", "enum": ["None", "Forum", "Area", "Unit", "Agent"] }
+            }
+          }
+        }
+      },
       "SearchRequest": {
         "type": "object",
         "description": "Advanced search request with filters, sorting, and pagination. Supports multiple filter operators and eager loading of relations.",

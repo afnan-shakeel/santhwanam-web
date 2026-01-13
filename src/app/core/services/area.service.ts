@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { HttpService } from '../http/http.service';
-import { SearchRequest, SearchResponse } from '../../shared/models/search.model';
+import { SearchRequest, SearchResponse, Filter } from '../../shared/models/search.model';
 import { Area, CreateAreaRequest, UpdateAreaRequest } from '../../shared/models/area.model';
 
 @Injectable({
@@ -29,5 +30,24 @@ export class AreaService {
 
   deleteArea(areaId: string): Observable<void> {
     return this.http.delete<void>(`/organization-bodies/areas/${areaId}`);
+  }
+
+  /**
+   * Search areas for select/autocomplete components
+   */
+  searchAreasForSelect(
+    searchTerm: string = '',
+    additionalFilters: Filter[] = []
+  ): Observable<Area[]> {
+    const request: SearchRequest = {
+      searchTerm,
+      filters: additionalFilters,
+      page: 1,
+      pageSize: 50,
+      sortBy: 'areaName',
+      sortOrder: 'asc',
+    };
+
+    return this.searchAreas(request).pipe(map((response) => response.items));
   }
 }

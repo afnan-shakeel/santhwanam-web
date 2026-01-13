@@ -1,0 +1,343 @@
+<!-- Main Modal -->
+<app-modal
+  id="manage-roles-modal"
+  title="Manage Roles"
+  size="lg"
+  [open]="open"
+  (openChange)="onOpenChange($event)"
+>
+  <div class="p-6">
+    <!-- User Info Card -->
+    <div class="bg-gray-50 rounded-lg p-4 mb-6">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+          <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-base font-semibold text-gray-900">{{ getUserDisplayName() }}</h3>
+          <p class="text-sm text-gray-500">{{ user?.email }}</p>
+          @if (userWithRoles()?.createdAt) {
+            <p class="text-xs text-gray-400">User since: {{ formatDate(userWithRoles()!.createdAt) }}</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="flex items-center justify-center py-12">
+        <svg class="animate-spin h-8 w-8 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </div>
+    } @else {
+      <!-- Divider -->
+      <hr class="border-gray-200 mb-6">
+
+      <!-- Add Mode: Inline Form -->
+      @if (mode() === 'add') {
+        <div class="bg-white border border-gray-200 rounded-lg p-4 mb-6">
+          <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-4">Assign New Role</h4>
+          
+          <!-- Role Selection -->
+          <div class="mb-4">
+            <app-select
+              label="Role"
+              placeholder="Select a role..."
+              [options]="roleOptions()"
+              [required]="true"
+              (valueChange)="onRoleChange($event)"
+            />
+          </div>
+
+          <!-- Scope Entity Selection (Dynamic based on role scopeType) -->
+          @if (requiresScope()) {
+            <div class="mb-4">
+              @switch (scopeType()) {
+                @case ('Forum') {
+                  <app-search-select
+                    label="Forum"
+                    placeholder="Search forums..."
+                    [options]="forumOptions()"
+                    [loading]="forumsLoading()"
+                    [required]="true"
+                    (search)="loadForums($event)"
+                    (selectionChange)="onScopeEntityChange($event)"
+                  />
+                }
+                @case ('Area') {
+                  <app-search-select
+                    label="Area"
+                    placeholder="Search areas..."
+                    [options]="areaOptions()"
+                    [loading]="areasLoading()"
+                    [required]="true"
+                    (search)="loadAreas($event)"
+                    (selectionChange)="onScopeEntityChange($event)"
+                  />
+                }
+                @case ('Unit') {
+                  <app-search-select
+                    label="Unit"
+                    placeholder="Search units..."
+                    [options]="unitOptions()"
+                    [loading]="unitsLoading()"
+                    [required]="true"
+                    (search)="loadUnits($event)"
+                    (selectionChange)="onScopeEntityChange($event)"
+                  />
+                }
+                @case ('Agent') {
+                  <app-search-select
+                    label="Agent"
+                    placeholder="Search agents..."
+                    [options]="agentOptions()"
+                    [loading]="agentsLoading()"
+                    [required]="true"
+                    (search)="loadAgents($event)"
+                    (selectionChange)="onScopeEntityChange($event)"
+                  />
+                }
+                @case ('Member') {
+                  <app-search-select
+                    label="Member"
+                    placeholder="Search members..."
+                    [options]="memberOptions()"
+                    [loading]="membersLoading()"
+                    [required]="true"
+                    (search)="loadMembers($event)"
+                    (selectionChange)="onScopeEntityChange($event)"
+                  />
+                }
+              }
+            </div>
+          }
+
+          <!-- Role Info Hint -->
+          @if (selectedRole()) {
+            <div class="mb-4 flex items-start gap-2 p-3 bg-blue-50 rounded-lg">
+              <svg class="w-5 h-5 text-blue-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+              </svg>
+              <p class="text-sm text-blue-700">
+                @if (scopeType() === 'None') {
+                  This is a global role with system-wide access.
+                } @else if (scopeType() === 'Forum') {
+                  This role grants access to manage all areas and units within the selected forum.
+                } @else if (scopeType() === 'Area') {
+                  This role grants access to manage all units within the selected area.
+                } @else if (scopeType() === 'Unit') {
+                  This role grants access to manage the selected unit.
+                } @else if (scopeType() === 'Agent') {
+                  This role grants access scoped to the selected agent.
+                } @else if (scopeType() === 'Member') {
+                  This role grants access scoped to the selected member.
+                }
+              </p>
+            </div>
+          }
+
+          <!-- Form Error -->
+          @if (formError()) {
+            <div class="mb-4 flex items-center gap-2 p-3 bg-red-50 rounded-lg">
+              <svg class="w-5 h-5 text-red-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+              </svg>
+              <p class="text-sm text-red-700">{{ formError() }}</p>
+            </div>
+          }
+
+          <!-- Form Actions -->
+          <div class="flex justify-end gap-3">
+            <button
+              type="button"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              (click)="switchToViewMode()"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              [disabled]="!canAssign() || assigning()"
+              (click)="assignRole()"
+            >
+              @if (assigning()) {
+                <span class="flex items-center gap-2">
+                  <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Assigning...
+                </span>
+              } @else {
+                Assign Role
+              }
+            </button>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <hr class="border-gray-200 mb-6">
+      }
+
+      <!-- Current Roles Section -->
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wide">Current Roles</h4>
+          @if (mode() === 'view') {
+            <button
+              type="button"
+              class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-primary-600 bg-primary-50 rounded-md hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              (click)="switchToAddMode()"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              Add
+            </button>
+          }
+        </div>
+
+        <!-- Roles List -->
+        @if (currentRoles().length === 0) {
+          <div class="text-center py-8 bg-gray-50 rounded-lg">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+            </svg>
+            <p class="mt-2 text-sm font-medium text-gray-900">No roles assigned</p>
+            <p class="mt-1 text-sm text-gray-500">Click "+ Add" to assign a role</p>
+          </div>
+        } @else {
+          <div class="border border-gray-200 rounded-lg divide-y divide-gray-200">
+            @for (role of currentRoles(); track role.userRoleId) {
+              <div class="p-4 flex items-start justify-between gap-4">
+                <div class="flex items-start gap-3">
+                  <div class="p-2 bg-gray-100 rounded-lg">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h5 class="text-sm font-medium text-gray-900">{{ role.roleName }}</h5>
+                    @if (role.scopeEntityName) {
+                      <p class="text-sm text-gray-600">Scope: {{ role.scopeEntityName }}</p>
+                    } @else {
+                      <p class="text-sm text-gray-500 italic">Global scope</p>
+                    }
+                    <p class="text-xs text-gray-400 mt-1">
+                      Assigned: {{ formatDate(role.assignedAt) }}
+                      @if (role.assignedBy && role.assignedBy.name) {
+                        by {{ role.assignedBy.name }}
+                      }
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  (click)="confirmRevoke(role)"
+                >
+                  Revoke
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Footer -->
+  <div class="bg-gray-50 px-6 py-4 flex justify-end rounded-b-lg">
+    <button
+      type="button"
+      class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+      (click)="openChange.emit(false)"
+    >
+      Close
+    </button>
+  </div>
+</app-modal>
+
+<!-- Revoke Confirmation Modal -->
+<app-modal
+  id="revoke-role-modal"
+  title="Revoke Role"
+  size="sm"
+  [open]="showRevokeConfirm()"
+  (openChange)="cancelRevoke()"
+>
+  <div class="p-6">
+    <div class="flex items-start gap-4">
+      <div class="p-3 bg-red-100 rounded-full">
+        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-lg font-medium text-gray-900">Are you sure?</h3>
+        <p class="mt-2 text-sm text-gray-500">
+          Are you sure you want to revoke the following role?
+        </p>
+        
+        @if (roleToRevoke()) {
+          <div class="mt-4 bg-gray-50 rounded-lg p-3">
+            <dl class="space-y-1 text-sm">
+              <div class="flex gap-2">
+                <dt class="text-gray-500">Role:</dt>
+                <dd class="font-medium text-gray-900">{{ roleToRevoke()!.roleName }}</dd>
+              </div>
+              @if (roleToRevoke()!.scopeEntityName) {
+                <div class="flex gap-2">
+                  <dt class="text-gray-500">Scope:</dt>
+                  <dd class="font-medium text-gray-900">{{ roleToRevoke()!.scopeEntityName }}</dd>
+                </div>
+              }
+              <div class="flex gap-2">
+                <dt class="text-gray-500">User:</dt>
+                <dd class="font-medium text-gray-900">{{ getUserDisplayName() }}</dd>
+              </div>
+            </dl>
+          </div>
+        }
+
+        <p class="mt-4 text-sm text-gray-500">
+          This action will immediately remove the user's access associated with this role.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Revoke Modal Footer -->
+  <div class="bg-gray-50 px-6 py-4 flex justify-end gap-3 rounded-b-lg">
+    <button
+      type="button"
+      class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+      (click)="cancelRevoke()"
+    >
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+      [disabled]="revoking()"
+      (click)="revokeRole()"
+    >
+      @if (revoking()) {
+        <span class="flex items-center gap-2">
+          <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Revoking...
+        </span>
+      } @else {
+        Revoke Role
+      }
+    </button>
+  </div>
+</app-modal>

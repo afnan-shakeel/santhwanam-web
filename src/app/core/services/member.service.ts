@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
 import { HttpService } from '../http/http.service';
-import { SearchRequest, SearchResponse } from '../../shared/models/search.model';
+import { SearchRequest, SearchResponse, Filter } from '../../shared/models/search.model';
 import {
   Member,
   RegisterMemberRequest,
@@ -199,5 +199,30 @@ export class MemberService {
     request: UpdateMemberProfileRequest
   ): Observable<void> {
     return this.http.put<void>(`/members/${memberId}/profile`, request);
+  }
+
+  /**
+   * Search members for select/autocomplete components
+   */
+  searchMembersForSelect(
+    searchTerm: string = '',
+    additionalFilters: Filter[] = []
+  ): Observable<Member[]> {
+    const filters: Filter[] = [
+      { field: 'registrationStatus', operator: 'equals', value: 'Approved' },
+      ...additionalFilters
+    ];
+
+    const request: SearchRequest = {
+      searchTerm,
+      searchFields: ['firstName', 'lastName', 'memberCode', 'email'],
+      filters,
+      page: 1,
+      pageSize: 50,
+      sortBy: 'firstName',
+      sortOrder: 'asc',
+    };
+
+    return this.searchMembers(request).pipe(map((response) => response.items));
   }
 }

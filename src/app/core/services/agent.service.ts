@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { HttpService, ApiRequestOptions } from '../http/http.service';
-import { SearchRequest, SearchResponse } from '../../shared/models/search.model';
+import { SearchRequest, SearchResponse, Filter } from '../../shared/models/search.model';
 import { Agent, RegisterAgentRequest, UpdateAgentRequest, UpdateDraftRequest } from '../../shared/models/agent.model';
 import {
   AgentProfile,
@@ -122,5 +123,30 @@ export class AgentService {
    */
   getAgentHierarchy(agentId: string): Observable<AgentHierarchy> {
     return this.http.get<AgentHierarchy>(`/agents/${agentId}/hierarchy`);
+  }
+
+  /**
+   * Search agents for select/autocomplete components
+   */
+  searchAgentsForSelect(
+    searchTerm: string = '',
+    additionalFilters: Filter[] = []
+  ): Observable<Agent[]> {
+    const filters: Filter[] = [
+      // { field: 'isActive', operator: 'equals', value: true },
+      ...additionalFilters
+    ];
+
+    const request: SearchRequest = {
+      searchTerm,
+      searchFields: ['firstName', 'lastName', 'agentCode', 'email'],
+      filters,
+      page: 1,
+      pageSize: 50,
+      sortBy: 'firstName',
+      sortOrder: 'asc',
+    };
+
+    return this.searchAgents(request).pipe(map((response) => response.items));
   }
 }
