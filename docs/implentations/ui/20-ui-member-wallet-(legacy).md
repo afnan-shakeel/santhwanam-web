@@ -1,4 +1,5 @@
-# Member Wallet UI Design
+# !! This doc is considered as not used, with updated version of ui in file 20-ui-wallet-v2.md
+# Member Wallet UI Design 
 
 ---
 

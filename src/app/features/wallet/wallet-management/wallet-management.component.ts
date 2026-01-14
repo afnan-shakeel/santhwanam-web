@@ -200,6 +200,18 @@ export class WalletManagementComponent implements OnInit {
     this.router.navigate(['/members', memberId, 'wallet']);
   }
 
+  viewAdminWallet(walletId: string): void {
+    this.router.navigate(['/admin/wallets', walletId]);
+  }
+
+  reviewApproval(approvalRequestId: string | null): void {
+    if (approvalRequestId) {
+      this.router.navigate(['/approvals/my-approvals', approvalRequestId]);
+    } else {
+      this.toastService.warning('No approval request found for this deposit');
+    }
+  }
+
   getStatusBadgeClass(status: DepositRequestStatus): string {
     switch (status) {
       case 'Draft':

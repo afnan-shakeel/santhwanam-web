@@ -1,0 +1,207 @@
+<!-- Pending Deposits Page (Admin) -->
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <!-- Header -->
+  <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
+
+      <div class="mt-4 flex items-center gap-3">
+        <button (click)="goBack()" 
+          class="p-2 -ml-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <div class="p-3 bg-gradient-to-br from-yellow-500 to-yellow-700 rounded-xl shadow-lg">
+          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Pending Deposit Approvals</h1>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Review and approve deposit requests from agents</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Summary -->
+    <div class="mb-6 flex flex-wrap items-center gap-4">
+      <div class="px-4 py-2 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded-lg text-sm font-medium">
+        {{ total() }} deposits pending
+      </div>
+      <div class="px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-lg text-sm font-medium">
+        Total: {{ formatCurrency(totalAmount()) }}
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 mb-6">
+      <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Filters</h3>
+      <form [formGroup]="filterForm" (ngSubmit)="onApplyFilters()" class="flex flex-wrap gap-4 items-end">
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Agent</label>
+          <select formControlName="agentId"
+            class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
+                   bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                   focus:ring-2 focus:ring-primary focus:border-primary">
+            <option value="">All Agents</option>
+            <!-- Note: Agent dropdown would need agent list from API -->
+          </select>
+        </div>
+
+        <div class="w-32">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount Min</label>
+          <input type="number" formControlName="amountMin" placeholder="₹0"
+            class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
+                   bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                   focus:ring-2 focus:ring-primary focus:border-primary">
+        </div>
+
+        <div class="w-32">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount Max</label>
+          <input type="number" formControlName="amountMax" placeholder="Any"
+            class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
+                   bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                   focus:ring-2 focus:ring-primary focus:border-primary">
+        </div>
+
+        <div class="flex gap-2">
+          <button type="submit"
+            class="px-4 py-2.5 bg-primary hover:bg-primary-dark text-white font-medium rounded-lg transition-colors">
+            Apply
+          </button>
+          <button type="button" (click)="onClearFilters()"
+            class="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+            Clear
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Sort -->
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <label class="text-sm text-gray-600 dark:text-gray-400">Sort by:</label>
+        <select [value]="sortBy()" (change)="onSortChange($event)"
+          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm
+                 focus:ring-2 focus:ring-primary focus:border-primary">
+          <option value="oldest">Oldest First</option>
+          <option value="newest">Newest First</option>
+          <option value="amount-high">Amount (High to Low)</option>
+          <option value="amount-low">Amount (Low to High)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Deposits List -->
+    @if (loading()) {
+      <div class="space-y-4">
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 animate-pulse">
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <div class="h-5 bg-gray-200 dark:bg-gray-700 rounded w-40 mb-3"></div>
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-64 mb-2"></div>
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-48"></div>
+              </div>
+              <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (sortedDeposits().length === 0) {
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
+        <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No pending deposits</h3>
+        <p class="text-gray-500 dark:text-gray-400">All deposit requests have been processed.</p>
+      </div>
+    } @else {
+      <div class="space-y-4">
+        @for (deposit of sortedDeposits(); track deposit.depositRequestId) {
+          <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:border-primary/30 hover:shadow-md transition-all">
+            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+              <!-- Deposit Info -->
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+                    <span class="text-lg">💰</span>
+                  </div>
+                  <div>
+                    <span class="px-2.5 py-0.5 text-xs font-semibold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 rounded-full">
+                      Pending
+                    </span>
+                  </div>
+                  <span class="text-2xl font-bold text-green-600 dark:text-green-400">
+                    {{ formatCurrency(deposit.amount) }}
+                  </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span class="text-gray-500 dark:text-gray-400">Member:</span>
+                    <span class="ml-2 font-medium text-gray-900 dark:text-white">
+                      {{ deposit.member?.firstName }} {{ deposit.member?.lastName }}
+                    </span>
+                    <span class="text-gray-500 dark:text-gray-400 ml-1">({{ deposit.member?.memberCode }})</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-500 dark:text-gray-400">Agent:</span>
+                    <span class="ml-2 font-medium text-gray-900 dark:text-white">
+                      {{ deposit.collectedByName || 'Unknown' }}
+                    </span>
+                  </div>
+                  <div>
+                    <span class="text-gray-500 dark:text-gray-400">Collected:</span>
+                    <span class="ml-2 text-gray-900 dark:text-white">
+                      {{ formatDate(deposit.collectionDate) }}
+                    </span>
+                    <span class="text-gray-500 dark:text-gray-400 ml-1">({{ getTimeAgo(deposit.collectionDate) }})</span>
+                  </div>
+                  @if (deposit.notes) {
+                    <div>
+                      <span class="text-gray-500 dark:text-gray-400">Notes:</span>
+                      <span class="ml-2 text-gray-900 dark:text-white italic">{{ deposit.notes }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex items-center gap-3 lg:flex-col lg:items-end">
+                <button (click)="reviewApproval(deposit.approvalRequestId)"
+                  class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark rounded-lg transition-colors flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  Review
+                </button>
+                <button (click)="viewMemberWallet(deposit.memberId)"
+                  class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  View Wallet
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="mt-8 flex justify-center">
+          <app-pagination
+            [currentPage]="page()"
+            [totalPages]="totalPages()"
+            (pageChange)="onPageChange($event)">
+          </app-pagination>
+        </div>
+      }
+    }
+  </div>
+</div>

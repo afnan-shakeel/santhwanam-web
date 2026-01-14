@@ -1,0 +1,319 @@
+<!-- Wallet Dashboard (Admin) -->
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <!-- Header -->
+  <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
+
+      <div class="mt-4 flex items-center gap-3">
+        <div class="p-3 bg-gradient-to-br from-primary-600 to-primary-800 rounded-xl shadow-lg">
+          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Wallet Management</h1>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Overview of member wallets and deposit requests</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Overview Statistics Cards -->
+    <div class="mb-8">
+      <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Overview</h2>
+      
+      @if (statsLoading()) {
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          @for (i of [1,2,3,4]; track i) {
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 animate-pulse">
+              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 mb-2"></div>
+              <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+            </div>
+          }
+        </div>
+      } @else if (statistics(); as stats) {
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Total Wallets -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
+            <div class="flex items-center gap-3">
+              <div class="p-2.5 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Wallets</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.totalWallets }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Balance -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
+            <div class="flex items-center gap-3">
+              <div class="p-2.5 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Balance</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatCurrency(stats.totalBalance) }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pending Deposits -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow cursor-pointer"
+               (click)="navigateToPendingDeposits()">
+            <div class="flex items-center gap-3">
+              <div class="p-2.5 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pending Deposits</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ pendingTotal() }}</p>
+                <p class="text-xs text-yellow-600 dark:text-yellow-400">{{ formatCurrency(pendingTotalAmount()) }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Low Balance -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow cursor-pointer"
+               (click)="navigateToLowBalance()">
+            <div class="flex items-center gap-3">
+              <div class="p-2.5 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Low Balance</p>
+                <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ stats.lowBalanceCount }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">⚠️ Need top-up</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mb-8">
+      <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Quick Actions</h2>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <button (click)="navigateToPendingDeposits()"
+          class="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary hover:shadow-md transition-all">
+          <div class="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+            <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div class="text-left">
+            <p class="font-medium text-gray-900 dark:text-white">Pending Deposits</p>
+            <p class="text-sm text-yellow-600 dark:text-yellow-400">({{ pendingTotal() }})</p>
+          </div>
+        </button>
+
+        <button (click)="navigateToLowBalance()"
+          class="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary hover:shadow-md transition-all">
+          <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+            <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div class="text-left">
+            <p class="font-medium text-gray-900 dark:text-white">Low Balance</p>
+            <p class="text-sm text-red-600 dark:text-red-400">({{ lowBalanceTotal() }})</p>
+          </div>
+        </button>
+
+        <button (click)="navigateToAllWallets()"
+          class="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary hover:shadow-md transition-all">
+          <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+          </div>
+          <div class="text-left">
+            <p class="font-medium text-gray-900 dark:text-white">All Wallets</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Browse</p>
+          </div>
+        </button>
+
+        <button (click)="navigateToReports()"
+          class="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary hover:shadow-md transition-all">
+          <div class="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+            <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div class="text-left">
+            <p class="font-medium text-gray-900 dark:text-white">Reports</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Coming soon</p>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Two Column Layout for Previews -->
+    <div class="grid lg:grid-cols-2 gap-8">
+      <!-- Pending Deposit Approvals -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 class="font-semibold text-gray-900 dark:text-white">Pending Deposit Approvals</h3>
+          <button (click)="navigateToPendingDeposits()"
+            class="text-sm text-primary hover:text-primary-dark font-medium flex items-center gap-1">
+            View All
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="p-5">
+          @if (pendingLoading()) {
+            <div class="space-y-4">
+              @for (i of [1,2,3]; track i) {
+                <div class="animate-pulse flex items-center justify-between">
+                  <div class="flex-1">
+                    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-2"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                  </div>
+                  <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                </div>
+              }
+            </div>
+          } @else if (pendingDeposits().length === 0) {
+            <div class="text-center py-8">
+              <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p class="text-gray-500 dark:text-gray-400">No pending deposits</p>
+            </div>
+          } @else {
+            <div class="space-y-3">
+              @for (deposit of pendingDeposits(); track deposit.depositRequestId) {
+                <div class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-sm">
+                      💰
+                    </div>
+                    <div>
+                      <p class="font-medium text-gray-900 dark:text-white text-sm">
+                        {{ deposit.member?.memberCode || 'Unknown' }} • {{ deposit.member?.firstName }} {{ deposit.member?.lastName }}
+                      </p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">
+                        Agent: {{ deposit.collectedByName || 'Unknown' }} • {{ getTimeAgo(deposit.createdAt) }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm font-bold text-green-600 dark:text-green-400">{{ formatCurrency(deposit.amount) }}</span>
+                    <button (click)="reviewApproval(deposit.approvalRequestId)"
+                      class="px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary-dark rounded-lg transition-colors">
+                      Review
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Low Balance Alerts -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 class="font-semibold text-gray-900 dark:text-white">Low Balance Alerts</h3>
+          <button (click)="navigateToLowBalance()"
+            class="text-sm text-primary hover:text-primary-dark font-medium flex items-center gap-1">
+            View All
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="p-5">
+          @if (lowBalanceLoading()) {
+            <div class="space-y-4">
+              @for (i of [1,2,3]; track i) {
+                <div class="animate-pulse flex items-center justify-between">
+                  <div class="flex-1">
+                    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-2"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                  </div>
+                  <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                </div>
+              }
+            </div>
+          } @else if (lowBalanceWallets().length === 0) {
+            <div class="text-center py-8">
+              <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p class="text-gray-500 dark:text-gray-400">No low balance alerts</p>
+            </div>
+          } @else {
+            <div class="space-y-3">
+              @for (wallet of lowBalanceWallets(); track wallet.walletId) {
+                <div class="flex items-center justify-between p-3 rounded-lg border border-yellow-200 dark:border-yellow-800/50 bg-yellow-50 dark:bg-yellow-900/10 hover:bg-yellow-100 dark:hover:bg-yellow-900/20 transition-colors">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-sm">
+                      ⚠️
+                    </div>
+                    <div>
+                      <p class="font-medium text-gray-900 dark:text-white text-sm">
+                        {{ wallet.member.memberCode }} • {{ wallet.member.firstName }} {{ wallet.member.lastName }}
+                      </p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">
+                        Balance: <span class="font-semibold text-red-600 dark:text-red-400">{{ formatCurrency(wallet.currentBalance) }}</span>
+                      </p>
+                    </div>
+                  </div>
+                  <button (click)="viewWallet(wallet.walletId)"
+                    class="px-3 py-1.5 text-xs font-medium text-primary border border-primary rounded-lg hover:bg-primary/5 transition-colors">
+                    View
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity Placeholder -->
+    <div class="mt-8 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
+      </div>
+      <div class="p-8 text-center">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 mb-4">
+          <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Activity Feed Coming Soon</h4>
+        <p class="text-gray-500 dark:text-gray-400 text-sm max-w-md mx-auto">
+          This section will display real-time wallet activity including deposit approvals, auto-debits, and adjustments.
+        </p>
+        <span class="inline-block mt-4 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+          🚧 Feature in Development
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

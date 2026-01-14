@@ -181,13 +181,26 @@
                         }
                       </div>
                     </div>
-                    <div class="text-right">
+                    <div class="text-right flex flex-col items-end gap-2">
                       <p class="text-xl font-bold text-green-600 dark:text-green-400">
                         {{ formatCurrency(deposit.amount) }}
                       </p>
                       <span class="px-2.5 py-1 text-xs font-medium rounded-full" [class]="getStatusBadgeClass(deposit.requestStatus)">
                         {{ deposit.requestStatus === 'PendingApproval' ? 'Pending' : deposit.requestStatus }}
                       </span>
+                      <!-- Action Buttons -->
+                      <div class="flex items-center gap-2 mt-2">
+                        @if (deposit.approvalRequestId) {
+                          <button (click)="reviewApproval(deposit.approvalRequestId)"
+                            class="px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary-dark rounded-lg transition-colors">
+                            Review
+                          </button>
+                        }
+                        <button (click)="viewMemberWallet(deposit.memberId)"
+                          class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
+                          Wallet
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -276,7 +289,7 @@
                         </span>
                       </td>
                       <td class="px-4 py-4 text-right">
-                        <button (click)="viewMemberWallet(wallet.memberId)"
+                        <button (click)="viewAdminWallet(wallet.walletId)"
                           class="text-sm text-primary hover:text-primary-dark font-medium">
                           View
                         </button>
@@ -339,7 +352,7 @@
                       </div>
                     </div>
                     <div class="flex items-center gap-3">
-                      <button (click)="viewMemberWallet(wallet.memberId)"
+                      <button (click)="viewAdminWallet(wallet.walletId)"
                         class="px-4 py-2 text-sm font-medium text-primary hover:text-primary-dark border border-primary rounded-lg hover:bg-primary/5 transition-colors">
                         View Details
                       </button>

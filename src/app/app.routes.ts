@@ -188,32 +188,49 @@ export const routes: Routes = [
           }
         ]
       },
+      // Admin Wallet Routes
       {
-        path: 'wallet/admin',
-        loadComponent: () => import('./features/wallet/wallet-management/wallet-management.component').then((m) => m.WalletManagementComponent)
-      },
-      // Admin Wallet Detail Routes (viewing individual wallets as admin)
-      {
-        path: 'admin/wallets/:walletId',
-        loadComponent: () => import('./features/wallet/member-wallet-v2/member-wallet-v2.component').then((m) => m.MemberWalletV2Component),
-        data: { viewMode: 'admin' },
+        path: 'admin/wallets',
         children: [
           {
             path: '',
-            redirectTo: 'overview',
-            pathMatch: 'full'
+            loadComponent: () => import('./features/wallet/admin/wallet-dashboard/wallet-dashboard.component').then((m) => m.WalletDashboardComponent)
           },
           {
-            path: 'overview',
-            loadComponent: () => import('./features/wallet/my-wallet/wallet-overview/wallet-overview.component').then((m) => m.WalletOverviewComponent)
+            path: 'pending-deposits',
+            loadComponent: () => import('./features/wallet/admin/pending-deposits/pending-deposits.component').then((m) => m.PendingDepositsComponent)
           },
           {
-            path: 'transactions',
-            loadComponent: () => import('./features/wallet/wallet-transactions/wallet-transactions.component').then((m) => m.WalletTransactionsComponent)
+            path: 'list',
+            loadComponent: () => import('./features/wallet/admin/all-wallets/all-wallets.component').then((m) => m.AllWalletsComponent)
           },
           {
-            path: 'deposits',
-            loadComponent: () => import('./features/wallet/my-wallet/wallet-deposits/wallet-deposits.component').then((m) => m.WalletDepositsComponent)
+            path: 'low-balance',
+            loadComponent: () => import('./features/wallet/admin/low-balance-report/low-balance-report.component').then((m) => m.LowBalanceReportComponent)
+          },
+          {
+            path: ':walletId',
+            loadComponent: () => import('./features/wallet/member-wallet-v2/member-wallet-v2.component').then((m) => m.MemberWalletV2Component),
+            data: { viewMode: 'admin' },
+            children: [
+              {
+                path: '',
+                redirectTo: 'overview',
+                pathMatch: 'full'
+              },
+              {
+                path: 'overview',
+                loadComponent: () => import('./features/wallet/my-wallet/wallet-overview/wallet-overview.component').then((m) => m.WalletOverviewComponent)
+              },
+              {
+                path: 'transactions',
+                loadComponent: () => import('./features/wallet/wallet-transactions/wallet-transactions.component').then((m) => m.WalletTransactionsComponent)
+              },
+              {
+                path: 'deposits',
+                loadComponent: () => import('./features/wallet/my-wallet/wallet-deposits/wallet-deposits.component').then((m) => m.WalletDepositsComponent)
+              }
+            ]
           }
         ]
       },
