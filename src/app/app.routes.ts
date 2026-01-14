@@ -93,6 +93,35 @@ export const routes: Routes = [
         loadComponent: () => import('./features/units/units.component').then((m) => m.UnitsComponent)
       }
       ,
+      // Agent's own profile route
+      {
+        path: 'agent/profile',
+        loadComponent: () => import('./features/agents/agent-profile/pages/my-agent-profile/my-agent-profile.component').then((m) => m.MyAgentProfileComponent),
+        children: [
+          {
+            path: '',
+            redirectTo: 'overview',
+            pathMatch: 'full'
+          },
+          {
+            path: 'overview',
+            loadComponent: () => import('./features/agents/agent-profile/tabs/agent-overview-tab/agent-overview-tab.component').then((m) => m.AgentOverviewTabComponent)
+          },
+          {
+            path: 'members',
+            loadComponent: () => import('./features/agents/agent-profile/tabs/agent-members-tab/agent-members-tab.component').then((m) => m.AgentMembersTabComponent)
+          },
+          {
+            path: 'collections',
+            loadComponent: () => import('./features/agents/agent-profile/tabs/agent-collections-tab/agent-collections-tab.component').then((m) => m.AgentCollectionsTabComponent)
+          },
+          {
+            path: 'performance',
+            loadComponent: () => import('./features/agents/agent-profile/tabs/agent-performance-tab/agent-performance-tab.component').then((m) => m.AgentPerformanceTabComponent)
+          }
+        ]
+      },
+      // Agent listing and management routes
       {
         path: 'agents',
         children: [
@@ -100,13 +129,37 @@ export const routes: Routes = [
             path: '',
             loadComponent: () => import('./features/agents/agents.component').then((m) => m.AgentsComponent)
           },
+          // Admin viewing agent profile
           {
-            path: 'my-profile',
-            loadComponent: () => import('./features/agents/agent-profile/agent-profile.component').then((m) => m.AgentProfileComponent)
-          },
-          {
-            path: ':agentId/profile',
-            loadComponent: () => import('./features/agents/agent-profile/agent-profile.component').then((m) => m.AgentProfileComponent)
+            path: ':agentId',
+            loadComponent: () => import('./features/agents/agent-profile/pages/admin-agent-profile/admin-agent-profile.component').then((m) => m.AdminAgentProfileComponent),
+            children: [
+              {
+                path: '',
+                redirectTo: 'overview',
+                pathMatch: 'full'
+              },
+              {
+                path: 'overview',
+                loadComponent: () => import('./features/agents/agent-profile/tabs/agent-overview-tab/agent-overview-tab.component').then((m) => m.AgentOverviewTabComponent)
+              },
+              {
+                path: 'members',
+                loadComponent: () => import('./features/agents/agent-profile/tabs/agent-members-tab/agent-members-tab.component').then((m) => m.AgentMembersTabComponent)
+              },
+              {
+                path: 'collections',
+                loadComponent: () => import('./features/agents/agent-profile/tabs/agent-collections-tab/agent-collections-tab.component').then((m) => m.AgentCollectionsTabComponent)
+              },
+              {
+                path: 'performance',
+                loadComponent: () => import('./features/agents/agent-profile/tabs/agent-performance-tab/agent-performance-tab.component').then((m) => m.AgentPerformanceTabComponent)
+              },
+              {
+                path: 'activity',
+                loadComponent: () => import('./features/agents/agent-profile/tabs/agent-activity-tab/agent-activity-tab.component').then((m) => m.AgentActivityTabComponent)
+              }
+            ]
           },
           // Agent Member Wallet Routes (viewing member wallets as agent)
           {

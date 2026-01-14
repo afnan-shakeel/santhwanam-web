@@ -1,0 +1,171 @@
+<div class="space-y-6">
+  <!-- Period Filter -->
+  <div class="flex flex-wrap gap-4 items-center">
+    <div>
+      <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">Period:</label>
+      <select
+        [value]="period()"
+        (change)="onPeriodChange($event)"
+        class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
+        <option value="thisMonth">This Month</option>
+        <option value="lastMonth">Last Month</option>
+        <option value="thisYear">This Year</option>
+      </select>
+    </div>
+    @if (viewMode() === 'admin') {
+      <div>
+        <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">Compare with:</label>
+        <select
+          [value]="compareWith()"
+          (change)="onCompareWithChange($event)"
+          class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
+          <option value="unitAverage">Unit Average</option>
+          <option value="areaAverage">Area Average</option>
+          <option value="forumAverage">Forum Average</option>
+        </select>
+      </div>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+    </div>
+  } @else if (performance()) {
+    <!-- Member Acquisition -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Member Acquisition</h3>
+      
+      <div class="space-y-4">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm text-gray-600 dark:text-gray-400">New Members This Month: {{ performance()?.memberAcquisition?.newMembersThisMonth }}</span>
+            <span class="text-sm text-gray-600 dark:text-gray-400">Monthly Target: 10</span>
+          </div>
+          <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+            <div
+              class="bg-primary-600 h-3 rounded-full transition-all duration-300"
+              [style.width.%]="getProgressPercentage()">
+            </div>
+          </div>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ getProgressPercentage() | number:'1.0-0' }}% of target</p>
+        </div>
+
+        <!-- Monthly Trend Chart -->
+        <div>
+          <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">📊 Monthly Trend</h4>
+          <div class="flex items-end gap-2 h-32">
+            @for (item of performance()?.memberAcquisition?.monthlyTrend; track item.month) {
+              <div class="flex-1 flex flex-col items-center">
+                <div
+                  class="w-full bg-primary-500 dark:bg-primary-600 rounded-t transition-all duration-300"
+                  [style.height.%]="getBarHeight(item.count)">
+                </div>
+                <span class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ item.month }}</span>
+                <span class="text-xs font-medium text-gray-900 dark:text-white">{{ item.count }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ranking (Self view) -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Ranking</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+            <span class="text-lg font-bold text-primary-600 dark:text-primary-400">#{{ ranking().unitRank }}</span>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">Your Unit Rank</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">of {{ ranking().unitTotal }} agents</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+            <span class="text-lg font-bold text-purple-600 dark:text-purple-400">#{{ ranking().areaRank }}</span>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">Your Area Rank</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">of {{ ranking().areaTotal }} agents</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Member Retention -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Member Retention</h3>
+      
+      <div class="space-y-4">
+        <div class="flex items-center gap-4">
+          <div class="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+            <span class="text-2xl font-bold text-green-600 dark:text-green-400">{{ performance()?.retention?.retentionRate }}%</span>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">Retention Rate</p>
+            <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <p>Active: {{ performance()?.retention?.activeMembers }} members</p>
+              <p>Suspended: {{ performance()?.retention?.suspendedMembers }} members</p>
+              <p>Frozen: {{ performance()?.retention?.frozenMembers }} members</p>
+              <p>Closed: {{ performance()?.retention?.closedMembers }} members</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Retention Trend Chart -->
+        @if (performance()?.retention?.retentionTrend?.length) {
+          <div>
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">📊 Retention Trend (Last 6 Months)</h4>
+            <div class="flex items-end gap-2 h-32">
+              @for (item of performance()?.retention?.retentionTrend; track item.month) {
+                <div class="flex-1 flex flex-col items-center">
+                  <div
+                    class="w-full bg-green-500 dark:bg-green-600 rounded-t transition-all duration-300"
+                    [style.height.%]="getRetentionBarHeight(item.rate)">
+                  </div>
+                  <span class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ item.month }}</span>
+                  <span class="text-xs font-medium text-gray-900 dark:text-white">{{ item.rate }}%</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Achievements -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Achievements</h3>
+      <div class="space-y-3">
+        @for (achievement of achievements(); track achievement.title) {
+          <div class="flex items-center gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+            <span class="text-2xl">{{ achievement.icon }}</span>
+            <div>
+              <p class="text-sm font-medium text-gray-900 dark:text-white">{{ achievement.title }}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">{{ achievement.date }}</p>
+            </div>
+          </div>
+        } @empty {
+          <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">No achievements yet. Keep up the great work!</p>
+        }
+      </div>
+    </div>
+
+    <!-- Export Button (Admin only) -->
+    @if (viewMode() === 'admin') {
+      <div class="flex justify-end">
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+          </svg>
+          Export Report
+        </button>
+      </div>
+    }
+  }
+</div>
