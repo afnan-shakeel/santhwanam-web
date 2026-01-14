@@ -107,6 +107,31 @@ export const routes: Routes = [
           {
             path: ':agentId/profile',
             loadComponent: () => import('./features/agents/agent-profile/agent-profile.component').then((m) => m.AgentProfileComponent)
+          },
+          // Agent Member Wallet Routes (viewing member wallets as agent)
+          {
+            path: 'members/:memberId/wallet',
+            loadComponent: () => import('./features/wallet/member-wallet-v2/member-wallet-v2.component').then((m) => m.MemberWalletV2Component),
+            data: { viewMode: 'agent' },
+            children: [
+              {
+                path: '',
+                redirectTo: 'overview',
+                pathMatch: 'full'
+              },
+              {
+                path: 'overview',
+                loadComponent: () => import('./features/wallet/my-wallet/wallet-overview/wallet-overview.component').then((m) => m.WalletOverviewComponent)
+              },
+              {
+                path: 'transactions',
+                loadComponent: () => import('./features/wallet/wallet-transactions/wallet-transactions.component').then((m) => m.WalletTransactionsComponent)
+              },
+              {
+                path: 'deposits',
+                loadComponent: () => import('./features/wallet/my-wallet/wallet-deposits/wallet-deposits.component').then((m) => m.WalletDepositsComponent)
+              }
+            ]
           }
         ]
       },
@@ -142,20 +167,55 @@ export const routes: Routes = [
       // Wallet routes
       {
         path: 'my-wallet',
+        loadComponent: () => import('./features/wallet/my-wallet/my-wallet.component').then((m) => m.MyWalletComponent),
         children: [
           {
             path: '',
-            loadComponent: () => import('./features/wallet/my-wallet/my-wallet.component').then((m) => m.MyWalletComponent)
+            redirectTo: 'overview',
+            pathMatch: 'full'
+          },
+          {
+            path: 'overview',
+            loadComponent: () => import('./features/wallet/my-wallet/wallet-overview/wallet-overview.component').then((m) => m.WalletOverviewComponent)
           },
           {
             path: 'transactions',
             loadComponent: () => import('./features/wallet/wallet-transactions/wallet-transactions.component').then((m) => m.WalletTransactionsComponent)
+          },
+          {
+            path: 'deposits',
+            loadComponent: () => import('./features/wallet/my-wallet/wallet-deposits/wallet-deposits.component').then((m) => m.WalletDepositsComponent)
           }
         ]
       },
       {
         path: 'wallet/admin',
         loadComponent: () => import('./features/wallet/wallet-management/wallet-management.component').then((m) => m.WalletManagementComponent)
+      },
+      // Admin Wallet Detail Routes (viewing individual wallets as admin)
+      {
+        path: 'admin/wallets/:walletId',
+        loadComponent: () => import('./features/wallet/member-wallet-v2/member-wallet-v2.component').then((m) => m.MemberWalletV2Component),
+        data: { viewMode: 'admin' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'overview',
+            pathMatch: 'full'
+          },
+          {
+            path: 'overview',
+            loadComponent: () => import('./features/wallet/my-wallet/wallet-overview/wallet-overview.component').then((m) => m.WalletOverviewComponent)
+          },
+          {
+            path: 'transactions',
+            loadComponent: () => import('./features/wallet/wallet-transactions/wallet-transactions.component').then((m) => m.WalletTransactionsComponent)
+          },
+          {
+            path: 'deposits',
+            loadComponent: () => import('./features/wallet/my-wallet/wallet-deposits/wallet-deposits.component').then((m) => m.WalletDepositsComponent)
+          }
+        ]
       },
       // Contributions routes
       { 

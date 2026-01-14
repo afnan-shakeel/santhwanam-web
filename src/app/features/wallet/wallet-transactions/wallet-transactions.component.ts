@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgTemplateOutlet } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
@@ -7,6 +7,7 @@ import { BreadcrumbsComponent, BreadcrumbItem } from '../../../shared/components
 import { SelectComponent } from '../../../shared/components/select/select.component';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 import { WalletService } from '../../../core/services/wallet.service';
+import { WalletStore } from '../../../core/state/wallet.store';
 import {
   WalletTransaction,
   WalletSummary,
@@ -21,6 +22,7 @@ import { SelectOption } from '../../../shared/components/select/select.component
   standalone: true,
   imports: [
     CommonModule,
+    NgTemplateOutlet,
     ReactiveFormsModule,
     BreadcrumbsComponent,
     SelectComponent,
@@ -31,6 +33,7 @@ import { SelectOption } from '../../../shared/components/select/select.component
 })
 export class WalletTransactionsComponent implements OnInit {
   private walletService = inject(WalletService);
+  private walletStore = inject(WalletStore);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
@@ -39,7 +42,6 @@ export class WalletTransactionsComponent implements OnInit {
   Math = Math;
 
   // State
-  wallet = signal<WalletSummary | null>(null);
   transactions = signal<WalletTransaction[]>([]);
   loading = signal(true);
   total = signal(0);
@@ -71,86 +73,93 @@ export class WalletTransactionsComponent implements OnInit {
     { value: 'Reversed', label: 'Reversed' }
   ];
 
-  // Breadcrumbs
+  // Breadcrumbs (only used in standalone mode)
   breadcrumbs: BreadcrumbItem[] = [
-    { label: 'My Wallet', route: '/my-wallet' },
+    { label: 'Members', route: '/members' },
+    { label: 'Wallet', route: '' },
     { label: 'Transactions', current: true }
   ];
 
   // Computed
   totalPages = computed(() => Math.ceil(this.total() / this.pageSize()));
 
-  // Check if viewing own wallet or member wallet
+  // Check if viewing own wallet (child route) or member wallet (standalone)
   memberId = signal<string | null>(null);
-  isOwnWallet = computed(() => !this.memberId());
+  isChildRoute = signal(false);
+
+  // Get wallet from store when used as child route
+  wallet = computed(() => this.isChildRoute() ? this.walletStore.wallet() : null);
+  currentBalance = computed(() => this.wallet()?.currentBalance ?? 0);
 
   ngOnInit(): void {
     // Check if we have a memberId in the route (admin viewing member wallet)
     const routeMemberId = this.route.snapshot.paramMap.get('memberId');
     if (routeMemberId) {
+      // Standalone mode - admin/agent viewing member wallet
       this.memberId.set(routeMemberId);
+      this.isChildRoute.set(false);
       this.breadcrumbs = [
         { label: 'Members', route: '/members' },
         { label: 'Wallet', route: `/members/${routeMemberId}/wallet` },
         { label: 'Transactions', current: true }
       ];
+      this.loadTransactions();
+    } else {
+      // Child route mode - member viewing own wallet
+      this.isChildRoute.set(true);
+      const storeWallet = this.walletStore.wallet();
+      if (storeWallet?.memberId) {
+        this.memberId.set(storeWallet.memberId);
+        this.loadTransactions();
+      } else {
+        // Fallback: load wallet to get memberId
+        this.walletService.getMyWallet().subscribe({
+          next: (wallet) => {
+            this.memberId.set(wallet.memberId);
+            this.loadTransactions();
+          },
+          error: (err) => {
+            console.error('Failed to load wallet:', err);
+            this.loading.set(false);
+          }
+        });
+      }
     }
-
-    this.loadWallet();
-    this.loadTransactions();
-  }
-
-  loadWallet(): void {
-    const memberId = this.memberId();
-    const request$ = memberId
-      ? this.walletService.getWalletSummary(memberId)
-      : this.walletService.getMyWallet();
-
-    request$.subscribe({
-      next: (data) => {
-        this.wallet.set(data);
-        // Store memberId from wallet if viewing own wallet
-        if (!memberId && data.memberId) {
-          this.memberId.set(data.memberId);
-        }
-      },
-      error: (err) => console.error('Failed to load wallet:', err)
-    });
   }
 
   loadTransactions(): void {
-    this.loading.set(true);
-
     const memberId = this.memberId();
-    if (!memberId && !this.wallet()) {
-      // Need to load wallet first to get memberId
-      this.walletService.getMyWallet().subscribe({
-        next: (wallet) => {
-          this.wallet.set(wallet);
-          this.memberId.set(wallet.memberId);
-          this.fetchTransactions(wallet.memberId);
-        },
-        error: (err) => {
-          console.error('Failed to load wallet:', err);
-          this.loading.set(false);
-        }
-      });
+    if (!memberId) {
+      this.loading.set(false);
       return;
     }
 
-    this.fetchTransactions(memberId || this.wallet()!.memberId);
+    this.loading.set(true);
+    this.fetchTransactions(memberId);
   }
 
   private fetchTransactions(memberId: string): void {
     const formValue = this.filterForm.value;
+    
+    // Build params object, only including defined values
     const params: TransactionQueryParams = {
       page: this.currentPage(),
-      limit: this.pageSize(),
-      type: formValue.type || undefined,
-      status: formValue.status || undefined,
-      startDate: formValue.startDate ? new Date(formValue.startDate).toISOString() : undefined,
-      endDate: formValue.endDate ? new Date(formValue.endDate).toISOString() : undefined
+      limit: this.pageSize()
     };
+    
+    // Only add optional params if they have values
+    if (formValue.type) {
+      params.type = formValue.type;
+    }
+    if (formValue.status) {
+      params.status = formValue.status;
+    }
+    if (formValue.startDate) {
+      params.startDate = new Date(formValue.startDate).toISOString();
+    }
+    if (formValue.endDate) {
+      params.endDate = new Date(formValue.endDate).toISOString();
+    }
 
     this.walletService.getTransactions(memberId, params).subscribe({
       next: (response) => {
@@ -261,5 +270,25 @@ export class WalletTransactionsComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  formatTime(dateString: string): string {
+    return new Date(dateString).toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  hasActiveFilters(): boolean {
+    const formValue = this.filterForm.value;
+    return !!(formValue.type || formValue.status || formValue.startDate || formValue.endDate);
+  }
+
+  getMaxShowing(): number {
+    return Math.min(this.currentPage() * this.pageSize(), this.total());
+  }
+
+  private isOwnWallet(): boolean {
+    return this.isChildRoute();
   }
 }

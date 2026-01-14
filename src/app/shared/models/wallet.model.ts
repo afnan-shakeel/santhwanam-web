@@ -59,7 +59,17 @@ export interface WalletSummary {
   currentBalance: number;
   stats?: WalletQuickStats;
   alerts?: WalletAlerts;
+  agent?: WalletAgentInfo;
   recentTransactions: WalletTransaction[];
+  pendingDepositsCount?: number; // Count of pending deposit requests
+}
+
+export interface WalletAgentInfo {
+  agentId: string;
+  agentCode: string;
+  firstName: string;
+  lastName: string;
+  contactNumber?: string;
 }
 
 export interface WalletQuickStats {

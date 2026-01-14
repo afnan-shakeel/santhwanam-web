@@ -1,0 +1,183 @@
+<!-- Wallet Deposits Tab Content -->
+<div class="space-y-6">
+  <!-- Filters -->
+  <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+    <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="flex items-center gap-4">
+      <div class="w-48">
+        <app-select formControlName="status" [options]="statusOptions" placeholder="All Status"></app-select>
+      </div>
+      <button type="submit"
+        class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark rounded-lg transition-colors">
+        Apply
+      </button>
+    </form>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading() && deposits().length === 0) {
+    <div class="flex items-center justify-center py-12">
+      <div class="flex flex-col items-center gap-4">
+        <div class="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent"></div>
+        <p class="text-gray-500 dark:text-gray-400">Loading deposits...</p>
+      </div>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error(); as errorMsg) {
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
+      <svg class="w-10 h-10 text-red-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+      <p class="text-red-600 dark:text-red-400 mb-3">{{ errorMsg }}</p>
+      <button (click)="loadDeposits()"
+        class="px-4 py-2 bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-200 rounded-lg hover:bg-red-200 dark:hover:bg-red-700 transition-colors">
+        Try Again
+      </button>
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!loading() || deposits().length > 0) {
+    @if (deposits().length > 0) {
+      <!-- Pending Deposits Section -->
+      @if (pendingDeposits().length > 0) {
+        <div>
+          <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 bg-yellow-400 rounded-full"></span>
+            Pending ({{ pendingDeposits().length }})
+          </h3>
+          <div class="space-y-3">
+            @for (deposit of pendingDeposits(); track deposit.depositRequestId) {
+              <div class="bg-white dark:bg-gray-800 rounded-xl border border-yellow-200 dark:border-yellow-800/50 p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-start justify-between gap-4">
+                  <div class="flex items-start gap-3">
+                    <span class="text-xl">{{ getStatusIcon(deposit.requestStatus) }}</span>
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <p class="font-medium text-gray-900 dark:text-white">
+                          DEP-{{ deposit.depositRequestId.substring(0, 8).toUpperCase() }}
+                        </p>
+                        <span class="px-2 py-0.5 text-xs font-medium rounded-full {{ getStatusBadgeClass(deposit.requestStatus) }}">
+                          {{ getStatusLabel(deposit.requestStatus) }}
+                        </span>
+                      </div>
+                      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        Submitted: {{ formatDate(deposit.createdAt) }}
+                      </p>
+                      @if (deposit.collectedByName) {
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                          Via Agent: {{ deposit.collectedByName }}
+                        </p>
+                      }
+                      @if (deposit.notes) {
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 italic">
+                          "{{ deposit.notes }}"
+                        </p>
+                      }
+                    </div>
+                  </div>
+                  <p class="text-lg font-bold text-gray-900 dark:text-white shrink-0">
+                    {{ formatCurrency(deposit.amount) }}
+                  </p>
+                </div>
+                <!-- Info message -->
+                <div class="mt-3 flex items-center gap-2 text-sm text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg px-3 py-2">
+                  <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                      clip-rule="evenodd" />
+                  </svg>
+                  <span>Waiting for admin approval. You will be notified once approved.</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Completed Deposits Section -->
+      @if (completedDeposits().length > 0) {
+        <div>
+          <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+            Completed ({{ completedDeposits().length }})
+          </h3>
+          <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden">
+            @for (deposit of completedDeposits(); track deposit.depositRequestId) {
+              <div class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <div class="flex items-center justify-between gap-4">
+                  <div class="flex items-center gap-3">
+                    <span class="text-lg">{{ getStatusIcon(deposit.requestStatus) }}</span>
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <p class="font-medium text-gray-900 dark:text-white">
+                          DEP-{{ deposit.depositRequestId.substring(0, 8).toUpperCase() }}
+                        </p>
+                        <span class="px-2 py-0.5 text-xs font-medium rounded-full {{ getStatusBadgeClass(deposit.requestStatus) }}">
+                          {{ getStatusLabel(deposit.requestStatus) }}
+                        </span>
+                      </div>
+                      <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Submitted: {{ formatShortDate(deposit.createdAt) }}
+                        @if (deposit.approvedAt) {
+                          <span class="mx-1">→</span>
+                          Approved: {{ formatShortDate(deposit.approvedAt) }}
+                        }
+                        @if (deposit.rejectedAt) {
+                          <span class="mx-1">→</span>
+                          Rejected: {{ formatShortDate(deposit.rejectedAt) }}
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  <p class="text-lg font-semibold shrink-0"
+                    [class]="deposit.requestStatus === 'Approved' ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400 line-through'">
+                    {{ formatCurrency(deposit.amount) }}
+                  </p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Load More -->
+      @if (hasMore()) {
+        <div class="text-center pt-4">
+          <button (click)="loadMore()"
+            class="px-6 py-2.5 text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
+            [disabled]="loading()">
+            @if (loading()) {
+              <span class="flex items-center gap-2">
+                <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                Loading...
+              </span>
+            } @else {
+              Load More
+            }
+          </button>
+        </div>
+      }
+
+      <!-- Summary -->
+      <div class="text-center text-sm text-gray-500 dark:text-gray-400">
+        Showing {{ deposits().length }} of {{ total() }} requests
+      </div>
+    } @else {
+      <!-- Empty State -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
+        <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No deposit requests yet</h3>
+        <p class="text-gray-500 dark:text-gray-400 mb-4">Request a deposit to add money to your wallet.</p>
+      </div>
+    }
+  }
+</div>

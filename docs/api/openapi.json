@@ -311,6 +311,56 @@
           "404": { "description": "User not found" },
           "409": { "description": "User already has this role in the given scope" }
         }
+      },
+      "get": {
+        "tags": ["IAM - User Roles"],
+        "summary": "Get user with all assigned roles",
+        "description": "Retrieves user details with all active role assignments including scope information and who assigned them.",
+        "parameters": [
+          { "name": "userId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "User ID" }
+        ],
+        "responses": {
+          "200": {
+            "description": "User with roles retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserWithRolesResponse"
+                },
+                "example": {
+                  "userId": "user-123",
+                  "externalAuthId": "auth0|abc123",
+                  "email": "john.doe@email.com",
+                  "firstName": "John",
+                  "lastName": "Doe",
+                  "isActive": true,
+                  "createdAt": "2025-01-15T00:00:00Z",
+                  "lastSyncedAt": "2025-01-20T10:30:00Z",
+                  "roles": [
+                    {
+                      "userRoleId": "ur-001",
+                      "roleId": "role-forum-admin",
+                      "roleCode": "forum_admin",
+                      "roleName": "Forum Admin",
+                      "scopeType": "Forum",
+                      "scopeEntityType": "Forum",
+                      "scopeEntityId": "forum-001",
+                      "scopeEntityName": "Oman Community Forum",
+                      "isSystemRole": true,
+                      "isActive": true,
+                      "assignedAt": "2025-01-20T00:00:00Z",
+                      "assignedBy": {
+                        "userId": "admin-001",
+                        "name": "Sarah Ahmed"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": { "description": "User not found" }
+        }
       }
     },
     "/api/iam/users/{userId}/roles/{userRoleId}": {
@@ -4657,6 +4707,8 @@
       "post": {
         "tags": ["Wallet - Debits"],
         "summary": "Acknowledge a debit request",
+        "deprecated": true,
+        "description": "DEPRECATED: This endpoint is deprecated when wallet.autoDebitEnabled is true (default). With auto-debit enabled, wallet debits are processed automatically without agent acknowledgment. This endpoint only works when auto-debit is disabled via system configuration.",
         "parameters": [
           {
             "name": "debitRequestId",
@@ -5988,6 +6040,8 @@
       "post": {
         "tags": ["Contributions"],
         "summary": "Acknowledge wallet debit for contribution",
+        "deprecated": true,
+        "description": "DEPRECATED: This endpoint is deprecated when wallet.autoDebitEnabled is true (default). With auto-debit enabled, contributions are collected automatically from wallets without agent acknowledgment. This endpoint only works when auto-debit is disabled via system configuration.",
         "parameters": [
           {
             "name": "contributionId",
@@ -6212,6 +6266,48 @@
           }
         }
       },
+      "UserWithRolesResponse": {
+        "type": "object",
+        "description": "User details with all assigned roles",
+        "properties": {
+          "userId": { "type": "string", "format": "uuid" },
+          "externalAuthId": { "type": "string", "description": "External authentication provider user ID" },
+          "email": { "type": "string", "format": "email" },
+          "firstName": { "type": ["string", "null"] },
+          "lastName": { "type": ["string", "null"] },
+          "isActive": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "lastSyncedAt": { "type": ["string", "null"], "format": "date-time" },
+          "roles": {
+            "type": "array",
+            "description": "List of all active role assignments for this user",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userRoleId": { "type": "string", "format": "uuid" },
+                "roleId": { "type": "string", "format": "uuid" },
+                "roleCode": { "type": "string", "description": "Role code (e.g., forum_admin, unit_admin)" },
+                "roleName": { "type": "string", "description": "Display name of the role" },
+                "scopeType": { "type": "string", "enum": ["None", "Forum", "Area", "Unit", "Agent"], "description": "Type of scope this role has" },
+                "scopeEntityType": { "type": ["string", "null"], "enum": ["None", "Forum", "Area", "Unit", "Agent", null], "description": "Specific entity type this assignment is scoped to" },
+                "scopeEntityId": { "type": ["string", "null"], "format": "uuid", "description": "ID of the scoped entity" },
+                "scopeEntityName": { "type": ["string", "null"], "description": "Name of the scoped entity (e.g., forum name, unit name)" },
+                "isSystemRole": { "type": "boolean", "description": "Whether this is a built-in system role" },
+                "isActive": { "type": "boolean" },
+                "assignedAt": { "type": "string", "format": "date-time" },
+                "assignedBy": {
+                  "type": ["object", "null"],
+                  "description": "User who assigned this role",
+                  "properties": {
+                    "userId": { "type": "string", "format": "uuid" },
+                    "name": { "type": "string", "description": "Full name or email of the user who assigned the role" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "SearchRequest": {
         "type": "object",
         "description": "Advanced search request with filters, sorting, and pagination. Supports multiple filter operators and eager loading of relations.",
@@ -6398,7 +6494,7 @@
       },
       "WalletDebitRequest": {
         "type": "object",
-        "description": "Debit request for a wallet",
+        "description": "Debit request for a wallet. When isAutoDebit is true, the debit was processed automatically without agent acknowledgment.",
         "properties": {
           "debitRequestId": { "type": "string", "format": "uuid" },
           "memberId": { "type": "string", "format": "uuid" },
@@ -6407,9 +6503,10 @@
           "purpose": { "type": "string" },
           "contributionCycleId": { "type": "string", "format": "uuid", "nullable": true },
           "contributionId": { "type": "string", "format": "uuid", "nullable": true },
-          "status": { "type": "string", "enum": ["PendingAcknowledgment", "Acknowledged", "Completed", "Invalidated", "Failed"] },
+          "status": { "type": "string", "enum": ["PendingAcknowledgment", "Acknowledged", "Completed", "Invalidated", "Failed"], "description": "Note: PendingAcknowledgment and Acknowledged are deprecated when auto-debit is enabled" },
+          "isAutoDebit": { "type": "boolean", "default": false, "description": "Indicates if this debit was processed automatically without agent acknowledgment" },
           "createdAt": { "type": "string", "format": "date-time" },
-          "acknowledgedAt": { "type": "string", "format": "date-time", "nullable": true },
+          "acknowledgedAt": { "type": "string", "format": "date-time", "nullable": true, "description": "Deprecated: Not set when isAutoDebit=true" },
           "completedAt": { "type": "string", "format": "date-time", "nullable": true }
         }
       },

@@ -4,34 +4,34 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { WalletService } from '../../../../core/services/wallet.service';
-import { CreateDepositRequest, WalletAgentInfo } from '../../../../shared/models/wallet.model';
+import { CreateDepositRequest } from '../../../../shared/models/wallet.model';
 
 @Component({
-  selector: 'app-deposit-request-modal',
+  selector: 'app-record-deposit-modal',
   standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
     ModalComponent
   ],
-  templateUrl: './deposit-request-modal.component.html',
-  styleUrls: ['./deposit-request-modal.component.css']
+  templateUrl: './record-deposit-modal.component.html',
+  styleUrls: ['./record-deposit-modal.component.css']
 })
-export class DepositRequestModalComponent implements OnInit {
+export class RecordDepositModalComponent implements OnInit {
   private fb = inject(FormBuilder);
   private walletService = inject(WalletService);
 
   @Input({ required: true }) memberId!: string;
-  @Input() agentInfo?: WalletAgentInfo | null;
+  @Input() memberName?: string | null;
   @Input() recommendedAmount?: number;
   @Output() closeModal = new EventEmitter<void>();
-  @Output() depositCreated = new EventEmitter<void>();
+  @Output() depositRecorded = new EventEmitter<void>();
 
   submitting = signal(false);
   error = signal<string | null>(null);
 
   // Suggested deposit amounts
-  suggestedAmounts = [500, 1000, 2000];
+  suggestedAmounts = [500, 1000, 2000, 5000];
   selectedAmount = signal<number | null>(null);
 
   depositForm: FormGroup = this.fb.group({
@@ -94,19 +94,19 @@ export class DepositRequestModalComponent implements OnInit {
         this.walletService.submitDepositRequest(depositRequest.depositRequestId).subscribe({
           next: () => {
             this.submitting.set(false);
-            this.depositCreated.emit();
+            this.depositRecorded.emit();
           },
           error: (err) => {
             console.error('Failed to submit deposit request:', err);
-            // Still emit success since request was created
+            // Still consider the deposit created, just not submitted
             this.submitting.set(false);
-            this.depositCreated.emit();
+            this.depositRecorded.emit();
           }
         });
       },
       error: (err) => {
         console.error('Failed to create deposit request:', err);
-        this.error.set(err.error?.message || 'Failed to create deposit request. Please try again.');
+        this.error.set(err?.error?.message || 'Failed to record deposit. Please try again.');
         this.submitting.set(false);
       }
     });
