@@ -91,8 +91,35 @@ export const routes: Routes = [
       {
         path: 'units',
         loadComponent: () => import('./features/units/units.component').then((m) => m.UnitsComponent)
-      }
-      ,
+      },
+      // Member's own profile route (self-view)
+      {
+        path: 'my-profile',
+        loadComponent: () => import('./features/members/member-profile/pages/my-profile/my-profile.component').then((m) => m.MyProfileComponent),
+        children: [
+          {
+            path: '',
+            redirectTo: 'overview',
+            pathMatch: 'full'
+          },
+          {
+            path: 'overview',
+            loadComponent: () => import('./features/members/member-profile/tabs/member-overview-tab/member-overview-tab.component').then((m) => m.MemberOverviewTabComponent)
+          },
+          {
+            path: 'contributions',
+            loadComponent: () => import('./features/members/member-profile/tabs/member-contributions-tab/member-contributions-tab.component').then((m) => m.MemberContributionsTabComponent)
+          },
+          {
+            path: 'nominees',
+            loadComponent: () => import('./features/members/member-profile/tabs/member-nominees-tab/member-nominees-tab.component').then((m) => m.MemberNomineesTabComponent)
+          },
+          {
+            path: 'documents',
+            loadComponent: () => import('./features/members/member-profile/tabs/member-documents-tab/member-documents-tab.component').then((m) => m.MemberDocumentsTabComponent)
+          }
+        ]
+      },
       // Agent's own profile route
       {
         path: 'agent/profile',
@@ -161,6 +188,34 @@ export const routes: Routes = [
               }
             ]
           },
+          // Agent viewing member profile
+          {
+            path: 'members/:memberId',
+            loadComponent: () => import('./features/members/member-profile/pages/agent-member-profile/agent-member-profile.component').then((m) => m.AgentMemberProfileComponent),
+            children: [
+              {
+                path: '',
+                redirectTo: 'overview',
+                pathMatch: 'full'
+              },
+              {
+                path: 'overview',
+                loadComponent: () => import('./features/members/member-profile/tabs/member-overview-tab/member-overview-tab.component').then((m) => m.MemberOverviewTabComponent)
+              },
+              {
+                path: 'contributions',
+                loadComponent: () => import('./features/members/member-profile/tabs/member-contributions-tab/member-contributions-tab.component').then((m) => m.MemberContributionsTabComponent)
+              },
+              {
+                path: 'nominees',
+                loadComponent: () => import('./features/members/member-profile/tabs/member-nominees-tab/member-nominees-tab.component').then((m) => m.MemberNomineesTabComponent)
+              },
+              {
+                path: 'documents',
+                loadComponent: () => import('./features/members/member-profile/tabs/member-documents-tab/member-documents-tab.component').then((m) => m.MemberDocumentsTabComponent)
+              }
+            ]
+          },
           // Agent Member Wallet Routes (viewing member wallets as agent)
           {
             path: 'members/:memberId/wallet',
@@ -203,9 +258,37 @@ export const routes: Routes = [
             path: ':memberId/edit',
             loadComponent: () => import('./features/members/member-form/member-form.component').then((m) => m.MemberFormComponent)
           },
+          // Admin viewing member profile
           {
             path: ':memberId/profile',
-            loadComponent: () => import('./features/members/member-profile/member-profile.component').then((m) => m.MemberProfileComponent)
+            loadComponent: () => import('./features/members/member-profile/pages/admin-member-profile/admin-member-profile.component').then((m) => m.AdminMemberProfileComponent),
+            children: [
+              {
+                path: '',
+                redirectTo: 'overview',
+                pathMatch: 'full'
+              },
+              {
+                path: 'overview',
+                loadComponent: () => import('./features/members/member-profile/tabs/member-overview-tab/member-overview-tab.component').then((m) => m.MemberOverviewTabComponent)
+              },
+              {
+                path: 'contributions',
+                loadComponent: () => import('./features/members/member-profile/tabs/member-contributions-tab/member-contributions-tab.component').then((m) => m.MemberContributionsTabComponent)
+              },
+              {
+                path: 'nominees',
+                loadComponent: () => import('./features/members/member-profile/tabs/member-nominees-tab/member-nominees-tab.component').then((m) => m.MemberNomineesTabComponent)
+              },
+              {
+                path: 'documents',
+                loadComponent: () => import('./features/members/member-profile/tabs/member-documents-tab/member-documents-tab.component').then((m) => m.MemberDocumentsTabComponent)
+              },
+              {
+                path: 'activity',
+                loadComponent: () => import('./features/members/member-profile/tabs/member-activity-tab/member-activity-tab.component').then((m) => m.MemberActivityTabComponent)
+              }
+            ]
           },
           {
             path: ':memberId/wallet',
@@ -332,6 +415,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/approvals/all-requests/all-requests.component').then((m) => m.AllRequestsComponent)
       }
     ]
+  },
+  // Forbidden page (no layout)
+  {
+    path: 'forbidden',
+    loadComponent: () => import('./shared/pages/forbidden/forbidden.component').then((m) => m.ForbiddenComponent)
   },
   {
     path: '**',

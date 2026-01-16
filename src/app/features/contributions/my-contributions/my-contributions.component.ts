@@ -118,6 +118,7 @@ export class MyContributionsComponent implements OnInit {
     this.contributionsService.getMyContributionsHistory(params).subscribe({
       next: (response) => {
         this.contributionHistory.set(response.contributions);
+        console.log("DEBUG", this.contributionHistory().length);
         this.totalPages.set(response.pagination?.totalPages);
         this.totalItems.set(response.pagination?.total);
         this.historyLoading.set(false);

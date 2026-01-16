@@ -1,0 +1,190 @@
+@if (loading()) {
+  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <div class="animate-pulse space-y-4">
+      <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+      </div>
+    </div>
+  </div>
+} @else if (profile()) {
+  <div class="space-y-6">
+    <!-- Personal Information -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Personal Information</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Full Name</p>
+          <p class="text-sm font-medium text-gray-900 dark:text-white">{{ fullName() }}</p>
+        </div>
+        
+        <div>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Member Code</p>
+          <p class="text-sm font-medium text-gray-900 dark:text-white">{{ profile()?.memberCode }}</p>
+        </div>
+        
+        @if (profile()?.dateOfBirth) {
+          <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Date of Birth</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">
+              {{ profile()?.dateOfBirth | date:'MMM d, yyyy' }}
+              @if (age() > 0) {
+                <span class="text-gray-500 dark:text-gray-400">({{ age() }} years)</span>
+              }
+            </p>
+          </div>
+        }
+        
+        @if (profile()?.gender) {
+          <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Gender</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ profile()?.gender }}</p>
+          </div>
+        }
+
+        @if (profile()?.aadhaarNumber) {
+          <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Aadhaar Number</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ profile()?.aadhaarNumber }}</p>
+          </div>
+        }
+
+        @if (profile()?.registeredAt) {
+          <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Member Since</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ profile()?.registeredAt | date:'MMM d, yyyy' }}</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Contact Information</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Phone Number</p>
+          <p class="text-sm font-medium text-gray-900 dark:text-white">
+            @if (profile()?.contactNumber) {
+              <a [href]="'tel:' + profile()?.contactNumber" class="text-primary-600 dark:text-primary-400 hover:underline">
+                {{ profile()?.contactNumber }}
+              </a>
+            } @else {
+              <span class="text-gray-400">Not provided</span>
+            }
+          </p>
+        </div>
+        
+        <div>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Email Address</p>
+          <p class="text-sm font-medium text-gray-900 dark:text-white">
+            @if (profile()?.email) {
+              <a [href]="'mailto:' + profile()?.email" class="text-primary-600 dark:text-primary-400 hover:underline">
+                {{ profile()?.email }}
+              </a>
+            } @else {
+              <span class="text-gray-400">Not provided</span>
+            }
+          </p>
+        </div>
+
+        @if (fullAddress()) {
+          <div class="md:col-span-2">
+            <p class="text-sm text-gray-500 dark:text-gray-400">Address</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ fullAddress() }}</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Membership Details -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Membership Details</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Status</p>
+          <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + 
+            (profile()?.memberStatus === 'Active' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+             profile()?.memberStatus === 'Suspended' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
+             'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400')">
+            {{ profile()?.memberStatus }}
+          </span>
+        </div>
+
+        @if (profile()?.tier) {
+          <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Tier</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ profile()?.tier?.tierName }}</p>
+          </div>
+        }
+
+        @if (profile()?.unit) {
+          <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Unit</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ profile()?.unit?.unitName }}</p>
+          </div>
+        }
+
+        @if (profile()?.area) {
+          <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Area</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ profile()?.area?.areaName }}</p>
+          </div>
+        }
+
+        @if (profile()?.forum) {
+          <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Forum</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ profile()?.forum?.forumName }}</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Agent Assignment (Only for Self view) -->
+    @if (viewMode() === 'self' && profile()?.agent) {
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Your Agent</h3>
+        
+        <div class="flex items-start gap-4">
+          <div class="shrink-0 w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 font-semibold">
+            {{ profile()?.agent?.firstName?.charAt(0) }}{{ profile()?.agent?.lastName?.charAt(0) }}
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">
+              {{ profile()?.agent?.firstName }} {{ profile()?.agent?.lastName }}
+            </p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ profile()?.agent?.agentCode }}</p>
+            @if (profile()?.agent?.contactNumber) {
+              <a [href]="'tel:' + profile()?.agent?.contactNumber" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">
+                📞 {{ profile()?.agent?.contactNumber }}
+              </a>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Wallet Summary -->
+    @if (profile()?.wallet) {
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Wallet</h3>
+        
+        <div class="grid grid-cols-1 gap-6">
+          <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+            <p class="text-sm text-gray-500 dark:text-gray-400">Current Balance</p>
+            <p class="text-lg font-semibold text-gray-900 dark:text-white">
+              ₹{{ profile()?.wallet?.currentBalance | number:'1.2-2' }}
+            </p>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}

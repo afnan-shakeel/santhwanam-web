@@ -1,0 +1,144 @@
+@if (loading()) {
+  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <div class="animate-pulse space-y-3">
+      <div class="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+      <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+      <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+    </div>
+  </div>
+} @else if (member()) {
+  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-4">{{ title() }}</h3>
+
+    <div class="space-y-4">
+      <!-- Agent Info (Self and Admin views) -->
+      @if (viewMode() === 'self' && member()?.agent) {
+        <div class="flex items-start gap-3">
+          <div class="shrink-0 w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <p class="text-xs text-gray-500 dark:text-gray-400">Your Agent</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ agentFullName() }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ member()?.agent?.agentCode }}</p>
+            @if (member()?.agent?.contactNumber) {
+              <a [href]="'tel:' + member()?.agent?.contactNumber" class="text-xs text-primary-600 dark:text-primary-400 hover:underline">
+                📞 {{ member()?.agent?.contactNumber }}
+              </a>
+            }
+          </div>
+        </div>
+      }
+
+      @if (viewMode() === 'admin' && member()?.agent) {
+        <div class="flex items-start justify-between">
+          <div class="flex items-start gap-3">
+            <div class="shrink-0 w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+              <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Agent</p>
+              <p class="text-sm font-medium text-gray-900 dark:text-white">{{ agentFullName() }}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">{{ member()?.agent?.agentCode }}</p>
+            </div>
+          </div>
+          @if (showReassign()) {
+            <button
+              type="button"
+              (click)="onReassignAgent()"
+              class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-500 font-medium">
+              Reassign
+            </button>
+          }
+        </div>
+      }
+
+      <!-- Unit/Area/Forum -->
+      @if (member()?.unit) {
+        <div class="flex items-center gap-3">
+          <div class="shrink-0 w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+            <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Unit</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ member()?.unit?.unitName }}</p>
+          </div>
+        </div>
+      }
+
+      @if (member()?.area) {
+        <div class="flex items-center gap-3">
+          <div class="shrink-0 w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Area</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ member()?.area?.areaName }}</p>
+          </div>
+        </div>
+      }
+
+      @if (member()?.forum) {
+        <div class="flex items-center gap-3">
+          <div class="shrink-0 w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+            <svg class="w-4 h-4 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Forum</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ member()?.forum?.forumName }}</p>
+          </div>
+        </div>
+      }
+
+      <!-- Wallet Section -->
+      <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <div class="shrink-0 w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+              <svg class="w-4 h-4 text-primary-600 dark:text-primary-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Wallet Balance</p>
+              <p class="text-lg font-semibold text-gray-900 dark:text-white">₹{{ walletBalance() | number:'1.0-0' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <button
+            type="button"
+            (click)="onViewWallet()"
+            class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+            View Wallet
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </button>
+          @if (viewMode() === 'agent') {
+            <button
+              type="button"
+              (click)="onRecordDeposit()"
+              class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary-600 px-3 py-2 text-sm font-medium text-white hover:bg-primary-700">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Record Deposit
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}

@@ -147,6 +147,7 @@ export interface Nominee {
   country: string;
   idProofType: IdProofType;
   idProofNumber: string;
+  sharePercentage?: number;
   createdAt?: string;
   updatedAt?: string;
   documents?: MemberDocument[];
@@ -193,10 +194,14 @@ export interface MemberDocument {
   documentCategory: DocumentCategory;
   documentName: string;
   fileUrl: string;
+  documentUrl?: string;
   fileSize: number;
   mimeType: string;
   expiryDate?: string;
   uploadedAt?: string;
+  isVerified?: boolean;
+  verifiedAt?: string;
+  verifiedBy?: string;
 }
 
 export interface UploadDocumentRequest {
@@ -348,6 +353,7 @@ export interface MemberProfile {
   dateOfBirth: string;
   gender: string;
   idNumber: string;
+  aadhaarNumber?: string;
   contactNumber: string;
   email: string;
   addressLine1: string;
@@ -382,6 +388,62 @@ export interface UpdateMemberProfileRequest {
   addressLine1?: string;
   addressLine2?: string;
   city?: string;
+  postalCode?: string;
+  country?: string;
+}
+
+// ==================== MEMBER SELF PROFILE ====================
+
+/**
+ * Member self profile - similar to MemberProfile but for logged-in member
+ */
+export interface MemberSelfProfile {
+  memberId: string;
+  memberCode: string;
+  fullName: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  dateOfBirth: string;
+  gender: string;
+  idNumber?: string;
+  aadhaarNumber?: string;
+  contactNumber: string;
+  alternateContactNumber?: string;
+  email: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city?: string;
+  postalCode: string;
+  state: string;
+  country: string;
+  memberStatus: MemberStatus;
+  registrationStatus: RegistrationStatus;
+  registrationDate?: string;
+  tier: MemberTier;
+  agent: Agent;
+  unit: Unit;
+  area: Area;
+  forum: Forum;
+  wallet: Wallet;
+  registrationPayment?: ProfileRegistrationPayment;
+  nominees?: Nominee[];
+  documents?: MemberDocument[];
+  createdAt: string;
+  registeredAt?: string;
+}
+
+/**
+ * Limited fields that member can update themselves
+ */
+export interface UpdateMemberSelfProfileRequest {
+  contactNumber?: string;
+  alternateContactNumber?: string;
+  email?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
   postalCode?: string;
   country?: string;
 }

@@ -24,11 +24,8 @@ interface ApiResponse<T> {
 }
 
 interface ContributionHistoryResponse {
-  success: boolean;
-  data: {
     contributions: MemberContribution[];
     total: number;
-  };
 }
 
 @Injectable({

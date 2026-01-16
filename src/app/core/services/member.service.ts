@@ -19,7 +19,9 @@ import {
   MemberMetadata,
   MetadataOption,
   MemberProfile,
-  UpdateMemberProfileRequest
+  UpdateMemberProfileRequest,
+  MemberSelfProfile,
+  UpdateMemberSelfProfileRequest
 } from '../../shared/models/member.model';
 
 @Injectable({
@@ -224,5 +226,72 @@ export class MemberService {
     };
 
     return this.searchMembers(request).pipe(map((response) => response.items));
+  }
+
+  // ==================== MEMBER SELF PROFILE ====================
+
+  /**
+   * Get logged-in member's own profile
+   */
+  getMyProfile(): Observable<MemberSelfProfile> {
+    return this.http.get<MemberSelfProfile>('/members/my-profile');
+  }
+
+  /**
+   * Update logged-in member's own profile (limited fields)
+   */
+  updateMyProfile(request: UpdateMemberSelfProfileRequest): Observable<void> {
+    return this.http.put<void>('/members/my-profile', request);
+  }
+
+  /**
+   * Get logged-in member's nominees
+   */
+  getMyNominees(): Observable<Nominee[]> {
+    return this.http.get<Nominee[]>('/members/my-profile/nominees');
+  }
+
+  /**
+   * Add nominee for logged-in member
+   */
+  addMyNominee(request: AddNomineeRequest): Observable<{ nomineeId: string }> {
+    return this.http.post<{ nomineeId: string }>('/members/my-profile/nominees', request);
+  }
+
+  /**
+   * Update nominee for logged-in member
+   */
+  updateMyNominee(nomineeId: string, request: UpdateNomineeRequest): Observable<void> {
+    return this.http.patch<void>(`/members/my-profile/nominees/${nomineeId}`, request);
+  }
+
+  /**
+   * Delete nominee for logged-in member
+   */
+  deleteMyNominee(nomineeId: string): Observable<void> {
+    return this.http.delete<void>(`/members/my-profile/nominees/${nomineeId}`);
+  }
+
+  /**
+   * Get logged-in member's documents
+   */
+  getMyDocuments(): Observable<MemberDocument[]> {
+    return this.http.get<MemberDocument[]>('/members/my-profile/documents');
+  }
+
+  // ==================== DOCUMENT VERIFICATION (ADMIN) ====================
+
+  /**
+   * Verify a member's document (Admin only)
+   */
+  verifyDocument(memberId: string, documentId: string): Observable<void> {
+    return this.http.post<void>(`/members/${memberId}/documents/${documentId}/verify`, {});
+  }
+
+  /**
+   * Unverify a member's document (Admin only)
+   */
+  unverifyDocument(memberId: string, documentId: string): Observable<void> {
+    return this.http.post<void>(`/members/${memberId}/documents/${documentId}/unverify`, {});
   }
 }

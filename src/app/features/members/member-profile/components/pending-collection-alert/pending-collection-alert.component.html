@@ -1,0 +1,54 @@
+@if (loading()) {
+  <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4">
+    <div class="animate-pulse flex items-center gap-3">
+      <div class="w-6 h-6 bg-yellow-200 dark:bg-yellow-800 rounded"></div>
+      <div class="h-4 bg-yellow-200 dark:bg-yellow-800 rounded w-1/2"></div>
+    </div>
+  </div>
+} @else if (pendingContributions().length > 0) {
+  <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl overflow-hidden">
+    <div class="px-4 py-3 border-b border-yellow-200 dark:border-yellow-800">
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
+        <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-300">Pending Collection</h4>
+      </div>
+    </div>
+
+    <div class="divide-y divide-yellow-200 dark:divide-yellow-800">
+      @for (contribution of pendingContributions(); track contribution.contributionId) {
+        <div class="px-4 py-3 flex items-center justify-between gap-4">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-sm font-medium text-gray-900 dark:text-white">{{ contribution.cycleNumber }}</span>
+              <span class="text-sm text-gray-500 dark:text-gray-400">•</span>
+              <span class="text-sm font-semibold text-primary-600 dark:text-primary-400">₹{{ contribution.amount | number:'1.0-0' }}</span>
+              <span class="text-sm text-gray-500 dark:text-gray-400">•</span>
+              <span class="text-sm text-gray-600 dark:text-gray-400">
+                Due: {{ contribution.deadline | date:'MMM d' }}
+                @if (contribution.daysRemaining <= 3) {
+                  <span class="text-red-600 dark:text-red-400 font-medium">
+                    ({{ contribution.daysRemaining }} {{ contribution.daysRemaining === 1 ? 'day' : 'days' }} left)
+                  </span>
+                }
+              </span>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+              {{ contribution.deceasedName }} Memorial
+            </p>
+          </div>
+          <button
+            type="button"
+            (click)="onCollect(contribution)"
+            class="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-yellow-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-yellow-700">
+            Collect
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}

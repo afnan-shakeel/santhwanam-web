@@ -32,7 +32,34 @@ export class AuthStore {
   readonly accessToken = computed(() => this.authState().accessToken);
   readonly refreshToken = computed(() => this.authState().refreshToken);
   readonly expiresAt = computed(() => this.authState().expiresAt);
-  readonly isAuthenticated = computed(() => !!this.authState().accessToken && !!this.authState().user);
+  
+  /**
+   * Check if user is authenticated (has valid token and user)
+   */
+  readonly isAuthenticated = computed(() => {
+    const state = this.authState();
+    return !!state.accessToken && !!state.user && this.isTokenValid();
+  });
+
+  /**
+   * Check if the current token is valid (not expired)
+   */
+  isTokenValid(): boolean {
+    const expiresAt = this.authState().expiresAt;
+    if (!expiresAt) {
+      // If no expiry set, check if token exists
+      return !!this.authState().accessToken;
+    }
+    // Add a small buffer (30 seconds) to account for network latency
+    return Date.now() < (expiresAt - 30000);
+  }
+
+  /**
+   * Check if token exists (regardless of validity)
+   */
+  hasToken(): boolean {
+    return !!this.authState().accessToken;
+  }
 
   constructor() {
     // Auto-persist to localStorage whenever state changes
