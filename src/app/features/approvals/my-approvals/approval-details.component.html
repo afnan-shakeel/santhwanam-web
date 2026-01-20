@@ -56,15 +56,15 @@
             <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Request Overview</h2>
           </div>
           <div class="p-5">
+
             <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
               <div>
-                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Entity ID</dt>
-                <dd class="mt-1 text-sm text-gray-900 dark:text-white font-mono">{{ requestDetails()!.entityId }}</dd>
+                <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ requestEntityDetails()?.displayName }}</dd>
+                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wide">{{ requestEntityDetails()?.subtitle }}</dt>
               </div>
               
-              <div>
-                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Entity Type</dt>
-                <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ requestDetails()!.entityType }}</dd>
+              <div class="py-4">
+                <a class="text-xs font-medium text-gray-500 dark:text-gray-400 hover:underline uppercase tracking-wide" href="{{ requestEntityDetails()?.route }}">View</a>
               </div>
               
               <div>
@@ -78,7 +78,7 @@
               
               <div>
                 <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Submitted By</dt>
-                <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ requestDetails()!.requestedByUserName }}</dd>
+                <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ requestDetails()!.requestedByUser.firstName }} {{ requestDetails()!.requestedByUser.lastName }}</dd>
               </div>
             </dl>
           </div>

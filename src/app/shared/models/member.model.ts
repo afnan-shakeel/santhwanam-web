@@ -33,7 +33,7 @@ export interface MemberTier {
   tierName: string;
   description?: string;
   registrationFee?: number;
-  advanceDeposit?: number;
+  advanceDepositAmount?: number;
   contributionAmount: number;
   deathBenefitAmount: number;
 }
@@ -232,7 +232,6 @@ export interface MemberPayment {
 export interface RecordPaymentRequest {
   registrationFee: number;
   advanceDeposit: number;
-  collectedBy: string;
   collectionDate: string;
   collectionMode: CollectionMode;
   referenceNumber?: string;

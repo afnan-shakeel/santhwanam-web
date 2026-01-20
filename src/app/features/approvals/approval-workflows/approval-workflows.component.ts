@@ -6,6 +6,7 @@ import { ApprovalWorkflowService } from '../../../core/services/approval-workflo
 import { ApprovalWorkflow } from '../../../shared/models/approval-workflow.model';
 import { SearchRequest, SearchResponse } from '../../../shared/models/search.model';
 import { WorkflowFormComponent } from './workflow-form/workflow-form.component';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-approval-workflows',
@@ -13,7 +14,8 @@ import { WorkflowFormComponent } from './workflow-form/workflow-form.component';
   imports: [
     CommonModule,
     BreadcrumbsComponent,
-    WorkflowFormComponent
+    WorkflowFormComponent,
+    ButtonComponent
   ],
   templateUrl: './approval-workflows.component.html',
   styleUrls: ['./approval-workflows.component.css']

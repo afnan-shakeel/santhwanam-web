@@ -77,8 +77,8 @@ export class DeathClaimsService {
   /**
    * Report a new death claim
    */
-  reportClaim(request: ReportClaimRequest): Observable<ApiResponse<DeathClaim>> {
-    return this.http.post<ApiResponse<DeathClaim>>(`${this.basePath}/report`, request);
+  reportClaim(request: ReportClaimRequest): Observable<DeathClaim> {
+    return this.http.post<DeathClaim>(`${this.basePath}/report`, request);
   }
 
   /**

@@ -53,41 +53,55 @@ export class PersonalDetailsStepComponent implements OnInit {
   unitOptions = signal<SearchSelectOption<string>[]>([]);
   agentOptions = signal<SearchSelectOption<string>[]>([]);
 
+  // Initial options for edit/update scenarios (to display pre-selected values)
+  initialUnitOptions = signal<SearchSelectOption<string>[]>([]);
+  initialAgentOptions = signal<SearchSelectOption<string>[]>([]);
+
   loadingTiers = signal(false);
   loadingUnits = signal(false);
   loadingAgents = signal(false);
 
   ngOnInit(): void {
 
-    this.onSearchUnits('');
-
     this.initializeForm();
     this.loadTiers();
     
-    console.log(this.initialData)
     if (this.initialData) {
-    this.personalForm.patchValue(this.initialData);
-
-    // if unit id in initial data, load units with unit it
-
-    this.loadingUnits.set(true);
-    this.unitService.getUnit(this.initialData.unitId).subscribe({
-      next: (response) => {
-        console.log(response)
-        this.unitOptions.set(
-          [{
-            value: this.initialData.unitId,
-            label: `${response.unitName} (${response.unitCode})`
-          }])
-        this.loadingUnits.set(false);
-      },
-      error: () => {
-        this.loadingUnits.set(false);
-      }
-    });
-
-
+      this.loadInitialOptions();
+      this.personalForm.patchValue(this.initialData);
+    }
   }
+
+  /**
+   * Load initial options for search-select fields when editing.
+   * This ensures the selected values display their labels correctly.
+   */
+  private loadInitialOptions(): void {
+    // Load initial unit option if unitId exists
+    const unitId = this.initialData.unitId || this.initialData.unit?.unitId;
+    const unitName = this.initialData.unit?.unitName;
+    const unitCode = this.initialData.unit?.unitCode;
+    
+    if (unitId && unitName) {
+      this.initialUnitOptions.set([{
+        value: unitId,
+        label: unitName + (unitCode ? ` (${unitCode})` : '')
+      }]);
+    }
+
+    // Load initial agent option if agentId exists
+    const agentId = this.initialData.agentId || this.initialData.agent?.agentId;
+    const agentFirstName = this.initialData.agent?.firstName;
+    const agentLastName = this.initialData.agent?.lastName;
+    const agentCode = this.initialData.agent?.agentCode;
+    const agentName = (agentFirstName && agentLastName ? `${agentFirstName} ${agentLastName}` : agentFirstName);
+    
+    if (agentId && agentName) {
+      this.initialAgentOptions.set([{
+        value: agentId,
+        label: agentName + (agentCode ? ` (${agentCode})` : '')
+      }]);
+    }
   }
 
   private initializeForm(): void {

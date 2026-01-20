@@ -1,17 +1,19 @@
-import { Component, inject, signal, computed, OnInit, input } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, input, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { AgentService } from '../../../../../core/services/agent.service';
 import { AgentMember, AgentMembersResponse, AgentMembersQueryParams } from '../../../../../shared/models/agent-profile.model';
+import { RecordCashModalComponent } from "../../../../death-claims/claim-details/record-cash-modal/record-cash-modal.component";
 
 export type MembersViewMode = 'self' | 'admin';
 
 @Component({
   selector: 'app-agent-members-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RecordCashModalComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './agent-members-tab.component.html',
   styleUrls: ['./agent-members-tab.component.css']
 })
@@ -51,6 +53,13 @@ export class AgentMembersTabComponent implements OnInit {
 
   title = computed(() => {
     return this.viewMode() === 'self' ? 'My Members' : "Agent's Members";
+  });
+
+  memberRowActions = computed(() => {
+    return [
+      { label: 'View Profile', action: (member: AgentMember) => this.viewMember(member), disabled: false },
+      { label: 'View Pending Collections', action: (member: AgentMember) => this.viewMemberPendingContributions(member), disabled: false },
+    ];
   });
 
   hasSelection = computed(() => {
@@ -190,10 +199,16 @@ export class AgentMembersTabComponent implements OnInit {
   // Actions
   viewMember(member: AgentMember): void {
     if (this.viewMode() === 'self') {
-      this.router.navigate(['/agents/members', member.memberId, 'wallet']);
+        // this.router.navigate(['/agents/members', member.memberId, 'wallet']);
+        this.router.navigate(['/members', member.memberId, 'profile']);
     } else {
       this.router.navigate(['/members', member.memberId, 'profile']);
     }
+  }
+
+  viewMemberPendingContributions(member: AgentMember): void {
+    ///members/:memberId/profile/contributions
+    this.router.navigate(['/members', member.memberId, 'profile', 'contributions'], { queryParams: { filter: 'pending' } });
   }
 
   registerNewMember(): void {

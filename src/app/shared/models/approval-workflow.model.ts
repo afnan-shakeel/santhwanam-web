@@ -1,3 +1,5 @@
+import { User } from "./user.model";
+
 export type ModuleType = 'Membership' | 'Wallet' | 'Claims' | 'Contributions' | 'Organization';
 export type ApproverType = 'Role' | 'SpecificUser' | 'OrganizationAdmin';
 export type OrganizationBody = 'Unit' | 'Area' | 'Forum';
@@ -95,6 +97,7 @@ export interface ApprovalExecution {
   status: 'Pending' | 'Approved' | 'Rejected';
   decision?: 'Approve' | 'Reject' | null;
   reviewedBy?: string | null;
+  reviewedByUser?: Partial<User> | null;
   reviewedAt?: Date | null;
   comments?: string | null;
 }
@@ -108,6 +111,7 @@ export interface ApprovalRequest {
   areaId?: string | null;
   unitId?: string | null;
   requestedBy: string;
+  requestedByUser: Partial<User>;
   requestedAt: Date;
   status: ApprovalRequestStatus;
   currentStageOrder?: number | null;

@@ -49,7 +49,6 @@ export class SearchSelectComponent<T = any> implements ControlValueAccessor, OnI
   @Input() label = '';
   @Input() placeholder = 'Search...';
   @Input() mode: SelectMode = 'single';
-  @Input() options: SearchSelectOption<T>[] = [];
   @Input() loading = false;
   @Input() debounceTime = 300;
   @Input() required = false;
@@ -72,6 +71,34 @@ export class SearchSelectComponent<T = any> implements ControlValueAccessor, OnI
   @ViewChild('dropdownButton', { static: false }) dropdownButton?: ElementRef<HTMLButtonElement>;
   @ViewChild('searchInput', { static: false }) searchInput?: ElementRef<HTMLInputElement>;
 
+  // Internal signals for reactive options
+  private optionsSignal = signal<SearchSelectOption<T>[]>([]);
+  private initialOptionsSignal = signal<SearchSelectOption<T>[]>([]);
+
+  /**
+   * Dynamic options from search results
+   */
+  @Input() 
+  set options(value: SearchSelectOption<T>[]) {
+    this.optionsSignal.set(value || []);
+  }
+  get options(): SearchSelectOption<T>[] {
+    return this.optionsSignal();
+  }
+
+  /**
+   * Initial/pre-selected options for edit/update scenarios.
+   * These are used to display labels for values that may not be in the current options list.
+   * Pass the previously selected option(s) here when editing existing data.
+   */
+  @Input() 
+  set initialOptions(value: SearchSelectOption<T>[]) {
+    this.initialOptionsSignal.set(value || []);
+  }
+  get initialOptions(): SearchSelectOption<T>[] {
+    return this.initialOptionsSignal();
+  }
+
   isOpen = signal(false);
   searchTerm = signal('');
   selectedValues = signal<T[]>([]);
@@ -82,11 +109,32 @@ export class SearchSelectComponent<T = any> implements ControlValueAccessor, OnI
   private onTouched: () => void = () => {};
   private loadingTimeout?: any;
 
+  /**
+   * Merged options combining initialOptions and dynamic options.
+   * Initial options take precedence for labels of already-selected values.
+   */
+  allOptions = computed(() => {
+    const optionsMap = new Map<T, SearchSelectOption<T>>();
+    
+    // Add initial options first (for pre-selected values in edit scenarios)
+    for (const opt of this.initialOptionsSignal()) {
+      optionsMap.set(opt.value, opt);
+    }
+    
+    // Add/override with current options (dynamic search results)
+    for (const opt of this.optionsSignal()) {
+      optionsMap.set(opt.value, opt);
+    }
+    
+    return Array.from(optionsMap.values());
+  });
+
   filteredOptions = computed(() => {
     const term = this.searchTerm().toLowerCase();
-    if (!term) return this.options;
+    const opts = this.optionsSignal();
+    if (!term) return opts;
     
-    return this.options.filter(option => 
+    return opts.filter(option => 
       option.label.toLowerCase().includes(term)
     );
   });
@@ -96,7 +144,8 @@ export class SearchSelectComponent<T = any> implements ControlValueAccessor, OnI
     if (selected.length === 0) return '';
     
     if (this.mode === 'single') {
-      const option = this.options.find(opt => opt.value === selected[0]);
+      // Look in allOptions (includes initialOptions) to find the label
+      const option = this.allOptions().find(opt => opt.value === selected[0]);
       return option?.label || '';
     }
     
@@ -105,7 +154,8 @@ export class SearchSelectComponent<T = any> implements ControlValueAccessor, OnI
 
   selectedLabels = computed(() => {
     const selected = this.selectedValues();
-    return this.options
+    // Use allOptions to include labels from initialOptions
+    return this.allOptions()
       .filter(opt => selected.includes(opt.value))
       .map(opt => opt.label);
   });

@@ -314,10 +314,8 @@ export interface MemberContribution {
 
 // Record Cash Request
 export interface RecordCashRequest {
-  collectionDate?: string;
-  collectedBy?: string;
   cashReceiptReference?: string;
-  notes?: string;
+  // notes?: string;
 }
 
 // Acknowledge Contribution Request

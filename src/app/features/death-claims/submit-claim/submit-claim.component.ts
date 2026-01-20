@@ -38,7 +38,7 @@ export class SubmitClaimComponent implements OnInit {
   // Store created claim ID after step 1
   createdClaimId = signal<string | null>(null);
   
-  // Store selected member
+  // Store selected member (populated from form control via memberSelected event)
   selectedMember = signal<MemberSearchResult | null>(null);
 
   // Step 1 Form: Member Information & Death Details
@@ -81,6 +81,7 @@ export class SubmitClaimComponent implements OnInit {
   private initializeForms(): void {
     // Step 1: Member Information & Death Details
     this.step1Form = this.fb.group({
+      memberId: ['', Validators.required],
       deathDate: ['', Validators.required],
       deathPlace: [''],
       causeOfDeath: [''],
@@ -101,11 +102,12 @@ export class SubmitClaimComponent implements OnInit {
 
   onMemberSelected(member: MemberSearchResult): void {
     this.selectedMember.set(member);
+    // The memberId is already set via formControlName binding
   }
 
   // Step 1: Submit death claim (calls report API)
   submitStep1(): void {
-    if (!this.selectedMember() || this.step1Form.invalid) {
+    if (this.step1Form.invalid) {
       this.error.set('Please fill in all required fields');
       return;
     }
@@ -115,7 +117,7 @@ export class SubmitClaimComponent implements OnInit {
 
     const formValue = this.step1Form.value;
     const request: ReportClaimRequest = {
-      memberId: this.selectedMember()!.memberId,
+      memberId: formValue.memberId,
       deathDate: new Date(formValue.deathDate).toISOString(),
       deathPlace: formValue.deathPlace || undefined,
       causeOfDeath: formValue.causeOfDeath || undefined,
@@ -124,20 +126,33 @@ export class SubmitClaimComponent implements OnInit {
 
     this.claimsService.reportClaim(request).subscribe({
       next: (response) => {
-        this.createdClaimId.set(response.data.claimId);
+        console.log('Claim reported successfully:', response);
+        this.createdClaimId.set(response.claimId);
         this.submitting.set(false);
         this.toastService.show({
           type: 'success',
           title: 'Claim Reported',
-          message: 'Death claim has been reported successfully. Please continue to add nominee details.'
+          message: 'Death claim has been reported successfully.'
         });
+        const claimId = this.createdClaimId();
+        if (claimId) {
+          this.router.navigate(['/death-claims', claimId]);
+        } else {
+          this.router.navigate(['/death-claims']);
+        }
+
+        // UPDATE: end in step one itself
+        return;
+        
         // Move to step 2
+
         this.currentStep.set('nominee-payout');
         this.error.set(null);
       },
-      error: (err) => {
+      error: (errRes) => {
+        console.log(errRes)
         this.submitting.set(false);
-        this.error.set(err.message || 'Failed to report claim');
+        this.error.set(errRes.error?.error?.message || 'Failed to report claim');
       }
     });
   }

@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { BreadcrumbsComponent, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs.component';
+import { DatatableComponent } from '../../../shared/components/datatable/datatable.component';
 import { DeathClaimsService } from '../../../core/services/death-claims.service';
 import { ContributionsService } from '../../../core/services/contributions.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -11,6 +12,8 @@ import { DocumentUploadModalComponent } from './document-upload-modal/document-u
 import { AcknowledgeContributionModalComponent } from './acknowledge-contribution-modal/acknowledge-contribution-modal.component';
 import { RecordCashModalComponent } from './record-cash-modal/record-cash-modal.component';
 import { SubmitApprovalModalComponent } from './submit-approval-modal/submit-approval-modal.component';
+import { DataTableConfig } from '../../../shared/models/datatable.model';
+import { SearchRequest, SearchResponse } from '../../../shared/models/search.model';
 import {
   DeathClaim,
   DeathClaimDocument,
@@ -19,7 +22,6 @@ import {
   ClaimStatus,
   DocumentVerificationStatus
 } from '../../../shared/models/death-claim.model';
-import { SearchRequest } from '../../../shared/models/search.model';
 
 type TabId = 'overview' | 'documents' | 'contribution-cycle' | 'timeline';
 
@@ -36,6 +38,7 @@ interface Tab {
     CommonModule,
     FormsModule,
     BreadcrumbsComponent,
+    DatatableComponent,
     DocumentUploadModalComponent,
     AcknowledgeContributionModalComponent,
     RecordCashModalComponent,
@@ -57,6 +60,15 @@ export class ClaimDetailsComponent implements OnInit {
   documents = signal<DeathClaimDocument[]>([]);
   contributionCycle = signal<ContributionCycle | null>(null);
   contributions = signal<MemberContribution[]>([]);
+  
+  // Contributions datatable data
+  contributionsData = signal<SearchResponse<MemberContribution>>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+    totalPages: 0
+  });
 
   // Loading states
   claimLoading = signal(true);
@@ -84,6 +96,82 @@ export class ClaimDetailsComponent implements OnInit {
     { id: 'contribution-cycle', label: 'Contribution Cycle', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
     { id: 'timeline', label: 'Timeline', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' }
   ];
+
+  // Contributions table config
+  contributionsTableConfig: DataTableConfig<MemberContribution> = {
+    columns: [
+      {
+        key: 'member',
+        label: 'Member',
+        sortable: true,
+        format: (value: any) => value ? `${value.firstName} ${value.lastName}` : '-'
+      },
+      {
+        key: 'member.memberCode',
+        label: 'Member Code',
+        sortable: true,
+        format: (value: any, row: MemberContribution) => row.member?.memberCode || '-'
+      },
+      {
+        key: 'agent',
+        label: 'Agent',
+        sortable: true,
+        format: (value: any) => value ? `${value.firstName} ${value.lastName}` : '-'
+      },
+      {
+        key: 'expectedAmount',
+        label: 'Amount',
+        sortable: true,
+        type: 'number',
+        format: (value: number) => `₹${value?.toLocaleString() || '0'}`
+      },
+      {
+        key: 'contributionStatus',
+        label: 'Status',
+        sortable: true,
+        type: 'badge'
+      },
+      {
+        key: 'collectedAt',
+        label: 'Collected At',
+        sortable: true,
+        type: 'date'
+      }
+    ],
+    actions: [
+      {
+        label: 'Acknowledge',
+        callback: (contrib: MemberContribution) => this.openAcknowledgeModal(contrib),
+        visible: (contrib: MemberContribution) => contrib.contributionStatus === 'WalletDebitRequested'
+      },
+      {
+        label: 'Record Cash',
+        callback: (contrib: MemberContribution) => this.openRecordCashModal(contrib),
+        visible: (contrib: MemberContribution) => contrib.contributionStatus === 'Pending' || contrib.contributionStatus === 'WalletDebitRequested'
+      },
+      {
+        label: 'Mark Missed',
+        callback: (contrib: MemberContribution) => this.markContributionMissed(contrib),
+        visible: (contrib: MemberContribution) => contrib.contributionStatus === 'Pending' || contrib.contributionStatus === 'WalletDebitRequested'
+      }
+    ],
+    showActions: true,
+    pageSize: 10,
+    eagerLoad: ['member', 'agent'],
+    filters: [
+      {
+        key: 'contributionStatus',
+        label: 'Status',
+        type: 'select',
+        options: [
+          { label: 'Pending', value: 'Pending' },
+          { label: 'Collected', value: 'Collected' },
+          { label: 'Missed', value: 'Missed' },
+          // { label: 'Exempted', value: 'Exempted' },
+        ]
+      }
+    ]
+  };
 
   // Computed
   breadcrumbs = computed<BreadcrumbItem[]>(() => {
@@ -181,17 +269,48 @@ export class ClaimDetailsComponent implements OnInit {
     
     const request: SearchRequest = {
       filters: [{ field: 'cycleId', operator: 'equals', value: cycleId }],
-      pageSize: 100,
+      pageSize: 10,
+      page: 1,
       eagerLoad: ['member', 'agent']
     };
 
     this.contributionsService.searchContributions(request).subscribe({
       next: (response) => {
         this.contributions.set(response.items);
+        this.contributionsData.set(response);
         this.contributionsLoading.set(false);
       },
       error: (error) => {
         console.error('Failed to load contributions:', error);
+        this.contributionsLoading.set(false);
+      }
+    });
+  }
+
+  onContributionsSearchChange(request: SearchRequest): void {
+    const cycleId = this.contributionCycle()?.cycleId;
+    if (!cycleId) return;
+
+    this.contributionsLoading.set(true);
+    
+    // Add cycleId filter to the request
+    const filters = request.filters ? [...request.filters] : [];
+    filters.push({ field: 'cycleId', operator: 'equals', value: cycleId });
+    
+    const searchRequest: SearchRequest = {
+      ...request,
+      filters,
+      eagerLoad: ['member', 'agent']
+    };
+
+    this.contributionsService.searchContributions(searchRequest).subscribe({
+      next: (response) => {
+        this.contributions.set(response.items);
+        this.contributionsData.set(response);
+        this.contributionsLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Failed to search contributions:', error);
         this.contributionsLoading.set(false);
       }
     });

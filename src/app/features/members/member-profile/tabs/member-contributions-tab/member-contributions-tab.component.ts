@@ -6,13 +6,14 @@ import { ContributionsService } from '../../../../../core/services/contributions
 import { ToastService } from '../../../../../core/services/toast.service';
 import { MemberContribution } from '../../../../../shared/models/death-claim.model';
 import { MemberContributionWithRelations } from '../../../../../shared/models/contribution.model';
+import { RecordCashModalComponent } from "../../../../death-claims/claim-details/record-cash-modal/record-cash-modal.component";
 
 export type MemberViewMode = 'self' | 'agent' | 'admin';
 
 @Component({
   selector: 'app-member-contributions-tab',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RecordCashModalComponent],
   templateUrl: './member-contributions-tab.component.html',
   styleUrls: ['./member-contributions-tab.component.css']
 })
@@ -47,6 +48,10 @@ export class MemberContributionsTabComponent implements OnInit {
       .filter(c => this.getStatus(c) === 'Pending' || this.getStatus(c) === 'WalletDebitRequested')
       .reduce((sum, c) => sum + this.getAmount(c), 0);
   });
+
+    showRecordCashModal = signal(false);
+  selectedContribution = signal<MemberContribution | MemberContributionWithRelations | null>(null);
+
 
   ngOnInit(): void {
     this.detectViewMode();
@@ -167,4 +172,21 @@ export class MemberContributionsTabComponent implements OnInit {
       deceasedMemberName: c.cycle.deceasedMemberName 
     } : {};
   }
+
+    openRecordCashModal(contribution: MemberContribution | MemberContributionWithRelations): void {
+      this.selectedContribution.set(contribution);
+      this.showRecordCashModal.set(true);
+    }
+  
+    closeRecordCashModal(): void {
+      this.showRecordCashModal.set(false);
+      this.selectedContribution.set(null);
+    }
+  
+    onCashRecorded(contribution: MemberContribution | MemberContributionWithRelations): void {
+    //   this.contributions.update(contribs => 
+    //     contribs.map(c => c.contributionId === contribution.contributionId ? contribution : c)
+    //   );
+      this.closeRecordCashModal();
+    }
 }

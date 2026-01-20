@@ -4,12 +4,35 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { ApprovalWorkflowService } from '../../../core/services/approval-workflow.service';
-import { 
+import {
   ApprovalRequest,
   ApprovalExecution,
   ApprovalRequestDetailsResponse
 } from '../../../shared/models/approval-workflow.model';
 import { BreadcrumbsComponent, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs.component';
+import { Member } from '../../../shared/models/member.model';
+import { Agent } from '../../../shared/models/agent.model';
+import { DeathClaim } from '../../../shared/models/death-claim.model';
+import { map, Observable } from 'rxjs';
+import { DeathClaimsService } from '../../../core/services/death-claims.service';
+import { MemberService } from '../../../core/services/member.service';
+import { AgentService } from '../../../core/services/agent.service';
+
+type requestEntity = Member | Agent | DeathClaim
+interface EntityConfig<T> {
+  icon: string,
+  getDisplayData: (entityId: string) => Observable<T>,
+  getDisplayName?: (entity: T) => string,
+  getSubtitle?: (entity: T) => string,
+  getRoute: (entityId: string) => string
+}
+interface EntityDetail<T> {
+  data: T;
+  icon: string;
+  route: string;
+  displayName: string;
+  subtitle: string;
+}
 
 @Component({
   selector: 'app-approval-details',
@@ -20,15 +43,43 @@ import { BreadcrumbsComponent, BreadcrumbItem } from '../../../shared/components
 })
 export class ApprovalDetailsComponent implements OnInit {
   private approvalService = inject(ApprovalWorkflowService);
+  private deathClaimService = inject(DeathClaimsService);
+  private memberService = inject(MemberService);
+  private agentService = inject(AgentService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
+  private configs: Record<string, EntityConfig<any>> = {
+    'DeathClaim': {
+      icon: '💀',
+      getDisplayData: (entityId: string) => this.deathClaimService.getClaimById(entityId),
+      getDisplayName: (entity: DeathClaim) => `Death Claim for ${entity.memberName || ''}`.trim() || 'Death Claim',
+      getSubtitle: (entity: DeathClaim) => `${entity.claimNumber} • ${entity.memberCode}`,
+      getRoute: (id: string) => `/death-claims/${id}`
+    },
+    'Member': {
+      icon: '👤',
+      getDisplayData: (entityId: string) => this.memberService.getMember(entityId),
+      getDisplayName: (entity: Member) => `Approval for ${entity.firstName} ${entity.lastName}`.trim() || 'Member',
+      getSubtitle: (entity: Member) => entity.memberCode,
+      getRoute: (id: string) => `/members/${id}`
+    },
+    'Agent': {
+      icon: '🧑‍💼',
+      getDisplayData: (entityId: string) => this.agentService.getAgent(entityId),
+      getDisplayName: (entity: Agent) => `Approval for ${entity.firstName} ${entity.lastName}`.trim() || 'Agent',
+      getSubtitle: (entity: Agent) => entity.agentCode,
+      getRoute: (id: string) => `/agents/${id}`
+    }
+  };
+
+  requestEntityDetails = signal<EntityDetail<requestEntity> | null>(null);
   requestDetails = signal<ApprovalRequest | null>(null);
   executions = signal<ApprovalExecution[]>([]);
   workflow = signal<any | null>(null);
   loading = signal(false);
   processing = signal(false);
-  
+
   comments = signal('');
   showRejectConfirm = signal(false);
 
@@ -65,6 +116,14 @@ export class ApprovalDetailsComponent implements OnInit {
         this.executions.set(response.executions);
         this.workflow.set(response.workflow);
         this.loading.set(false);
+
+        // Load entity details
+        this.getEntityDisplay(
+          response.request.entityType,
+          response.request.entityId
+        ).subscribe((entityDetails) => {
+          this.requestEntityDetails.set(entityDetails as EntityDetail<requestEntity>);
+        });
       },
       error: (error) => {
         console.error('Failed to load approval details:', error);
@@ -75,12 +134,25 @@ export class ApprovalDetailsComponent implements OnInit {
     });
   }
 
+  getEntityDisplay(entityType: string, entityId: string): Observable<EntityDetail<requestEntity>> {
+    const config = this.configs[entityType];
+    return config.getDisplayData(entityId).pipe(
+      map((data: requestEntity) => ({
+        data: data,
+        icon: config.icon,
+        route: config.getRoute(entityId),
+        displayName: config.getDisplayName ? config.getDisplayName(data) : '',
+        subtitle: config.getSubtitle ? config.getSubtitle(data) : ''
+      }))
+    );
+  }
+
   onApprove(): void {
     const details = this.requestDetails();
     const currentExecution = this.currentStageExecution();
     if (!details || !this.canTakeAction() || !currentExecution) return;
 
-    const confirmMsg = this.comments() 
+    const confirmMsg = this.comments()
       ? `Are you sure you want to approve this ${details.entityType}?`
       : `Are you sure you want to approve this ${details.entityType}? Consider adding comments.`;
 
@@ -114,7 +186,7 @@ export class ApprovalDetailsComponent implements OnInit {
     if (!details) return;
 
     this.processing.set(true);
-    
+
     this.approvalService.processApproval({
       executionId,
       decision,
@@ -153,9 +225,9 @@ export class ApprovalDetailsComponent implements OnInit {
 
   getStageStatusText(execution: ApprovalExecution): string {
     if (execution.status === 'Approved') {
-      return `Approved by ${execution.reviewedBy || 'User'} on ${this.formatDate(execution.reviewedAt!)}`;
+      return `Approved by ${((execution.reviewedByUser?.firstName) + ' ' + (execution.reviewedByUser?.lastName)) || 'User'} on ${this.formatDate(execution.reviewedAt!)}`;
     } else if (execution.status === 'Rejected') {
-      return `Rejected by ${execution.reviewedBy || 'User'} on ${this.formatDate(execution.reviewedAt!)}`;
+      return `Rejected by ${((execution.reviewedByUser?.firstName) + ' ' + (execution.reviewedByUser?.lastName)) || 'User'} on ${this.formatDate(execution.reviewedAt!)}`;
     } else {
       const details = this.requestDetails();
       if (details?.currentStageOrder === execution.stageOrder) {

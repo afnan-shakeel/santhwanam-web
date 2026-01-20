@@ -8,6 +8,7 @@
   </div>
 
   <!-- Stepper -->
+   @if(false){
   <nav aria-label="Progress" class="mb-8">
     <ol class="flex items-center justify-center">
       @for (step of steps; track step.id; let isLast = $last) {
@@ -46,6 +47,7 @@
       }
     </ol>
   </nav>
+  }
 
   <!-- Error Message -->
   @if (error()) {
@@ -68,79 +70,54 @@
     <div class="px-6 py-8">
       <!-- Step 1: Member Information -->
       @if (currentStep() === 'member-info') {
-        <div class="space-y-6">
+        <form [formGroup]="step1Form" class="space-y-6">
           <div>
             <h2 class="text-lg font-medium text-gray-900 mb-4">Search Deceased Member</h2>
             <app-member-search-select
+              label="Deceased Member"
               placeholder="Search by member code or name..."
+              formControlName="memberId"
               [required]="true"
               (memberSelected)="onMemberSelected($event)">
             </app-member-search-select>
           </div>
 
           @if (selectedMember()) {
-            <!-- Selected Member Details -->
-            <div class="rounded-lg border border-gray-200 bg-gray-50 p-6">
-              <h3 class="text-sm font-medium text-gray-900 mb-4">Selected Member</h3>
-              <div class="flex items-start gap-4">
-                <div class="shrink-0">
-                  @if (selectedMember()!.photoUrl) {
-                    <img [src]="selectedMember()!.photoUrl" alt="Member photo" class="h-16 w-16 rounded-full object-cover">
-                  } @else {
-                    <div class="h-16 w-16 rounded-full bg-linear-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-semibold text-lg">
-                      {{ selectedMember()!.firstName[0] }}{{ selectedMember()!.lastName[0] }}
-                    </div>
-                  }
-                </div>
-                <div class="flex-1 grid grid-cols-2 gap-x-4 gap-y-2">
-                  <div>
-                    <dt class="text-sm font-medium text-gray-500">Full Name</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ selectedMember()!.firstName }} {{ selectedMember()!.middleName }} {{ selectedMember()!.lastName }}</dd>
-                  </div>
-                  <div>
-                    <dt class="text-sm font-medium text-gray-500">Member Code</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ selectedMember()!.memberCode }}</dd>
-                  </div>
-                  <div>
-                    <dt class="text-sm font-medium text-gray-500">Tier</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ selectedMember()!.tierName || 'N/A' }}</dd>
-                  </div>
-                  <div>
-                    <dt class="text-sm font-medium text-gray-500">Status</dt>
-                    <dd class="mt-1">
-                      <span [class]="'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ' + 
-                        (selectedMember()!.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')">
-                        {{ selectedMember()!.status }}
-                      </span>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt class="text-sm font-medium text-gray-500">Agent</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ selectedMember()!.agentName || 'N/A' }}</dd>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <!-- Death Information Form -->
-            <form [formGroup]="step1Form" class="space-y-4">
-              <h3 class="text-lg font-medium text-gray-900">Death Information</h3>
-              
-              <app-input
-                label="Date of Death"
-                type="date"
-                formControlName="deathDate"
-                [required]="true">
-              </app-input>
-
-              <app-input
-                label="Place of Death"
-                type="text"
-                formControlName="deathPlace"
-                placeholder="e.g., Royal Hospital, Muscat">
-              </app-input>
+            <h3 class="text-lg font-medium text-gray-900 ">Death Information</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="">
+                <app-input
+                  label="Date of Death"
+                  type="date"
+                  formControlName="deathDate"
+                  [required]="true">
+                </app-input>
+              </div>
 
               <div>
+                <app-input
+                  label="Place of Death"
+                  type="text"
+                  formControlName="deathPlace"
+                  placeholder="e.g., Royal Hospital, Muscat">
+                </app-input>
+              </div>
+
+                <app-input
+                  label="Hospital/Location"
+                  type="text"
+                  formControlName="hospitalName"
+                  placeholder="Hospital name">
+                </app-input>
+                <app-input
+                  label="Doctor Name"
+                  type="text"
+                  formControlName="doctorName"
+                  placeholder="Attending doctor">
+                </app-input>
+
+              <div class="lg:col-span-4">
                 <label for="causeOfDeath" class="block text-sm font-medium text-gray-700 mb-1">
                   Cause of Death
                 </label>
@@ -149,26 +126,10 @@
                   formControlName="causeOfDeath"
                   rows="3"
                   placeholder="e.g., Natural causes - Heart attack"
-                  class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"></textarea>
+                  class="mt-1 block w-full rounded-md border-0 py-1.5 px-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"></textarea>
               </div>
 
-              <div class="grid grid-cols-2 gap-4">
-                <app-input
-                  label="Hospital/Location"
-                  type="text"
-                  formControlName="hospitalName"
-                  placeholder="Hospital name">
-                </app-input>
-
-                <app-input
-                  label="Doctor Name"
-                  type="text"
-                  formControlName="doctorName"
-                  placeholder="Attending doctor">
-                </app-input>
-              </div>
-
-              <div>
+              <div class="lg:col-span-4">
                 <label for="additionalNotes" class="block text-sm font-medium text-gray-700 mb-1">
                   Additional Notes (Optional)
                 </label>
@@ -177,11 +138,11 @@
                   formControlName="additionalNotes"
                   rows="3"
                   placeholder="Add any additional notes or information..."
-                  class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"></textarea>
+                  class="mt-1 block w-full rounded-md border-0 py-1.5 px-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"></textarea>
               </div>
-            </form>
+            </div>
           }
-        </div>
+        </form>
       }
 
       <!-- Step 2: Nominee & Payout -->
@@ -313,7 +274,7 @@
           <button
             type="button"
             (click)="submitStep1()"
-            [disabled]="!selectedMember() || step1Form.invalid || submitting()"
+            [disabled]="step1Form.invalid || submitting()"
             class="inline-flex justify-center rounded-md border border-transparent bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
             @if (submitting()) {
               <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">

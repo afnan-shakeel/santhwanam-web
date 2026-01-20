@@ -6,6 +6,8 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
 import { ContributionsService } from '../../../../core/services/contributions.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { MemberContribution } from '../../../../shared/models/death-claim.model';
+import { InputComponent } from "../../../../shared/components/input/input.component";
+import { MemberContributionWithRelations } from '../../../../shared/models/contribution.model';
 
 @Component({
   selector: 'app-record-cash-modal',
@@ -13,8 +15,9 @@ import { MemberContribution } from '../../../../shared/models/death-claim.model'
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    ModalComponent
-  ],
+    ModalComponent,
+    InputComponent
+],
   templateUrl: './record-cash-modal.component.html',
   styleUrls: ['./record-cash-modal.component.css']
 })
@@ -23,7 +26,7 @@ export class RecordCashModalComponent {
   private contributionsService = inject(ContributionsService);
   private toastService = inject(ToastService);
 
-  @Input({ required: true }) contribution!: MemberContribution;
+  @Input({ required: true }) contribution!: MemberContribution | MemberContributionWithRelations;
   @Output() closeModal = new EventEmitter<void>();
   @Output() cashRecorded = new EventEmitter<MemberContribution>();
 
@@ -31,10 +34,8 @@ export class RecordCashModalComponent {
   error = signal<string | null>(null);
 
   recordForm: FormGroup = this.fb.group({
-    collectionDate: [this.getTodayDate(), [Validators.required]],
-    collectedBy: ['', [Validators.required]],
     receiptNumber: [''],
-    notes: ['']
+    // notes: ['']
   });
 
   get memberName(): string {
@@ -64,10 +65,8 @@ export class RecordCashModalComponent {
     this.contributionsService.recordCashContribution(
       this.contribution.contributionId,
       {
-        collectionDate: new Date(formValue.collectionDate).toISOString(),
-        collectedBy: formValue.collectedBy,
         cashReceiptReference: formValue.receiptNumber || undefined,
-        notes: formValue.notes || undefined
+        // notes: formValue.notes || undefined
       }
     ).subscribe({
       next: (response) => {
@@ -80,14 +79,15 @@ export class RecordCashModalComponent {
         this.cashRecorded.emit(response.data);
         this.onClose();
       },
-      error: (err) => {
+      error: (response) => {
+        console.log("ERR",response.error)
         this.submitting.set(false);
-        this.error.set(err.message || 'Failed to record cash collection');
-        this.toastService.show({
-          type: 'error',
-          title: 'Action Failed',
-          message: err.message || 'Failed to record cash collection'
-        });
+        this.error.set(response.error?.error?.message || 'Failed to record cash collection');
+        // this.toastService.show({
+        //   type: 'error',
+        //   title: 'Action Failed',
+        //   message: err.message || 'Failed to record cash collection'
+        // });
       }
     });
   }

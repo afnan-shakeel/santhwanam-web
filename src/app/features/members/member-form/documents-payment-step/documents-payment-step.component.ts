@@ -18,7 +18,7 @@ import {
   DocumentCategory,
   CollectionMode
 } from '../../../../shared/models/member.model';
-  
+
 @Component({
   selector: 'app-documents-payment-step',
   standalone: true,
@@ -87,7 +87,7 @@ export class DocumentsPaymentStepComponent implements OnInit {
           this.tierData.set(tier);
           this.paymentForm.patchValue({
             registrationFee: tier.registrationFee || 0,
-            advanceDeposit: tier.advanceDeposit || 0
+            advanceDeposit: tier.advanceDepositAmount || 0
           });
           // Disable the fields since they come from tier
           this.paymentForm.get('registrationFee')?.disable();
@@ -113,7 +113,7 @@ export class DocumentsPaymentStepComponent implements OnInit {
     this.paymentForm = this.fb.group({
       registrationFee: [0, [Validators.required, Validators.min(0)]],
       advanceDeposit: [0, [Validators.required, Validators.min(0)]],
-      collectedBy: ['', Validators.required],
+      // collectedBy: ['', Validators.required],
       collectionDate: [today, Validators.required],
       collectionMode: ['', Validators.required],
       referenceNumber: ['']
@@ -267,7 +267,7 @@ export class DocumentsPaymentStepComponent implements OnInit {
     }
 
     this.loading.set(true);
-    const formValue = this.paymentForm.value;
+    const formValue = this.paymentForm.getRawValue();
     
     this.memberService.recordPayment(this.memberId, formValue).subscribe({
       next: () => {

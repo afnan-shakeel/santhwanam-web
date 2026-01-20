@@ -66,6 +66,9 @@ export interface AgentMember {
     tierCode: string;
     tierName: string;
   };
+  contributions?: {
+    count?: { pending: number }
+  }
   createdAt: string;
   registeredAt?: string | null;
 }

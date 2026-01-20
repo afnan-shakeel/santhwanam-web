@@ -1,10 +1,10 @@
-import { Component, EventEmitter, Input, Output, inject, signal, computed, effect } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject, signal, forwardRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { debounceTime, Subject } from 'rxjs';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
 import { MemberService } from '../../../core/services/member.service';
 import { Member } from '../../models/member.model';
+import { SearchSelectComponent, SearchSelectOption } from '../search-select/search-select.component';
 
 export interface MemberSearchResult {
   memberId: string;
@@ -26,57 +26,85 @@ export interface MemberSearchResult {
 @Component({
   selector: 'app-member-search-select',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SearchSelectComponent],
   templateUrl: './member-search-select.component.html',
-  styleUrls: ['./member-search-select.component.css']
+  styleUrls: ['./member-search-select.component.css'],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => MemberSearchSelectComponent),
+      multi: true
+    }
+  ]
 })
-export class MemberSearchSelectComponent {
+export class MemberSearchSelectComponent implements ControlValueAccessor {
   private memberService = inject(MemberService);
 
+  @Input() label = '';
   @Input() placeholder = 'Search by member code or name...';
   @Input() required = false;
   @Input() disabled = false;
+  @Input() hint = '';
+  @Input() error = '';
+
   @Output() memberSelected = new EventEmitter<MemberSearchResult>();
 
-  searchQuery = signal('');
-  searchResults = signal<MemberSearchResult[]>([]);
+  // Options for the search select
+  memberOptions = signal<SearchSelectOption<string>[]>([]);
+  initialOptions = signal<SearchSelectOption<string>[]>([]);
+  loading = signal(false);
+
+  // Store full member data for lookup
+  private membersMap = signal<Map<string, MemberSearchResult>>(new Map());
+
+  // Current selected value (memberId)
+  selectedMemberId = signal<string | null>(null);
+
+  // Currently selected member (full object)
   selectedMember = signal<MemberSearchResult | null>(null);
-  isSearching = signal(false);
-  showDropdown = signal(false);
-  error = signal<string | null>(null);
 
-  private searchSubject = new Subject<string>();
+  private onChange: (value: string | null) => void = () => {};
+  private onTouched: () => void = () => {};
 
-  constructor() {
-    // Debounce search
-    this.searchSubject.pipe(debounceTime(300)).subscribe(query => {
-      if (query.length >= 2) {
-        this.performSearch(query);
-      } else {
-        this.searchResults.set([]);
-        this.showDropdown.set(false);
+  // ControlValueAccessor implementation
+  writeValue(value: string | null): void {
+    this.selectedMemberId.set(value);
+    if (value) {
+      // Try to find the member in the map
+      const member = this.membersMap().get(value);
+      if (member) {
+        this.selectedMember.set(member);
+        this.initialOptions.set([{
+          value: member.memberId,
+          label: `${member.memberCode} - ${member.firstName} ${member.lastName}`
+        }]);
       }
-    });
-  }
-
-  onSearchInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const value = input.value;
-    this.searchQuery.set(value);
-    
-    if (value.length >= 2) {
-      this.isSearching.set(true);
-      this.searchSubject.next(value);
     } else {
-      this.searchResults.set([]);
-      this.showDropdown.set(false);
-      this.isSearching.set(false);
+      this.selectedMember.set(null);
     }
   }
 
-  private performSearch(query: string): void {
+  registerOnChange(fn: (value: string | null) => void): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled = isDisabled;
+  }
+
+  onSearch(term: string): void {
+    if (term.length < 2) {
+      this.memberOptions.set([]);
+      return;
+    }
+
+    this.loading.set(true);
     this.memberService.searchMembers({
-      searchTerm: query,
+      searchTerm: term,
       searchFields: ['memberCode', 'firstName', 'middleName', 'lastName'],
       page: 1,
       pageSize: 10,
@@ -84,47 +112,60 @@ export class MemberSearchSelectComponent {
       sortOrder: 'asc'
     }).subscribe({
       next: (response) => {
-        this.isSearching.set(false);
-        const results = response.items.map((member: Member) => ({
-          memberId: member.memberId,
-          memberCode: member.memberCode,
-          firstName: member.firstName,
-          middleName: member.middleName,
-          lastName: member.lastName,
-          dateOfBirth: member.dateOfBirth,
-          contactNumber: member.contactNumber,
-          email: member.email,
-          status: member.memberStatus,
-          tierId: member.tier?.tierId,
-          tierName: member.tier?.tierName,
-          agentId: member.agent?.agentId,
-          agentName: member.agent ? `${member.agent.firstName} ${member.agent.lastName}` : undefined,
-          photoUrl: undefined // Member model doesn't have photoUrl
-        }));
-        this.searchResults.set(results);
-        this.showDropdown.set(results.length > 0);
-        this.error.set(null);
+        this.loading.set(false);
+        const results = response.items.map((member: Member) => this.mapMemberToResult(member));
+        
+        // Store in map for later lookup
+        const newMap = new Map(this.membersMap());
+        results.forEach(member => newMap.set(member.memberId, member));
+        this.membersMap.set(newMap);
+
+        // Convert to search select options
+        this.memberOptions.set(results.map(member => ({
+          value: member.memberId,
+          label: `${member.memberCode} - ${member.firstName} ${member.lastName} (${member.status || 'Unknown'})`
+        })));
       },
       error: (err) => {
-        this.isSearching.set(false);
-        this.error.set('Failed to search members');
+        this.loading.set(false);
         console.error('Member search error:', err);
       }
     });
   }
 
-  selectMember(member: MemberSearchResult): void {
-    this.selectedMember.set(member);
-    this.searchQuery.set(`${member.memberCode} - ${member.firstName} ${member.lastName}`);
-    this.showDropdown.set(false);
-    this.memberSelected.emit(member);
+  onSelectionChange(memberId: string | null): void {
+    this.selectedMemberId.set(memberId);
+    this.onChange(memberId);
+    this.onTouched();
+
+    if (memberId) {
+      const member = this.membersMap().get(memberId);
+      if (member) {
+        this.selectedMember.set(member);
+        this.memberSelected.emit(member);
+      }
+    } else {
+      this.selectedMember.set(null);
+    }
   }
 
-  clearSelection(): void {
-    this.selectedMember.set(null);
-    this.searchQuery.set('');
-    this.searchResults.set([]);
-    this.showDropdown.set(false);
+  private mapMemberToResult(member: Member): MemberSearchResult {
+    return {
+      memberId: member.memberId,
+      memberCode: member.memberCode,
+      firstName: member.firstName,
+      middleName: member.middleName,
+      lastName: member.lastName,
+      dateOfBirth: member.dateOfBirth,
+      contactNumber: member.contactNumber,
+      email: member.email,
+      status: member.memberStatus,
+      tierId: member.tier?.tierId,
+      tierName: member.tier?.tierName,
+      agentId: member.agent?.agentId,
+      agentName: member.agent ? `${member.agent.firstName} ${member.agent.lastName}` : undefined,
+      photoUrl: undefined
+    };
   }
 
   getFullName(member: MemberSearchResult): string {
@@ -136,18 +177,5 @@ export class MemberSearchSelectComponent {
     const firstInitial = member.firstName?.[0] || '';
     const lastInitial = member.lastName?.[0] || '';
     return (firstInitial + lastInitial).toUpperCase();
-  }
-
-  onFocus(): void {
-    if (this.searchResults().length > 0 && this.searchQuery().length >= 2) {
-      this.showDropdown.set(true);
-    }
-  }
-
-  onBlur(): void {
-    // Delay to allow click on dropdown item
-    setTimeout(() => {
-      this.showDropdown.set(false);
-    }, 200);
   }
 }

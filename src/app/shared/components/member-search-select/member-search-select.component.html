@@ -1,112 +1,64 @@
-<div class="relative">
-  <!-- Search Input -->
-  <div class="relative">
-    <input
-      type="text"
-      [value]="searchQuery()"
-      (input)="onSearchInput($event)"
-      (focus)="onFocus()"
-      (blur)="onBlur()"
-      [placeholder]="placeholder"
-      [disabled]="disabled"
-      [required]="required"
-      class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
-      [class.pr-10]="isSearching() || selectedMember()"
-    />
-    
-    <!-- Loading Spinner -->
-    @if (isSearching()) {
-      <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-        <svg class="animate-spin h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
+<div class="space-y-4">
+  <!-- Search Select for Member -->
+  <app-search-select
+    [label]="label"
+    [placeholder]="placeholder"
+    [options]="memberOptions()"
+    [initialOptions]="initialOptions()"
+    [loading]="loading()"
+    [required]="required"
+    [disabled]="disabled"
+    [hint]="hint"
+    [error]="error"
+    [ngModel]="selectedMemberId()"
+    (ngModelChange)="onSelectionChange($event)"
+    (search)="onSearch($event)">
+  </app-search-select>
+
+  <!-- Selected Member Details Card -->
+  @if (selectedMember()) {
+    <div class="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+      <div class="flex items-start gap-4">
+        <!-- Avatar -->
+        <div class="shrink-0">
+          @if (selectedMember()!.photoUrl) {
+            <img [src]="selectedMember()!.photoUrl" [alt]="getFullName(selectedMember()!)" class="h-12 w-12 rounded-full object-cover">
+          } @else {
+            <div class="h-12 w-12 rounded-full bg-linear-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-semibold text-sm">
+              {{ getInitials(selectedMember()!) }}
+            </div>
+          }
+        </div>
+
+        <!-- Member Info -->
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2">
+            <p class="text-sm font-medium text-gray-900">
+              {{ getFullName(selectedMember()!) }}
+            </p>
+            @if (selectedMember()!.status) {
+              <span [class]="'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ' + 
+                (selectedMember()!.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')">
+                {{ selectedMember()!.status }}
+              </span>
+            }
+          </div>
+          <p class="text-xs text-gray-500 mt-1">
+            <span class="font-medium">{{ selectedMember()!.memberCode }}</span>
+            @if (selectedMember()!.tierName) {
+              <span class="mx-1">•</span>
+              {{ selectedMember()!.tierName }}
+            }
+            @if (selectedMember()!.agentName) {
+              <span class="mx-1">•</span>
+              Agent: {{ selectedMember()!.agentName }}
+            }
+          </p>
+          @if (selectedMember()!.contactNumber) {
+            <p class="text-xs text-gray-400 mt-0.5">{{ selectedMember()!.contactNumber }}</p>
+          }
+        </div>
       </div>
-    }
-
-    <!-- Clear Button -->
-    @if (selectedMember() && !disabled) {
-      <button
-        type="button"
-        (click)="clearSelection()"
-        class="absolute inset-y-0 right-0 flex items-center pr-3">
-        <svg class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
-    }
-
-    <!-- Search Icon -->
-    @if (!isSearching() && !selectedMember()) {
-      <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-      </div>
-    }
-  </div>
-
-  <!-- Error Message -->
-  @if (error()) {
-    <p class="mt-1 text-sm text-red-500">{{ error() }}</p>
-  }
-
-  <!-- Dropdown Results -->
-  @if (showDropdown() && searchResults().length > 0) {
-    <div class="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
-      <ul class="py-1">
-        @for (member of searchResults(); track member.memberId) {
-          <li>
-            <button
-              type="button"
-              (click)="selectMember(member)"
-              class="w-full px-4 py-3 hover:bg-gray-50 flex items-center gap-3 text-left transition-colors">
-              <!-- Avatar -->
-              <div class="shrink-0">
-                @if (member.photoUrl) {
-                  <img [src]="member.photoUrl" [alt]="getFullName(member)" class="h-10 w-10 rounded-full object-cover">
-                } @else {
-                  <div class="h-10 w-10 rounded-full bg-linear-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-semibold text-sm">
-                    {{ getInitials(member) }}
-                  </div>
-                }
-              </div>
-
-              <!-- Member Info -->
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2">
-                  <p class="text-sm font-medium text-gray-900 truncate">
-                    {{ getFullName(member) }}
-                  </p>
-                  <span [class]="'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ' + 
-                    (member.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')">
-                    {{ member.status }}
-                  </span>
-                </div>
-                <p class="text-xs text-gray-500">
-                  {{ member.memberCode }}
-                  @if (member.tierName) {
-                    <span class="mx-1">•</span>
-                    {{ member.tierName }}
-                  }
-                  @if (member.agentName) {
-                    <span class="mx-1">•</span>
-                    Agent: {{ member.agentName }}
-                  }
-                </p>
-                <p class="text-xs text-gray-400">{{ member.contactNumber }}</p>
-              </div>
-            </button>
-          </li>
-        }
-      </ul>
-    </div>
-  }
-
-  <!-- No Results -->
-  @if (showDropdown() && searchResults().length === 0 && !isSearching() && searchQuery().length >= 2) {
-    <div class="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 p-4">
-      <p class="text-sm text-gray-500 text-center">No members found matching "{{ searchQuery() }}"</p>
     </div>
   }
 </div>

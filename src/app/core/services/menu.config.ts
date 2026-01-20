@@ -30,6 +30,7 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     label: 'Admin',
     route: '/admin',
     icon: 'settings',
+    roles: ['super_admin', 'forum_admin'],
     children: [
       { 
         label: 'Permissions', 
@@ -71,7 +72,7 @@ export const MENU_CONFIG: MenuItemConfig[] = [
         label: 'Membership Tiers',
         route: '/admin/tiers',
         icon: 'layers',
-        permissions: [PERMISSIONS.ORG.TIER.READ]
+        roles: ['super_admin', 'forum_admin']
       }
     ]
   },
@@ -105,31 +106,36 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     label: 'Forums', 
     route: '/forums',
     icon: 'forum',
-    permissions: [PERMISSIONS.ORG.FORUM.READ]
+    roles: ['forum_admin']
+    // permissions: [PERMISSIONS.ORG.FORUM.READ]
   },
   { 
     label: 'Areas', 
     route: '/areas',
     icon: 'map',
-    permissions: [PERMISSIONS.ORG.AREA.READ]
+    roles: ['forum_admin', 'area_admin']
+    // permissions: [PERMISSIONS.ORG.AREA.READ]
   },
   { 
     label: 'Units', 
     route: '/units',
     icon: 'business',
-    permissions: [PERMISSIONS.ORG.UNIT.READ]
+    roles: ['forum_admin', 'area_admin', 'unit_admin']
+    // permissions: [PERMISSIONS.ORG.UNIT.READ]
   },
   { 
     label: 'Agents', 
     route: '/agents',
     icon: 'support_agent',
-    permissions: [PERMISSIONS.AGENT.READ]
+    // permissions: [PERMISSIONS.AGENT.READ],
+    roles: ['forum_admin', 'area_admin', 'unit_admin']
   },
   { 
     label: 'Members', 
     route: '/members',
     icon: 'groups',
-    permissions: [PERMISSIONS.MEMBER.READ]
+    // permissions: [PERMISSIONS.MEMBER.READ]
+    roles: ['forum_admin', 'area_admin', 'unit_admin']
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -155,12 +161,13 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     label: 'Finance',
     route: '/finance',
     icon: 'account_balance',
+    roles: ['forum_admin'],
     children: [
       {
         label: 'Chart of Accounts',
         route: '/finance/accounts',
         icon: 'list_alt',
-        permissions: [PERMISSIONS.GL.ACCOUNT.READ]
+        roles: ['forum_admin']
       },
       {
         label: 'Journal Entries',
@@ -184,6 +191,7 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     label: 'Reports',
     route: '/reports',
     icon: 'analytics',
+    roles: ['forum_admin'],
     children: [
       {
         label: 'Member Reports',
