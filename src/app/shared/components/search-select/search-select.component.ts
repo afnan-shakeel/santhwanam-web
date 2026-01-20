@@ -56,7 +56,15 @@ export class SearchSelectComponent<T = any> implements ControlValueAccessor, OnI
   @Input() disabled = false;
   @Input() hint = '';
   @Input() error = '';
-  @Input() maxHeight = '300px';
+
+  @Input() size: 'x-small' | 'small' | 'medium' | 'large' = 'medium';
+  sizeMapper = {
+    'x-small': '2px',
+    'small': '4px',
+    'medium': '6px',
+    'large': '8px'
+  };
+  @Input() maxHeight = '300px'; // options list size
 
   @Output() search = new EventEmitter<string>();
   @Output() selectionChange = new EventEmitter<T | T[] | null>();

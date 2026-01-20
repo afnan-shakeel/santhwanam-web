@@ -42,7 +42,11 @@ export class LoginComponent implements OnInit {
       password: this.password()
     }).subscribe({
       next: () => {
-        this.router.navigateByUrl(this.returnUrl());
+        console.log('Login successful, navigating to:', this.returnUrl());
+        this.router.navigateByUrl(this.returnUrl()).then(
+          (success) => console.log('Navigation result:', success),
+          (error) => console.error('Navigation error:', error)
+        );
       },
       error: (error) => {
         this.isLoading.set(false);

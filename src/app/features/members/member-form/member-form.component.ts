@@ -34,6 +34,11 @@ export class MemberFormComponent implements OnInit {
   isEditMode = signal(false);
   memberData = signal<Member | null>(null);
 
+  // whether the form is being filled by agent or admin
+  formFillingEntity = signal<'agent' | 'admin'>('admin'); // whether its the agent or admin filling the form
+  formFillingEntityIsAgent = computed(() => this.formFillingEntity() === 'agent');
+  formFillingEntityId = signal<string | null>(null); // agentId if formFillingEntity is agent
+
   steps = computed<StepConfig[]>(() => {
     const current = this.currentStep();
     return [
@@ -60,6 +65,21 @@ export class MemberFormComponent implements OnInit {
   });
 
   ngOnInit(): void {
+
+    // check if form id filled by agent
+    const agentId = this.route.snapshot.queryParamMap.get('agentId');
+    if (agentId) {
+      this.formFillingEntity.set('agent');
+      this.formFillingEntityId.set(agentId);
+      // set agent id in memberData
+      this.memberData.update((data) => {
+        if (data) {
+          data.agentId = agentId;
+        }
+        return data;
+      });
+    }
+
     // Check if we're in edit mode
     const memberId = this.route.snapshot.paramMap.get('memberId');
     if (memberId) {
@@ -67,7 +87,7 @@ export class MemberFormComponent implements OnInit {
       this.memberId.set(memberId);
       this.loadMemberData(memberId);
     }
-  }
+  }  
 
   private loadMemberData(memberId: string): void {
     this.loading.set(true);

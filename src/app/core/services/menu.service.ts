@@ -1,11 +1,12 @@
-import { Injectable, signal, computed } from '@angular/core';
+// src/app/core/menu/menu.service.ts
+import { Injectable, inject, signal, computed, effect } from '@angular/core';
+import { MENU_CONFIG, MenuItemConfig } from './menu.config';
+import { AuthService } from './auth.service';
+import { AccessService } from './access.service';
+import { AccessStore } from './access.index';
 
-export interface MenuItem {
-  label: string;
-  route: string;
-  icon?: string;
+export interface MenuItem extends MenuItemConfig {
   active?: boolean;
-  // Optional children for nested menus (two levels supported)
   children?: MenuItem[];
 }
 
@@ -13,102 +14,219 @@ export interface MenuItem {
   providedIn: 'root'
 })
 export class MenuService {
-  private menuItems = signal<MenuItem[]>([
-    {
-      label: 'Admin',
-      route: '/admin',
-      active: true,
-      children: [
-        { label: 'Permissions', route: '/permissions', active: false },
-        { label: 'Roles', route: '/roles', active: false },
-        { label: 'Users', route: '/users', active: false },
-        { label: 'Approval Workflows', route: '/approvals/workflows', active: false },
-        { label: 'Approval Requests', route: '/approvals/all-requests', active: false },
-        { label: 'Wallet Management', route: '/wallet/admin', active: false }
-      ]
-    },
-    { label: 'My Approvals', route: '/approvals/my-approvals', active: false },
-    { label: 'My Wallet', route: '/my-wallet', active: false },
-    // { label: 'My Agent Profile', route: '/agents/my-profile', active: false },
-    { label: 'Forums', route: '/forums', active: false },
-    { label: 'Areas', route: '/areas', active: false },
-    { label: 'Units', route: '/units', active: false },
-    { label: 'Agents', route: '/agents', active: false },
-    { label: 'Members', route: '/members', active: false },
-    { label: 'Death Claims', route: '/death-claims', active: false },
-    { label: 'Contributions', route: '/contributions', active: false },
-  ]);
+  private authService = inject(AuthService);
+  private accessService = inject(AccessService);
+  private accessStore = inject(AccessStore);
 
-  readonly items = computed(() => this.menuItems());
+  // Internal state with visibility tracking
+  private _menuItems = signal<MenuItem[]>([]);
 
-  setMenuItems(items: MenuItem[]): void {
-    this.menuItems.set(items);
+  // Public: only returns visible items
+  readonly items = computed(() => this._menuItems());
+
+  constructor() {
+    // Recompute menu when auth state changes
+    effect(() => {
+      // Create dependencies on auth signals
+      const permissions = this.accessStore.permissions();
+      const roles = this.accessStore.roles();
+      
+      // Recompute visible menu
+      const visibleMenu = this.buildVisibleMenu(MENU_CONFIG);
+      this._menuItems.set(visibleMenu);
+    });
   }
 
-  addMenuItem(item: MenuItem): void {
-    this.menuItems.update(items => [...items, item]);
-  }
+  // ─────────────────────────────────────────────────────────────────────────────
+  // VISIBILITY COMPUTATION
+  // ─────────────────────────────────────────────────────────────────────────────
 
   /**
-   * Add a child menu item under a parent route.
-   * If parent not found at root level, no-op.
+   * Build menu with only visible items based on user's permissions/roles
    */
-  addChildMenuItem(parentRoute: string, child: MenuItem): void {
-    this.menuItems.update(items =>
-      items.map(i => {
-        if (i.route === parentRoute) {
-          const children = i.children ? [...i.children, child] : [child];
-          return { ...i, children };
-        }
-        return i;
-      })
-    );
-  }
+  private buildVisibleMenu(config: MenuItemConfig[]): MenuItem[] {
+    const result: MenuItem[] = [];
 
-  removeMenuItem(route: string): void {
-    const removeRecursive = (items: MenuItem[]): MenuItem[] =>
-      items
-        .map(item => ({ ...item }))
-        .filter(item => item.route !== route)
-        .map(item => {
-          if (item.children) {
-            item.children = removeRecursive(item.children);
-          }
-          return item;
-        });
+    for (const item of config) {
+      const visibleItem = this.processMenuItem(item);
+      if (visibleItem) {
+        result.push(visibleItem);
+      }
+    }
 
-    this.menuItems.update(items => removeRecursive(items));
-  }
-
-  setActiveMenuItem(route: string): void {
-    const updateRecursive = (items: MenuItem[]): MenuItem[] =>
-      items.map(item => {
-        const isActive = item.route === route;
-        let children: MenuItem[] | undefined;
-        if (item.children) {
-          children = updateRecursive(item.children);
-          // if any child is active, mark parent active too
-          const anyChildActive = children.some(c => c.active);
-          return { ...item, active: isActive || anyChildActive, children };
-        }
-        return { ...item, active: isActive };
-      });
-
-    this.menuItems.update(items => updateRecursive(items));
+    return result;
   }
 
   /**
-   * Flatten items into a list — useful for components that expect flat array
+   * Process a single menu item and its children
+   * Returns null if item should be hidden
+   */
+  private processMenuItem(item: MenuItemConfig): MenuItem | null {
+    // Process children first (if any)
+    let visibleChildren: MenuItem[] | undefined;
+    
+    if (item.children?.length) {
+      visibleChildren = [];
+      for (const child of item.children) {
+        const visibleChild = this.processMenuItem(child);
+        if (visibleChild) {
+          visibleChildren.push(visibleChild);
+        }
+      }
+    }
+
+    // Check direct access
+    const hasDirectAccess = this.hasAccess(item);
+
+    // For parent items: visible if has direct access OR has visible children
+    const hasVisibleChildren = visibleChildren && visibleChildren.length > 0;
+    
+    if (!hasDirectAccess && !hasVisibleChildren) {
+      return null; // Hide this item
+    }
+
+    // Build the visible menu item
+    const menuItem: MenuItem = {
+      label: item.label,
+      route: item.route,
+      icon: item.icon,
+      active: false
+    };
+
+    if (visibleChildren?.length) {
+      menuItem.children = visibleChildren;
+    }
+
+    return menuItem;
+  }
+
+  /**
+   * Check if current user has access to a menu item
+   */
+  private hasAccess(item: MenuItemConfig): boolean {
+    // No restrictions = always visible
+    if (!item.permissions?.length && !item.roles?.length) {
+      return true;
+    }
+
+    // Check permissions (OR logic)
+    if (item.permissions?.length) {
+      if (this.accessStore.hasAnyPermission(item.permissions)) {
+        return true;
+      }
+    }
+
+    // Check roles (OR logic)
+    if (item.roles?.length) {
+      for (const roleCode of item.roles) {
+        if (this.accessStore.hasRole(roleCode)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // ACTIVE STATE MANAGEMENT
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Set active menu item by route
+   */
+  setActiveMenuItem(route: string): void {
+    this._menuItems.update(items => this.updateActiveState(items, route));
+  }
+
+  private updateActiveState(items: MenuItem[], activeRoute: string): MenuItem[] {
+    return items.map(item => {
+      const isDirectMatch = item.route === activeRoute;
+      let children = item.children;
+      let isChildActive = false;
+
+      if (children) {
+        children = this.updateActiveState(children, activeRoute);
+        isChildActive = children.some(c => c.active);
+      }
+
+      return {
+        ...item,
+        active: isDirectMatch || isChildActive,
+        children
+      };
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // UTILITY METHODS
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Flatten menu into a single-level array
    */
   flattenItems(): MenuItem[] {
-    const res: MenuItem[] = [];
+    const result: MenuItem[] = [];
+    
     const walk = (items: MenuItem[]) => {
-      for (const it of items) {
-        res.push(it);
-        if (it.children) walk(it.children);
+      for (const item of items) {
+        result.push(item);
+        if (item.children) {
+          walk(item.children);
+        }
       }
     };
-    walk(this.menuItems());
-    return res;
+    
+    walk(this._menuItems());
+    return result;
+  }
+
+  /**
+   * Check if a route is accessible to current user
+   */
+  isRouteAccessible(route: string): boolean {
+    const find = (items: MenuItem[]): boolean => {
+      for (const item of items) {
+        if (item.route === route) return true;
+        if (item.children && find(item.children)) return true;
+      }
+      return false;
+    };
+    return find(this._menuItems());
+  }
+
+  /**
+   * Get first accessible route (useful for redirect after login)
+   */
+  getDefaultRoute(): string {
+    const items = this._menuItems();
+    
+    if (items.length === 0) {
+      return '/dashboard'; // Fallback
+    }
+
+    // Return first item's route (or first child's route if parent has children)
+    const first = items[0];
+    if (first.children?.length) {
+      return first.children[0].route;
+    }
+    return first.route;
+  }
+
+  /**
+   * Find menu item by route
+   */
+  findByRoute(route: string): MenuItem | null {
+    const find = (items: MenuItem[]): MenuItem | null => {
+      for (const item of items) {
+        if (item.route === route) return item;
+        if (item.children) {
+          const found = find(item.children);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+    return find(this._menuItems());
   }
 }

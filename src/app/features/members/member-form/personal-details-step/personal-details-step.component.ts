@@ -28,6 +28,8 @@ import { MemberTier } from '../../../../shared/models/member.model';
 export class PersonalDetailsStepComponent implements OnInit {
   @Input() memberId: string | null = null;
   @Input() initialData: any = null;
+  @Input() formFillingEntity: 'agent' | 'admin' = 'admin';
+  @Input() formFillingEntityId: string | null = null;
   
   @Output() saveDraft = new EventEmitter<UpdateDraftPersonalDetailsRequest>();
   @Output() continue = new EventEmitter<RegisterMemberRequest>();
@@ -56,12 +58,36 @@ export class PersonalDetailsStepComponent implements OnInit {
   loadingAgents = signal(false);
 
   ngOnInit(): void {
+
+    this.onSearchUnits('');
+
     this.initializeForm();
     this.loadTiers();
     
+    console.log(this.initialData)
     if (this.initialData) {
-      this.personalForm.patchValue(this.initialData);
-    }
+    this.personalForm.patchValue(this.initialData);
+
+    // if unit id in initial data, load units with unit it
+
+    this.loadingUnits.set(true);
+    this.unitService.getUnit(this.initialData.unitId).subscribe({
+      next: (response) => {
+        console.log(response)
+        this.unitOptions.set(
+          [{
+            value: this.initialData.unitId,
+            label: `${response.unitName} (${response.unitCode})`
+          }])
+        this.loadingUnits.set(false);
+      },
+      error: () => {
+        this.loadingUnits.set(false);
+      }
+    });
+
+
+  }
   }
 
   private initializeForm(): void {
@@ -84,6 +110,15 @@ export class PersonalDetailsStepComponent implements OnInit {
       unitId: ['', Validators.required],
       agentId: ['', Validators.required]
     });
+
+    // if form is being filled by agents, set the agent id and disable agent id in form
+    if (this.formFillingEntity === 'agent' && this.formFillingEntityId) {
+      console.log('Setting agentId in personal form:', this.formFillingEntityId, this.initialData);
+      this.personalForm.patchValue({ agentId: this.formFillingEntityId });
+      // this.personalForm.get('agentId').readonly();
+      console.log('Agent ID field disabled in form', this.personalForm.value);
+      // conditionally hide the field in the template based on formFillingEntity
+    }
   }
 
   private ageValidator(control: any): { [key: string]: boolean } | null {
@@ -124,10 +159,10 @@ export class PersonalDetailsStepComponent implements OnInit {
   }
 
   onSearchUnits(searchTerm: string): void {
-    if (!searchTerm || searchTerm.length < 2) {
-      this.unitOptions.set([]);
-      return;
-    }
+    // if (!searchTerm || searchTerm.length < 2) {
+    //   this.unitOptions.set([]);
+    //   return;
+    // }
 
     this.loadingUnits.set(true);
     this.unitService.searchUnits({
@@ -187,6 +222,7 @@ export class PersonalDetailsStepComponent implements OnInit {
   }
 
   onContinue(): void {
+    console.log('Continuing with form value:', this.personalForm.value);
     if (this.personalForm.invalid) {
       Object.keys(this.personalForm.controls).forEach(key => {
         this.personalForm.controls[key].markAsTouched();

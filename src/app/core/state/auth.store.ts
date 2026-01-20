@@ -1,19 +1,7 @@
 import { Injectable, computed, signal, effect } from '@angular/core';
 
-export interface UserInfo {
-  userId: string;
-  externalAuthId: string;
-  email: string;
-  firstName: string | null;
-  lastName: string | null;
-  isActive: boolean;
-  userMetadata: any | null;
-  createdAt: Date;
-  lastSyncedAt: Date | null;
-}
 
 export interface AuthState {
-  user: UserInfo | null;
   accessToken: string | null;
   refreshToken: string | null;
   expiresAt: number | null;
@@ -28,7 +16,6 @@ export class AuthStore {
   private readonly authState = signal<AuthState>(this.loadFromStorage());
 
   // Computed signals for easy access
-  readonly user = computed(() => this.authState().user);
   readonly accessToken = computed(() => this.authState().accessToken);
   readonly refreshToken = computed(() => this.authState().refreshToken);
   readonly expiresAt = computed(() => this.authState().expiresAt);
@@ -38,7 +25,7 @@ export class AuthStore {
    */
   readonly isAuthenticated = computed(() => {
     const state = this.authState();
-    return !!state.accessToken && !!state.user && this.isTokenValid();
+    return !!state.accessToken && this.isTokenValid();
   });
 
   /**
@@ -69,17 +56,24 @@ export class AuthStore {
     });
   }
 
-  setAuth(user: UserInfo, accessToken: string, refreshToken?: string, expiresAt?: number): void {
+  setAuth(accessToken: string, refreshToken?: string, expiresAt?: number): void {
+    console.log('[AuthStore] setAuth called with token:', !!accessToken, 'expiresAt:', expiresAt);
+    
+    // Convert expiresAt from seconds to milliseconds if needed
+    // (API returns Unix timestamp in seconds, but Date.now() uses milliseconds)
+    let expiresAtMs: number | null = null;
+    if (expiresAt) {
+      // If expiresAt is less than a reasonable millisecond timestamp (year 2001), 
+      // it's likely in seconds and needs conversion
+      expiresAtMs = expiresAt < 1000000000000 ? expiresAt * 1000 : expiresAt;
+    }
+    
     this.authState.set({
-      user,
       accessToken,
       refreshToken: refreshToken || null,
-      expiresAt: expiresAt || null
+      expiresAt: expiresAtMs
     });
-  }
-
-  setUser(user: UserInfo | null): void {
-    this.authState.update(state => ({ ...state, user }));
+    console.log('[AuthStore] After set, isTokenValid:', this.isTokenValid(), 'isAuthenticated:', this.isAuthenticated());
   }
 
   setAccessToken(token: string): void {
@@ -90,16 +84,9 @@ export class AuthStore {
     this.authState.update(state => ({ ...state, refreshToken: token }));
   }
 
-  updateUser(updates: Partial<UserInfo>): void {
-    this.authState.update(state => ({
-      ...state,
-      user: state.user ? { ...state.user, ...updates } : null
-    }));
-  }
 
   clearAuth(): void {
     this.authState.set({
-      user: null,
       accessToken: null,
       refreshToken: null,
       expiresAt: null
@@ -116,7 +103,6 @@ export class AuthStore {
       console.error('Failed to load auth state from storage:', error);
     }
     return {
-      user: null,
       accessToken: null,
       refreshToken: null,
       expiresAt: null

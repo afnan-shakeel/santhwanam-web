@@ -12,11 +12,14 @@ export const authGuard: CanActivateFn = (route, state) => {
   const authStore = inject(AuthStore);
   const router = inject(Router);
 
+  console.log('[authGuard] Checking auth, isAuthenticated:', authStore.isAuthenticated(), 'for route:', state.url);
+
   if (authStore.isAuthenticated()) {
     return true;
   }
 
   // Redirect to login with return URL
+  console.log('[authGuard] Not authenticated, redirecting to login');
   router.navigate(['/auth/login'], {
     queryParams: { returnUrl: state.url }
   });

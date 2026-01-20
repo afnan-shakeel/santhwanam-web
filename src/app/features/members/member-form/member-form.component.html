@@ -43,6 +43,8 @@
             <app-personal-details-step
               [memberId]="memberId()"
               [initialData]="memberData()"
+              [formFillingEntity]="formFillingEntity()"
+              [formFillingEntityId]="formFillingEntityId()"
               (saveDraft)="onSaveDraft($event)"
               (continue)="onContinueFromPersonalDetails($event)"
             ></app-personal-details-step>

@@ -3,7 +3,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { tap, switchMap, catchError } from 'rxjs/operators';
 
 import { HttpService } from '../http/http.service';
-import { AuthStore, UserInfo } from '../state/auth.store';
+import { AuthStore } from '../state/auth.store';
 import { AccessStore } from '../state/access.store';
 import { AuthContext, AccessCheckResult } from '../../shared/models/auth.types';
 
@@ -13,7 +13,6 @@ export interface LoginCredentials {
 }
 
 export interface LoginResponse {
-  user: UserInfo | null;
   accessToken: string | null;
   refreshToken: string | null;
   expiresAt: number | null;
@@ -77,19 +76,21 @@ export class AuthService {
   login(credentials: LoginCredentials): Observable<AuthContext> {
     return this.http.post<LoginResponse>('/auth/login', credentials).pipe(
       tap(response => {
-        if (response.user && response.accessToken) {
+        console.log('[AuthService] Login response received:', !!response.accessToken);
+        if (response.accessToken) {
           this.authStore.setAuth(
-            response.user,
             response.accessToken,
             response.refreshToken || undefined,
             response.expiresAt || undefined
           );
+          console.log('[AuthService] After setAuth, isAuthenticated:', this.authStore.isAuthenticated());
         }
       }),
       switchMap(response => {
         if (!response.accessToken) {
           return throwError(() => new Error('Login failed: No access token received'));
         }
+        console.log('[AuthService] Fetching auth context...');
         // Fetch full auth context after login
         return this.fetchAuthContext();
       })
@@ -99,9 +100,8 @@ export class AuthService {
   register(data: RegisterData): Observable<AuthContext> {
     return this.http.post<LoginResponse>('/auth/register', data).pipe(
       tap(response => {
-        if (response.user && response.accessToken) {
+        if (response.accessToken) {
           this.authStore.setAuth(
-            response.user,
             response.accessToken,
             response.refreshToken || undefined,
             response.expiresAt || undefined
@@ -132,7 +132,9 @@ export class AuthService {
   fetchAuthContext(): Observable<AuthContext> {
     return this.http.get<AuthContext>('/auth/me').pipe(
       tap(context => {
+        console.log('[AuthService] Auth context fetched:', context?.user?.email);
         this.accessStore.setContext(context);
+        console.log('[AuthService] After setContext, isAuthenticated:', this.authStore.isAuthenticated());
       })
     );
   }
@@ -166,24 +168,6 @@ export class AuthService {
     );
   }
 
-  /**
-   * @deprecated Use accessStore.user instead for user info from auth context
-   */
-  getCurrentUser(): Observable<UserInfo> {
-    return this.http.get<UserInfo>('/auth/me').pipe(
-      tap(user => {
-        this.authStore.setUser(user);
-      })
-    );
-  }
-
-  updateProfile(updates: Partial<UserInfo>): Observable<UserInfo> {
-    return this.http.patch<UserInfo>('/auth/profile', updates).pipe(
-      tap(user => {
-        this.authStore.setUser(user);
-      })
-    );
-  }
 
   /**
    * Clear all authentication and access state

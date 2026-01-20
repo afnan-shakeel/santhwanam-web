@@ -18,7 +18,7 @@ import {
   DocumentCategory,
   CollectionMode
 } from '../../../../shared/models/member.model';
-
+  
 @Component({
   selector: 'app-documents-payment-step',
   standalone: true,

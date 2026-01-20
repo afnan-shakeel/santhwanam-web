@@ -7,6 +7,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { AuthStore } from '../../core/state/auth.store';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { ToastContainerComponent } from '../../shared/components/toast/toast-container.component';
+import { AccessStore } from '../../core/state/access.store';
 
 @Component({
   selector: 'app-main-layout',
@@ -18,6 +19,7 @@ import { ToastContainerComponent } from '../../shared/components/toast/toast-con
 export class MainLayoutComponent {
   menuService = inject(MenuService);
   authStore = inject(AuthStore);
+  accessStore = inject(AccessStore)
   private authService = inject(AuthService);
   private router = inject(Router);
 
@@ -39,7 +41,7 @@ export class MainLayoutComponent {
   }
 
   getUserDisplayName(): string {
-    const user = this.authStore.user();
+    const user = this.accessStore.user();
     if (!user) return 'User';
     
     if (user.firstName && user.lastName) {
@@ -49,7 +51,7 @@ export class MainLayoutComponent {
   }
 
   getUserEmail(): string {
-    return this.authStore.user()?.email || '';
+    return this.accessStore.user()?.email || '';
   }
 }
 
