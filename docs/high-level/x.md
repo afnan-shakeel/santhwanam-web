@@ -26,28 +26,86 @@ The Chart of Accounts includes a **parent-child structure** for cash accounts to
   - 1004 Cash - Forum Admin Custody
 
 ### 3. Calculated vs Stored Values
-**Retained Earnings** is calculated (Revenue - Expenses) rather than stored.
+**Retained Earnings** is calculated (Revenue - Expenses) rather than stored, ensuring data integrity in financial reports.
+
+### 4. Drill-Down Navigation
+Users can navigate from summary views → detailed views → source transactions seamlessly.
 
 ---
 
-## Complete Screen View Inventory
+## Architecture Overview
 
-| # | Screen | Purpose |
-|---|--------|---------|
-| 1 | Finance Dashboard | Overview, KPIs, quick actions |
-| 2 | Chart of Accounts | Manage accounts (tree view) |
-| 3 | Account Ledger | All transactions for an account |
-| 4 | Journal Entries List | Browse all journal entries |
-| 5 | Journal Entry Details | View entry with debit/credit lines |
-| 6 | Create Journal Entry | Manual entry form |
-| 7 | Trial Balance | Debit/Credit verification |
-| 8 | Income Statement | Revenue vs Expenses |
-| 9 | Balance Sheet | Assets = Liabilities + Equity |
-| 10 | Fiscal Periods | Period open/close management |
+### Component Structure
+
+```
+finance/
+├── components/                          # Shared Presentational
+│   ├── account-tree/                    # Hierarchical account display
+│   ├── account-balance-card/            # Single account summary
+│   ├── journal-entry-lines-table/       # Debit/Credit lines display
+│   ├── financial-summary-card/          # KPI cards
+│   ├── report-header/                   # Report title + date range
+│   └── export-buttons/                  # PDF/Excel export
+│
+├── pages/
+│   ├── finance-dashboard/               # Landing page
+│   ├── chart-of-accounts/               # Account list (tree view)
+│   │   └── account-ledger/              # Drill-down transactions
+│   ├── journal-entries/
+│   │   ├── journal-entries-list/        # All entries
+│   │   └── journal-entry-details/       # Single entry view (panel)
+│   ├── reports/
+│   │   ├── trial-balance/
+│   │   ├── income-statement/
+│   │   └── balance-sheet/
+│   └── fiscal-periods/                  # Period management
+│
+├── modals/
+│   ├── create-account-modal/
+│   ├── edit-account-modal/
+│   └── create-journal-entry-modal/
+│
+└── services/
+    ├── gl.service.ts
+    └── reports.service.ts
+```
+
+### Route Structure
+
+```
+Finance Routes:
+/finance                              → FinanceDashboardComponent
+/finance/accounts                     → ChartOfAccountsComponent
+/finance/accounts/:accountCode/ledger → AccountLedgerComponent
+/finance/journal-entries              → JournalEntriesListComponent
+/finance/reports/trial-balance        → TrialBalanceComponent
+/finance/reports/income-statement     → IncomeStatementComponent
+/finance/reports/balance-sheet        → BalanceSheetComponent
+/finance/periods                      → FiscalPeriodsComponent
+```
+
+---
+
+## Complete Screen Inventory
+
+| # | Screen | Route | Purpose |
+|---|--------|-------|---------|
+| 1 | Finance Dashboard | `/finance` | Overview, KPIs, quick actions |
+| 2 | Chart of Accounts | `/finance/accounts` | Manage accounts (tree view) |
+| 3 | Account Ledger | `/finance/accounts/:code/ledger` | All transactions for an account |
+| 4 | Journal Entries List | `/finance/journal-entries` | Browse all journal entries |
+| 5 | Journal Entry Details | Panel/Modal | View entry with debit/credit lines |
+| 6 | Create Journal Entry | Modal | Manual entry form |
+| 7 | Trial Balance | `/finance/reports/trial-balance` | Debit/Credit verification |
+| 8 | Income Statement | `/finance/reports/income-statement` | Revenue vs Expenses |
+| 9 | Balance Sheet | `/finance/reports/balance-sheet` | Assets = Liabilities + Equity |
+| 10 | Fiscal Periods | `/finance/periods` | Period open/close management |
 
 ---
 
 ## Current Chart of Accounts
+
+Based on the updated COA with cash custody sub-accounts:
 
 | Code | Account Name | Type | Parent | System |
 |------|--------------|------|--------|--------|
@@ -70,6 +128,8 @@ The Chart of Accounts includes a **parent-child structure** for cash accounts to
 ---
 
 ## 1.1 Finance Dashboard
+
+**Route:** `/finance`
 
 **Purpose:** Landing page providing financial overview, key metrics, and quick navigation to all finance functions.
 
@@ -174,11 +234,62 @@ The Chart of Accounts includes a **parent-child structure** for cash accounts to
 └────────────────────────────────┘
 ```
 
+### Dashboard Data Structure
+
+```typescript
+interface FinanceDashboard {
+  currentPeriod: {
+    periodId: string;
+    periodName: string;
+    startDate: string;
+    endDate: string;
+    daysRemaining: number;
+  };
+  
+  summaryCards: {
+    totalCashInCustody: number;
+    cashByLevel: {
+      agent: number;
+      unitAdmin: number;
+      areaAdmin: number;
+      forumAdmin: number;
+    };
+    bankBalance: number;
+    walletLiability: number;
+    netIncomeMTD: number;
+    netIncomeChange: number; // percentage
+  };
+  
+  revenueVsExpenses: {
+    totalRevenue: number;
+    totalExpenses: number;
+    netIncome: number;
+  };
+  
+  recentEntries: JournalEntrySummary[];
+  
+  alerts: FinanceAlert[];
+}
+
+interface FinanceAlert {
+  alertId: string;
+  type: 'CashOverdue' | 'PeriodClosing' | 'TrialBalanceError';
+  message: string;
+  severity: 'warning' | 'error';
+  actionLabel: string;
+  actionRoute: string;
+}
+```
+
+---
+
 # Part 2: Chart of Accounts
 
 ---
 
 ## 2.1 Chart of Accounts List
+
+**Route:** `/finance/accounts`
 
 **Purpose:** Display all accounts in a hierarchical tree structure, grouped by account type.
 
@@ -271,7 +382,7 @@ The Chart of Accounts includes a **parent-child structure** for cash accounts to
 
 ### Account Row Click → Details Panel
 
-Clicking on an account row opens a detail panel:
+Clicking on an account row opens a slide-out panel:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -371,7 +482,7 @@ Clicking on an account row opens a detail panel:
 
 ## 2.3 Account Ledger
 
-**Trigger:** Clicking on "View Ledger" in an account row opens below view.
+**Route:** `/finance/accounts/:accountCode/ledger`
 
 **Purpose:** Shows all journal entry lines affecting a specific account with running balance.
 
@@ -421,6 +532,8 @@ Clicking on an account row opens a detail panel:
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
+### Entry # Click → Opens Journal Entry Details Panel
+
 ---
 
 # Part 3: Journal Entries
@@ -428,6 +541,8 @@ Clicking on an account row opens a detail panel:
 ---
 
 ## 3.1 Journal Entries List
+
+**Route:** `/finance/journal-entries`
 
 **Purpose:** Browse, search, and filter all journal entries in the system.
 
@@ -637,6 +752,8 @@ When Forum Admin deposits to bank:
 
 ## 4.1 Trial Balance
 
+**Route:** `/finance/reports/trial-balance`
+
 **Purpose:** Verify that total debits equal total credits across all accounts.
 
 ### Layout Structure
@@ -696,6 +813,8 @@ When Forum Admin deposits to bank:
 
 ## 4.2 Income Statement (Profit & Loss)
 
+**Route:** `/finance/reports/income-statement`
+
 **Purpose:** Show revenue and expenses for a period to calculate net income.
 
 ### Layout Structure
@@ -747,6 +866,8 @@ When Forum Admin deposits to bank:
 ---
 
 ## 4.3 Balance Sheet
+
+**Route:** `/finance/reports/balance-sheet`
 
 **Purpose:** Show financial position at a point in time (Assets = Liabilities + Equity).
 
@@ -821,6 +942,8 @@ When Forum Admin deposits to bank:
 ---
 
 ## 5.1 Fiscal Periods Management
+
+**Route:** `/finance/periods`
 
 **Purpose:** Manage fiscal periods - view status, close periods, create new fiscal years.
 
@@ -902,13 +1025,295 @@ When Forum Admin deposits to bank:
 
 ---
 
-# Part 6: Updates and Enhancement - (Accounts Receivable)
+# Part 6: API Endpoints
 
-**Accounts Receivable** for tracking contribution obligations, the following work is required:
+## Complete API List
+
+### Chart of Accounts
+| # | Method | Endpoint | Description |
+|---|--------|----------|-------------|
+| 1 | GET | `/api/gl/accounts` | Get all accounts |
+| 2 | GET | `/api/gl/accounts/:accountId` | Get account by ID |
+| 3 | GET | `/api/gl/accounts/code/:accountCode` | Get account by code |
+| 4 | GET | `/api/gl/accounts/type/:accountType` | Get accounts by type |
+| 5 | GET | `/api/gl/accounts/active/list` | Get all active accounts |
+| 6 | POST | `/api/gl/accounts` | Create new account |
+| 7 | PUT | `/api/gl/accounts/:accountId` | Update account |
+| 8 | DELETE | `/api/gl/accounts/:accountId` | Deactivate account |
+| 9 | POST | `/api/gl/accounts/search` | Search accounts |
+
+### Journal Entries
+| # | Method | Endpoint | Description |
+|---|--------|----------|-------------|
+| 10 | GET | `/api/gl/entries` | List journal entries (paginated) |
+| 11 | GET | `/api/gl/entries/:entryId` | Get entry with lines |
+| 12 | POST | `/api/gl/entries` | Create manual entry |
+| 13 | POST | `/api/gl/entries/:entryId/reverse` | Reverse an entry |
+| 14 | POST | `/api/gl/entries/search` | Search entries |
+
+### Account Ledger
+| # | Method | Endpoint | Description |
+|---|--------|----------|-------------|
+| 15 | GET | `/api/gl/accounts/:accountCode/ledger` | Get account ledger |
+| 16 | GET | `/api/gl/accounts/:accountCode/balance` | Get account balance |
+
+### Reports
+| # | Method | Endpoint | Description |
+|---|--------|----------|-------------|
+| 17 | GET | `/api/gl/reports/trial-balance` | Generate trial balance |
+| 18 | GET | `/api/gl/reports/income-statement` | Generate income statement |
+| 19 | GET | `/api/gl/reports/balance-sheet` | Generate balance sheet |
+
+### Fiscal Periods
+| # | Method | Endpoint | Description |
+|---|--------|----------|-------------|
+| 20 | GET | `/api/gl/periods` | List all periods |
+| 21 | GET | `/api/gl/periods/year/:fiscalYear` | Get periods by year |
+| 22 | GET | `/api/gl/periods/current/active` | Get current active period |
+| 23 | POST | `/api/gl/periods` | Create fiscal year |
+| 24 | POST | `/api/gl/periods/:periodId/close` | Close a period |
+
+### Dashboard
+| # | Method | Endpoint | Description |
+|---|--------|----------|-------------|
+| 25 | GET | `/api/gl/dashboard` | Get dashboard data |
 
 ---
 
-## 6.1 When Would A/R Be Needed?
+# Part 7: Data Structures
+
+## ChartOfAccount
+
+```typescript
+interface ChartOfAccount {
+  accountId: string;
+  accountCode: string;
+  accountName: string;
+  accountType: 'Asset' | 'Liability' | 'Revenue' | 'Expense';
+  accountCategory?: string;
+  parentAccountId?: string;
+  parentAccount?: ChartOfAccount;
+  childAccounts?: ChartOfAccount[];
+  accountLevel: number;
+  normalBalance: 'Debit' | 'Credit';
+  currentBalance: number;
+  isActive: boolean;
+  isSystemAccount: boolean;
+  createdAt: string;
+  createdBy: string;
+  updatedAt?: string;
+  updatedBy?: string;
+}
+```
+
+## JournalEntry
+
+```typescript
+interface JournalEntry {
+  entryId: string;
+  entryNumber: string;
+  entryDate: string;
+  postingDate?: string;
+  description: string;
+  reference?: string;
+  sourceModule: string;
+  sourceEntityId?: string;
+  sourceTransactionType: string;
+  entryStatus: 'Draft' | 'Posted' | 'Reversed';
+  reversedEntryId?: string;
+  reversalReason?: string;
+  totalDebit: number;
+  totalCredit: number;
+  isBalanced: boolean;
+  lines: JournalEntryLine[];
+  createdAt: string;
+  createdBy: string;
+  postedAt?: string;
+  postedBy?: string;
+}
+
+interface JournalEntryLine {
+  lineId: string;
+  entryId: string;
+  lineNumber: number;
+  accountId: string;
+  accountCode: string;
+  accountName: string;
+  debitAmount: number;
+  creditAmount: number;
+  description: string;
+}
+```
+
+## AccountLedger
+
+```typescript
+interface AccountLedgerResponse {
+  account: ChartOfAccount;
+  dateRange: {
+    startDate: string;
+    endDate: string;
+  };
+  openingBalance: number;
+  closingBalance: number;
+  totalDebits: number;
+  totalCredits: number;
+  entries: AccountLedgerEntry[];
+}
+
+interface AccountLedgerEntry {
+  date: string;
+  entryId: string;
+  entryNumber: string;
+  description: string;
+  debit: number;
+  credit: number;
+  runningBalance: number;
+}
+```
+
+## Reports
+
+```typescript
+interface TrialBalanceReport {
+  asOfDate: string;
+  accounts: TrialBalanceItem[];
+  totalDebits: number;
+  totalCredits: number;
+  isBalanced: boolean;
+}
+
+interface TrialBalanceItem {
+  accountCode: string;
+  accountName: string;
+  accountType: string;
+  parentAccountCode?: string;
+  debitBalance: number;
+  creditBalance: number;
+}
+
+interface IncomeStatementReport {
+  startDate: string;
+  endDate: string;
+  revenue: IncomeStatementItem[];
+  expenses: IncomeStatementItem[];
+  totalRevenue: number;
+  totalExpenses: number;
+  netIncome: number;
+}
+
+interface IncomeStatementItem {
+  accountCode: string;
+  accountName: string;
+  amount: number;
+}
+
+interface BalanceSheetReport {
+  asOfDate: string;
+  assets: BalanceSheetSection;
+  liabilities: BalanceSheetSection;
+  equity: BalanceSheetSection;
+  totalAssets: number;
+  totalLiabilities: number;
+  totalEquity: number;
+  isBalanced: boolean;
+}
+
+interface BalanceSheetSection {
+  items: BalanceSheetItem[];
+  total: number;
+}
+
+interface BalanceSheetItem {
+  accountCode: string;
+  accountName: string;
+  amount: number;
+  children?: BalanceSheetItem[];
+}
+```
+
+## FiscalPeriod
+
+```typescript
+interface FiscalPeriod {
+  periodId: string;
+  fiscalYear: number;
+  periodNumber: number;
+  periodName: string;
+  startDate: string;
+  endDate: string;
+  status: 'Open' | 'Closed';
+  closedAt?: string;
+  closedBy?: string;
+  createdAt: string;
+}
+```
+
+---
+
+# Part 8: Permissions
+
+| Permission | Description | Roles |
+|------------|-------------|-------|
+| `gl.dashboard.view` | View finance dashboard | Super Admin, Forum Admin, Finance Admin |
+| `gl.account.view` | View chart of accounts | Super Admin, Forum Admin, Finance Admin |
+| `gl.account.create` | Create new accounts | Super Admin, Finance Admin |
+| `gl.account.update` | Update accounts | Super Admin, Finance Admin |
+| `gl.account.delete` | Deactivate accounts | Super Admin |
+| `gl.entry.view` | View journal entries | Super Admin, Forum Admin, Finance Admin |
+| `gl.entry.create` | Create manual entries | Super Admin, Finance Admin |
+| `gl.entry.reverse` | Reverse entries | Super Admin |
+| `gl.report.view` | View financial reports | Super Admin, Forum Admin, Finance Admin |
+| `gl.period.view` | View fiscal periods | Super Admin, Forum Admin, Finance Admin |
+| `gl.period.close` | Close fiscal periods | Super Admin |
+
+---
+
+# Part 9: Component Summary
+
+## Shared Components
+
+| Component | Selector | Purpose |
+|-----------|----------|---------|
+| AccountTreeComponent | `<app-account-tree>` | Hierarchical account display |
+| JournalEntryLinesTableComponent | `<app-je-lines-table>` | Debit/Credit lines table |
+| FinancialSummaryCardComponent | `<app-financial-card>` | KPI display cards |
+| ReportHeaderComponent | `<app-report-header>` | Report title + parameters |
+| AccountSelectorComponent | `<app-account-selector>` | Dropdown for account selection |
+| DateRangePickerComponent | `<app-date-range>` | Period/date selection |
+
+## Page Components
+
+| Component | Route | Purpose |
+|-----------|-------|---------|
+| FinanceDashboardComponent | `/finance` | Landing page |
+| ChartOfAccountsComponent | `/finance/accounts` | Account list |
+| AccountLedgerComponent | `/finance/accounts/:code/ledger` | Account transactions |
+| JournalEntriesListComponent | `/finance/journal-entries` | Entry list |
+| TrialBalanceComponent | `/finance/reports/trial-balance` | Trial balance report |
+| IncomeStatementComponent | `/finance/reports/income-statement` | P&L report |
+| BalanceSheetComponent | `/finance/reports/balance-sheet` | Balance sheet |
+| FiscalPeriodsComponent | `/finance/periods` | Period management |
+
+## Modals/Panels
+
+| Component | Trigger | Purpose |
+|-----------|---------|---------|
+| AccountDetailsPanelComponent | Click account row | View/edit account |
+| CreateAccountModalComponent | "+ Add Account" button | Create new account |
+| JournalEntryDetailsPanelComponent | Click entry row | View entry details |
+| CreateJournalEntryModalComponent | "+ Manual Entry" button | Create manual entry |
+| ClosePeriodConfirmModalComponent | "Close" button on period | Confirm period closure |
+
+---
+
+# Part 10: Future Enhancement - Accounts Receivable
+
+If the cooperative decides to implement **Accounts Receivable** for tracking contribution obligations, the following work would be required:
+
+---
+
+## 10.1 When Would A/R Be Needed?
 
 A/R becomes relevant when:
 1. **Contribution cycles create obligations** - When a death claim is created, all active members owe a contribution
@@ -917,7 +1322,7 @@ A/R becomes relevant when:
 
 ---
 
-## 6.2 New Chart of Accounts Required
+## 10.2 New Chart of Accounts Required
 
 | Code | Account Name | Type | Purpose |
 |------|--------------|------|---------|
@@ -926,7 +1331,7 @@ A/R becomes relevant when:
 
 ---
 
-## 6.3 Accounting Treatment
+## 10.3 Accounting Treatment
 
 ### Option A: Recognize Revenue When Collected (Current Approach - Simpler)
 
@@ -962,7 +1367,50 @@ Remaining A/R Balance: OMR 3,000 (150 members still owe)
 
 ---
 
-## 6.5 Required UI Changes
+## 10.4 Required Backend Changes
+
+### Domain Model Addition
+
+```typescript
+// No new entity needed - track via ContributionRecord.paymentStatus
+
+// Update GL Service to handle A/R entries
+interface ARJournalEntryRequest {
+  claimId: string;
+  contributionCycleId: string;
+  totalObligationAmount: number;
+  memberCount: number;
+}
+```
+
+### New GL Service Methods
+
+```typescript
+// Create bulk A/R entry when cycle starts
+async createContributionReceivable(request: ARJournalEntryRequest): Promise<JournalEntry>
+
+// Clear A/R when payments come in (batch process)
+async clearContributionReceivable(contributionRecordIds: string[]): Promise<JournalEntry>
+```
+
+### Event Handlers
+
+```typescript
+// Listen for contribution cycle events
+@OnEvent('ContributionCycleStarted')
+async handleCycleStarted(payload: ContributionCyclePayload) {
+  // Create A/R entry for total obligation
+}
+
+@OnEvent('ContributionPaid')
+async handleContributionPaid(payload: ContributionPaidPayload) {
+  // Clear individual A/R (or batch at end of day)
+}
+```
+
+---
+
+## 10.5 Required UI Changes
 
 ### Balance Sheet Update
 
@@ -1018,6 +1466,32 @@ Add A/R summary card to Finance Dashboard:
 │ [View A/R →]  │
 └───────────────┘
 ```
+
+---
+
+## 10.6 Implementation Effort Estimate
+
+| Component | Effort | Notes |
+|-----------|--------|-------|
+| Add new GL accounts (1200) | Low | Simple seed data |
+| GL Service - A/R entry creation | Medium | New methods |
+| GL Service - A/R clearing (batch) | Medium | Batch processing |
+| Event handlers integration | Medium | Wire up events |
+| Balance Sheet update | Low | Include new account |
+| A/R Aging Report | Medium | New report |
+| Dashboard card | Low | New component |
+| **Total** | **~2-3 sprints** | |
+
+---
+
+## 10.7 Recommendation
+
+**For Phase 1**: Continue with current approach (recognize revenue when collected). The operational tracking via `ContributionRecord.paymentStatus` provides sufficient visibility.
+
+**Consider A/R in Phase 2** if:
+- Auditors or regulators require accrual-based accounting
+- Management needs Balance Sheet to reflect total obligations
+- Collection aging analysis becomes important for decision-making
 
 ---
 
