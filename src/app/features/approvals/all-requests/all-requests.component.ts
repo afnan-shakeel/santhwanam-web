@@ -69,11 +69,11 @@ export class AllRequestsComponent implements OnInit {
       format: (value: string) => value.substring(0, 8)
     },
     {
-      key: 'module',
+      key: 'workflow.module',
       label: 'Module',
       sortable: true,
-      type: 'badge',
-      format: (value: ModuleType | undefined) => value || '-'
+      // type: 'badge',
+      // format: (value: ModuleType | undefined) => value || '-'
     },
     {
       key: 'status',
@@ -130,6 +130,7 @@ export class AllRequestsComponent implements OnInit {
   loadRequests(request: SearchRequest): void {
     this.loading.set(true);
     
+    request.eagerLoad = ['workflow', 'stageExecutions', 'requestedByUser'];
     this.approvalService.searchApprovalRequests(request).subscribe({
       next: (response) => {
         this.requestData.set(response);

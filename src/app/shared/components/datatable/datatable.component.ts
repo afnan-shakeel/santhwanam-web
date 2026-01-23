@@ -214,7 +214,7 @@ export class DatatableComponent<T = any> implements OnInit {
   }
 
   getCellValue(row: T, column: DataTableColumn<T>): any {
-    const value = (row as any)[column.key];
+    const value = this.getNestedValue(row, column.key);
     
     if (column.format) {
       return column.format(value, row);
@@ -225,6 +225,26 @@ export class DatatableComponent<T = any> implements OnInit {
     }
     
     return value ?? '-';
+  }
+
+  /**
+   * Get nested property value using dot notation
+   * e.g., 'workflow.module' will get row.workflow.module
+   */
+  private getNestedValue(obj: any, path: string): any {
+    if (!obj || !path) return undefined;
+    
+    const keys = path.split('.');
+    let value = obj;
+    
+    for (const key of keys) {
+      if (value === null || value === undefined) {
+        return undefined;
+      }
+      value = value[key];
+    }
+    
+    return value;
   }
 
   getCellClass(column: DataTableColumn<T>, value: any): string {
