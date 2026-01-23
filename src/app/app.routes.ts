@@ -7,7 +7,7 @@ import { guestGuard } from './core/guards/guest.guard';
 export const routes: Routes = [
   {
     path: 'home',
-    loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent)    
+    loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent)
   },
   // Auth routes (no layout, guest only)
   {
@@ -44,27 +44,15 @@ export const routes: Routes = [
         loadComponent: () => import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent)
       },
       {
-        path: 'team',
-        loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent)
-      },
-      {
-        path: 'projects',
-        loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent)
-      },
-      {
-        path: 'calendar',
-        loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent)
-      },
-      {
-        path: 'users',
+        path: 'admin/users',
         loadComponent: () => import('./features/users/users.component').then((m) => m.UsersComponent)
       },
       {
-        path: 'permissions',
+        path: 'admin/permissions',
         loadComponent: () => import('./features/permissions/permissions.component').then((m) => m.PermissionsComponent)
       },
       {
-        path: 'roles',
+        path: 'admin/roles',
         children: [
           {
             path: '',
@@ -79,6 +67,14 @@ export const routes: Routes = [
             loadComponent: () => import('./features/roles/role-form/role-form.component').then((m) => m.RoleFormComponent)
           }
         ]
+      },
+      {
+        path: 'admin/approvals/workflows',
+        loadComponent: () => import('./features/approvals/approval-workflows/approval-workflows.component').then((m) => m.ApprovalWorkflowsComponent)
+      },
+      {
+        path: 'admin/approvals/all-requests',
+        loadComponent: () => import('./features/approvals/all-requests/all-requests.component').then((m) => m.AllRequestsComponent)
       },
       {
         path: 'forums',
@@ -219,7 +215,7 @@ export const routes: Routes = [
           // Agent Member Wallet Routes (viewing member wallets as agent)
           {
             path: 'members/:memberId/wallet',
-            loadComponent: () => import('./features/wallet/member-wallet-v2/member-wallet-v2.component').then((m) => m.MemberWalletV2Component),
+            loadComponent: () => import('./features/wallet/pages/member-wallet/member-wallet.component').then((m) => m.MemberWalletComponent),
             data: { viewMode: 'agent' },
             children: [
               {
@@ -229,15 +225,15 @@ export const routes: Routes = [
               },
               {
                 path: 'overview',
-                loadComponent: () => import('./features/wallet/my-wallet/wallet-overview/wallet-overview.component').then((m) => m.WalletOverviewComponent)
+                loadComponent: () => import('./features/wallet/pages/wallet-overview/wallet-overview.component').then((m) => m.WalletOverviewComponent)
               },
               {
                 path: 'transactions',
-                loadComponent: () => import('./features/wallet/wallet-transactions/wallet-transactions.component').then((m) => m.WalletTransactionsComponent)
+                loadComponent: () => import('./features/wallet/pages/wallet-transactions/wallet-transactions.component').then((m) => m.WalletTransactionsComponent)
               },
               {
                 path: 'deposits',
-                loadComponent: () => import('./features/wallet/my-wallet/wallet-deposits/wallet-deposits.component').then((m) => m.WalletDepositsComponent)
+                loadComponent: () => import('./features/wallet/pages/wallet-deposits/wallet-deposits.component').then((m) => m.WalletDepositsComponent)
               }
             ]
           }
@@ -290,20 +286,12 @@ export const routes: Routes = [
               }
             ]
           },
-          {
-            path: ':memberId/wallet',
-            loadComponent: () => import('./features/wallet/member-wallet/member-wallet.component').then((m) => m.MemberWalletComponent)
-          },
-          {
-            path: ':memberId/wallet/transactions',
-            loadComponent: () => import('./features/wallet/wallet-transactions/wallet-transactions.component').then((m) => m.WalletTransactionsComponent)
-          }
         ]
       },
       // Wallet routes
       {
         path: 'my-wallet',
-        loadComponent: () => import('./features/wallet/my-wallet/my-wallet.component').then((m) => m.MyWalletComponent),
+        loadComponent: () => import('./features/wallet/pages/my-wallet/my-wallet.component').then((m) => m.MyWalletComponent),
         children: [
           {
             path: '',
@@ -312,15 +300,15 @@ export const routes: Routes = [
           },
           {
             path: 'overview',
-            loadComponent: () => import('./features/wallet/my-wallet/wallet-overview/wallet-overview.component').then((m) => m.WalletOverviewComponent)
+            loadComponent: () => import('./features/wallet/pages/wallet-overview/wallet-overview.component').then((m) => m.WalletOverviewComponent)
           },
           {
             path: 'transactions',
-            loadComponent: () => import('./features/wallet/wallet-transactions/wallet-transactions.component').then((m) => m.WalletTransactionsComponent)
+            loadComponent: () => import('./features/wallet/pages/wallet-transactions/wallet-transactions.component').then((m) => m.WalletTransactionsComponent)
           },
           {
             path: 'deposits',
-            loadComponent: () => import('./features/wallet/my-wallet/wallet-deposits/wallet-deposits.component').then((m) => m.WalletDepositsComponent)
+            loadComponent: () => import('./features/wallet/pages/wallet-deposits/wallet-deposits.component').then((m) => m.WalletDepositsComponent)
           }
         ]
       },
@@ -330,23 +318,23 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            loadComponent: () => import('./features/wallet/admin/wallet-dashboard/wallet-dashboard.component').then((m) => m.WalletDashboardComponent)
+            loadComponent: () => import('./features/wallet/pages/admin/wallet-dashboard/wallet-dashboard.component').then((m) => m.WalletDashboardComponent)
           },
           {
             path: 'pending-deposits',
-            loadComponent: () => import('./features/wallet/admin/pending-deposits/pending-deposits.component').then((m) => m.PendingDepositsComponent)
+            loadComponent: () => import('./features/wallet/pages/admin/pending-deposits/pending-deposits.component').then((m) => m.PendingDepositsComponent)
           },
           {
             path: 'list',
-            loadComponent: () => import('./features/wallet/admin/all-wallets/all-wallets.component').then((m) => m.AllWalletsComponent)
+            loadComponent: () => import('./features/wallet/pages/admin/all-wallets/all-wallets.component').then((m) => m.AllWalletsComponent)
           },
           {
             path: 'low-balance',
-            loadComponent: () => import('./features/wallet/admin/low-balance-report/low-balance-report.component').then((m) => m.LowBalanceReportComponent)
+            loadComponent: () => import('./features/wallet/pages/admin/low-balance-report/low-balance-report.component').then((m) => m.LowBalanceReportComponent)
           },
           {
             path: ':walletId',
-            loadComponent: () => import('./features/wallet/member-wallet-v2/member-wallet-v2.component').then((m) => m.MemberWalletV2Component),
+            loadComponent: () => import('./features/wallet/pages/member-wallet/member-wallet.component').then((m) => m.MemberWalletComponent),
             data: { viewMode: 'admin' },
             children: [
               {
@@ -356,22 +344,22 @@ export const routes: Routes = [
               },
               {
                 path: 'overview',
-                loadComponent: () => import('./features/wallet/my-wallet/wallet-overview/wallet-overview.component').then((m) => m.WalletOverviewComponent)
+                loadComponent: () => import('./features/wallet/pages/wallet-overview/wallet-overview.component').then((m) => m.WalletOverviewComponent)
               },
               {
                 path: 'transactions',
-                loadComponent: () => import('./features/wallet/wallet-transactions/wallet-transactions.component').then((m) => m.WalletTransactionsComponent)
+                loadComponent: () => import('./features/wallet/pages/wallet-transactions/wallet-transactions.component').then((m) => m.WalletTransactionsComponent)
               },
               {
                 path: 'deposits',
-                loadComponent: () => import('./features/wallet/my-wallet/wallet-deposits/wallet-deposits.component').then((m) => m.WalletDepositsComponent)
+                loadComponent: () => import('./features/wallet/pages/wallet-deposits/wallet-deposits.component').then((m) => m.WalletDepositsComponent)
               }
             ]
           }
         ]
       },
       // Contributions routes
-      { 
+      {
         path: 'contributions',
         loadComponent: () => import('./features/contributions/my-contributions/my-contributions.component').then((m) => m.MyContributionsComponent)
       },
@@ -394,10 +382,6 @@ export const routes: Routes = [
         ]
       },
       {
-        path: 'approvals/workflows',
-        loadComponent: () => import('./features/approvals/approval-workflows/approval-workflows.component').then((m) => m.ApprovalWorkflowsComponent)
-      },
-      {
         path: 'approvals/my-approvals',
         children: [
           {
@@ -410,10 +394,6 @@ export const routes: Routes = [
           }
         ]
       },
-      {
-        path: 'approvals/all-requests',
-        loadComponent: () => import('./features/approvals/all-requests/all-requests.component').then((m) => m.AllRequestsComponent)
-      }
     ]
   },
   // Forbidden page (no layout)

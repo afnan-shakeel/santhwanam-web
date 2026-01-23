@@ -3,11 +3,11 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
-import { BreadcrumbsComponent, BreadcrumbItem } from '../../../../shared/components/breadcrumbs/breadcrumbs.component';
-import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
-import { WalletService } from '../../../../core/services/wallet.service';
-import { ToastService } from '../../../../core/services/toast.service';
-import { WalletDepositRequest } from '../../../../shared/models/wallet.model';
+import { BreadcrumbsComponent, BreadcrumbItem } from '../../../../../shared/components/breadcrumbs/breadcrumbs.component';
+import { PaginationComponent } from '../../../../../shared/components/pagination/pagination.component';
+import { WalletService } from '../../../../../core/services/wallet.service';
+import { ToastService } from '../../../../../core/services/toast.service';
+import { WalletDepositRequest } from '../../../../../shared/models/wallet.model';
 
 type SortOption = 'oldest' | 'newest' | 'amount-high' | 'amount-low';
 

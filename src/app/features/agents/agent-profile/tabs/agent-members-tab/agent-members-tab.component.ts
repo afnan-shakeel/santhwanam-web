@@ -4,29 +4,33 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { AgentService } from '../../../../../core/services/agent.service';
+import { AccessService } from '../../../../../core/services/access.service';
 import { AgentMember, AgentMembersResponse, AgentMembersQueryParams } from '../../../../../shared/models/agent-profile.model';
 import { RecordCashModalComponent } from "../../../../death-claims/claim-details/record-cash-modal/record-cash-modal.component";
+import { ButtonComponent } from "../../../../../shared/components/button/button.component";
+import { SelectComponent } from "../../../../../shared/components/select/select.component";
+import { InputComponent } from "../../../../../shared/components/input/input.component";
 
 export type MembersViewMode = 'self' | 'admin';
 
 @Component({
   selector: 'app-agent-members-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule, RecordCashModalComponent],
+  imports: [CommonModule, FormsModule, RecordCashModalComponent, ButtonComponent, SelectComponent, InputComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './agent-members-tab.component.html',
   styleUrls: ['./agent-members-tab.component.css']
 })
 export class AgentMembersTabComponent implements OnInit {
   private agentService = inject(AgentService);
+  private accessService = inject(AccessService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   // Expose Math for template
   Math = Math;
 
-  // Inputs
-  viewMode = input<MembersViewMode>('self');
+  readonly viewMode = this.accessService.viewMode
 
   // State
   members = signal<AgentMembersResponse | null>(null);
@@ -52,7 +56,7 @@ export class AgentMembersTabComponent implements OnInit {
   });
 
   title = computed(() => {
-    return this.viewMode() === 'self' ? 'My Members' : "Agent's Members";
+    return this.viewMode() === 'agent' ? 'My Members' : "Agent's Members";
   });
 
   memberRowActions = computed(() => {
@@ -198,17 +202,23 @@ export class AgentMembersTabComponent implements OnInit {
 
   // Actions
   viewMember(member: AgentMember): void {
-    if (this.viewMode() === 'self') {
-        // this.router.navigate(['/agents/members', member.memberId, 'wallet']);
-        this.router.navigate(['/members', member.memberId, 'profile']);
+    if (this.viewMode() === 'agent') {
+      // Agent viewing their own member - use agent profile route
+      this.router.navigate(['/agents/members', member.memberId]);
     } else {
+      // Admin viewing - use admin member profile route
       this.router.navigate(['/members', member.memberId, 'profile']);
     }
   }
 
   viewMemberPendingContributions(member: AgentMember): void {
-    ///members/:memberId/profile/contributions
-    this.router.navigate(['/members', member.memberId, 'profile', 'contributions'], { queryParams: { filter: 'pending' } });
+    if (this.viewMode() === 'agent') {
+      // Agent viewing their own member's contributions
+      this.router.navigate(['/agents/members', member.memberId, 'contributions'], { queryParams: { filter: 'pending' } });
+    } else {
+      // Admin viewing
+      this.router.navigate(['/members', member.memberId, 'profile', 'contributions'], { queryParams: { filter: 'pending' } });
+    }
   }
 
   registerNewMember(): void {

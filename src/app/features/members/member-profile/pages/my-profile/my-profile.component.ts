@@ -8,6 +8,7 @@ import { MemberService } from '../../../../../core/services/member.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { MemberSelfProfile } from '../../../../../shared/models/member.model';
 import { DevInProgressModalComponent } from '../../../../agents/agent-profile/modals/dev-in-progress-modal/dev-in-progress-modal.component';
+import { ButtonComponent } from "../../../../../shared/components/button/button.component";
 
 type TabType = 'overview' | 'contributions' | 'nominees' | 'documents';
 
@@ -26,8 +27,9 @@ interface TabItem {
     RouterModule,
     BreadcrumbsComponent,
     MemberQuickInfoCardComponent,
-    DevInProgressModalComponent
-  ],
+    DevInProgressModalComponent,
+    ButtonComponent
+],
   templateUrl: './my-profile.component.html',
   styleUrls: ['./my-profile.component.css']
 })

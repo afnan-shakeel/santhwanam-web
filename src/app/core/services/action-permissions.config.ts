@@ -55,9 +55,29 @@ export const ACTION_PERMISSIONS = {
       mode: 'hide' as const
     },
     viewWallet: {
-      permission: 'wallet.balance.view',
+      permission: 'wallet.balance.read',
       mode: 'hide' as const
-    }
+    },
+    createNominee: {
+      permission: 'member.nominee.create',
+      mode: 'disable' as const
+    },
+    editNominee: {
+      permission: 'member.nominee.update',
+      mode: 'disable' as const
+    },
+    viewDocument: {
+      permission: 'member.document.read',
+      mode: 'hide' as const
+    },
+    uploadDocument: {
+      permission: 'member.document.upload',
+      mode: 'disable' as const
+    },
+    deleteDocument: {
+      permission: 'member.document.delete',
+      mode: 'disable' as const
+    },
   },
 
   // ============================================
@@ -66,11 +86,15 @@ export const ACTION_PERMISSIONS = {
   agent: {
     create: {
       permission: 'agent.create',
-      mode: 'hide' as const
+      mode: 'disable' as const
     },
     edit: {
       permission: 'agent.update',
-      mode: 'hide' as const
+      mode: 'disable' as const
+    },
+    editProfile: {
+      permission: 'agent.profile.update',
+      mode: 'disable' as const
     },
     view: {
       permission: 'agent.read',
@@ -80,6 +104,16 @@ export const ACTION_PERMISSIONS = {
       permission: 'agent.deactivate',
       mode: 'disable' as const,
       disabledTooltip: 'You need agent.deactivate permission'
+    },
+    suspend: {
+      permission: 'agent.suspend',
+      mode: 'disable' as const,
+      disabledTooltip: 'You need agent.suspend permission'
+    },
+    reassign: {
+      permission: 'agent.reassign',
+      mode: 'disable' as const,
+      disabledTooltip: 'You need agent.reassign permission'
     }
   },
 
@@ -105,7 +139,21 @@ export const ACTION_PERMISSIONS = {
   // ============================================
   // Approval Actions
   // ============================================
-  approval: {
+  approvalWorkflow: {
+    view: {
+      permission: 'approval.workflow.read',
+      mode: 'hide' as const
+    },
+    create: {
+      permission: 'approval.workflow.create',
+      mode: 'disable' as const
+    },
+    edit: {
+      permission: 'approval.workflow.update',
+      mode: 'disable' as const
+    },
+  },
+  approvalStageRequest: {
     view: {
       permission: 'approval.read',
       mode: 'hide' as const
@@ -170,24 +218,24 @@ export const ACTION_PERMISSIONS = {
   // ============================================
   role: {
     view: {
-      permission: 'role.read',
+      permission: 'iam.role.read',
       mode: 'hide' as const
     },
     create: {
-      permission: 'role.create',
+      permission: 'iam.role.create',
       mode: 'hide' as const
     },
     edit: {
-      permission: 'role.update',
+      permission: 'iam.role.update',
       mode: 'hide' as const
     },
     delete: {
-      permission: 'role.delete',
+      permission: 'iam.role.delete',
       mode: 'disable' as const,
       disabledTooltip: 'Only administrators can delete roles'
     },
     assign: {
-      permission: 'role.assign',
+      permission: 'iam.role.assign',
       mode: 'disable' as const,
       disabledTooltip: 'You need role assignment permission'
     }
@@ -198,19 +246,19 @@ export const ACTION_PERMISSIONS = {
   // ============================================
   user: {
     view: {
-      permission: 'user.read',
+      permission: 'iam.user.read',
       mode: 'hide' as const
     },
     create: {
-      permission: 'user.create',
+      permission: 'iam.user.create',
       mode: 'hide' as const
     },
     edit: {
-      permission: 'user.update',
+      permission: 'iam.user.update',
       mode: 'hide' as const
     },
     deactivate: {
-      permission: 'user.deactivate',
+      permission: 'iam.user.deactivate',
       mode: 'disable' as const,
       disabledTooltip: 'You need user deactivation permission'
     }
@@ -221,46 +269,46 @@ export const ACTION_PERMISSIONS = {
   // ============================================
   forum: {
     view: {
-      permission: 'forum.read',
+      permission: 'org.forum.read',
       mode: 'hide' as const
     },
     create: {
-      permission: 'forum.create',
-      mode: 'hide' as const
+      permission: 'org.forum.create',
+      mode: 'disable' as const
     },
     edit: {
-      permission: 'forum.update',
-      mode: 'hide' as const
+      permission: 'org.forum.update',
+      mode: 'disable' as const
     }
   },
 
   area: {
     view: {
-      permission: 'area.read',
+      permission: 'org.area.read',
       mode: 'hide' as const
     },
     create: {
-      permission: 'area.create',
-      mode: 'hide' as const
+      permission: 'org.area.create',
+      mode: 'disable' as const
     },
     edit: {
-      permission: 'area.update',
-      mode: 'hide' as const
+      permission: 'org.area.update',
+      mode: 'disable' as const
     }
   },
 
   unit: {
     view: {
-      permission: 'unit.read',
+      permission: 'org.unit.read',
       mode: 'hide' as const
     },
     create: {
-      permission: 'unit.create',
-      mode: 'hide' as const
+      permission: 'org.unit.create',
+      mode: 'disable' as const
     },
     edit: {
-      permission: 'unit.update',
-      mode: 'hide' as const
+      permission: 'org.unit.update',
+      mode: 'disable' as const
     }
   }
 } as const;

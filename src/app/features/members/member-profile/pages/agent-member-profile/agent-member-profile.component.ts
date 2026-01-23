@@ -194,7 +194,7 @@ export class AgentMemberProfileComponent implements OnInit {
   }
 
   onViewWallet(): void {
-    this.router.navigate(['/agents/members', this.memberId(), 'wallet']);
+    this.router.navigate(['/agents/members', this.memberId(), 'wallet'])
   }
 
   onRecordDeposit(): void {

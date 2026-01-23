@@ -290,7 +290,7 @@ export interface MemberContribution {
   walletDebitRequestId?: string;
   cashReceiptReference?: string;
   journalEntryId?: string;
-  collectedAt?: string;
+  collectionDate?: string;
   missedAt?: string;
   exemptionReason?: string;
   createdAt: string;

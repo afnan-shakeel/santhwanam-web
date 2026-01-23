@@ -78,11 +78,15 @@ export class AreasComponent {
     actions: [
       {
         label: 'View',
-        callback: (area: Area) => this.onViewArea(area)
+        callback: (area: Area) => this.onViewArea(area),
+        actionAccessEntity: "area",
+        actionAccessAction: "view"
       },
       {
         label: 'Edit',
-        callback: (area: Area) => this.onEditArea(area)
+        callback: (area: Area) => this.onEditArea(area),
+        actionAccessEntity: "area",
+        actionAccessAction: "edit"
       }
     ],
     showActions: true,

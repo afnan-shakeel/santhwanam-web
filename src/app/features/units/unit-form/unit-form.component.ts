@@ -24,6 +24,7 @@ import { Unit, CreateUnitRequest, UpdateUnitRequest } from '../../../shared/mode
 import { Forum } from '../../../shared/models/forum.model';
 import { Area } from '../../../shared/models/area.model';
 import { User } from '../../../shared/models/user.model';
+import { ButtonComponent } from "../../../shared/components/button/button.component";
 
 @Component({
   selector: 'app-unit-form',
@@ -34,7 +35,8 @@ import { User } from '../../../shared/models/user.model';
     ModalComponent,
     InputComponent,
     SearchSelectComponent,
-  ],
+    ButtonComponent
+],
   templateUrl: './unit-form.component.html',
   styleUrls: ['./unit-form.component.css'],
 })

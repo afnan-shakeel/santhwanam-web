@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 
 import { AccessService } from '../../../core/services/access.service';
 import { EntityType } from '../../../core/services/action-permissions.config';
 
 type ButtonVariant = 'primary' | 'secondary' | 'soft' | 'danger' | 'ghost';
-type ButtonSize = 'sm' | 'md' | 'lg';
+type ButtonSize = 'xs' | 'sm' | 'md' | 'lg';
 
 @Component({
   selector: 'app-button',
@@ -18,31 +18,35 @@ type ButtonSize = 'sm' | 'md' | 'lg';
 export class ButtonComponent {
   private accessService = inject(AccessService);
 
-  // Standard button inputs
-  @Input({ required: true }) label!: string;
-  @Input() variant: ButtonVariant = 'primary';
-  @Input() type: 'button' | 'submit' = 'button';
-  @Input() size: ButtonSize = 'md';
-  @Input() disabled = false;
+  // Standard button inputs (using signal inputs for reactivity)
+  readonly label = input<string>();
+  readonly variant = input<ButtonVariant>('primary');
+  readonly type = input<'button' | 'submit'>('button');
+  readonly size = input<ButtonSize>('md');
+  readonly disabled = input<boolean>(false);
 
   // Permission-aware inputs (optional)
-  @Input() entity?: EntityType;
-  @Input() action?: string;
-  @Input() permission?: string | string[];
-  @Input() disabledTooltip?: string;
+  readonly entity = input<EntityType>();
+  readonly action = input<string>();
+  readonly permission = input<string | string[]>();
+  readonly disabledTooltip = input<string>();
 
   /**
    * Computed permission check - combines direct permission and entity/action config
    */
   protected readonly hasPermission = computed(() => {
+    const permission = this.permission();
+    const entity = this.entity();
+    const action = this.action();
+
     // If direct permission is specified, use that
-    if (this.permission) {
-      return this.accessService.checkPermissions(this.permission);
+    if (permission) {
+      return this.accessService.checkPermissions(permission);
     }
 
     // If entity and action are specified, use action config
-    if (this.entity && this.action) {
-      return this.accessService.canPerformAction(this.entity, this.action);
+    if (entity && action) {
+      return this.accessService.canPerformAction(entity, action);
     }
 
     // No permission restriction
@@ -53,8 +57,11 @@ export class ButtonComponent {
    * Whether the button should be shown (for hide mode)
    */
   protected readonly shouldShow = computed(() => {
-    if (this.entity && this.action) {
-      return this.accessService.shouldShowAction(this.entity, this.action);
+    const entity = this.entity();
+    const action = this.action();
+
+    if (entity && action) {
+      return this.accessService.shouldShowAction(entity, action);
     }
     // If only permission is set without entity/action, always show (disable mode)
     return true;
@@ -64,16 +71,20 @@ export class ButtonComponent {
    * Whether the button should be disabled (includes both permission and disabled input)
    */
   protected readonly isDisabled = computed(() => {
-    // First check the explicit disabled input
-    if (this.disabled) return true;
+    const entity = this.entity();
+    const action = this.action();
+    const permission = this.permission();
+
+    // First check the explicit disabled input (now reactive!)
+    if (this.disabled()) return true;
 
     // Then check permission-based disable
-    if (this.entity && this.action) {
-      return this.accessService.shouldDisableAction(this.entity, this.action);
+    if (entity && action) {
+      return this.accessService.shouldDisableAction(entity, action);
     }
 
     // If only permission is specified (no entity/action), disable if no permission
-    if (this.permission && !this.hasPermission()) {
+    if (permission && !this.hasPermission()) {
       return true;
     }
 
@@ -84,29 +95,37 @@ export class ButtonComponent {
    * Get tooltip text for disabled state
    */
   protected readonly tooltip = computed(() => {
+    const entity = this.entity();
+    const action = this.action();
+    const customTooltip = this.disabledTooltip();
+
     if (!this.isDisabled()) return '';
 
     // Custom tooltip takes priority
-    if (this.disabledTooltip) return this.disabledTooltip;
+    if (customTooltip) return customTooltip;
 
     // Get tooltip from action config
-    if (this.entity && this.action) {
-      return this.accessService.getActionTooltip(this.entity, this.action);
+    if (entity && action) {
+      return this.accessService.getActionTooltip(entity, action);
     }
 
     return 'You do not have permission to perform this action';
   });
 
-  protected get classes(): string {
+  protected readonly classes = computed(() => {
+    const size = this.size();
+    const variant = this.variant();
+
     const sizeMap: Record<ButtonSize, string> = {
+      xs: 'h-8 px-3 text-xs',
       sm: 'h-9 px-3 text-sm',
       md: 'h-10 px-4 text-sm',
       lg: 'h-11 px-5 text-base'
     };
 
-    const sizeClass = sizeMap[this.size] ?? sizeMap.md;
+    const sizeClass = sizeMap[size] ?? sizeMap.md;
 
-    switch (this.variant) {
+    switch (variant) {
       case 'secondary':
         return `${sizeClass} bg-secondary-600 text-white hover:bg-secondary-700`;
       case 'soft':
@@ -118,6 +137,6 @@ export class ButtonComponent {
       default:
         return `${sizeClass} bg-primary-600 text-white hover:bg-primary-700`;
     }
-  }
+  });
 }
 

@@ -95,23 +95,33 @@ export class MembersComponent {
     actions: [
       {
         label: 'View',
-        callback: (member: Member) => this.onViewMember(member)
+        callback: (member: Member) => this.onViewMember(member),
+        actionAccessEntity: "member",
+        actionAccessAction: "view"
       },
       {
         label: 'Edit',
-        callback: (member: Member) => this.onEditMember(member)
+        callback: (member: Member) => this.onEditMember(member),
+        actionAccessEntity: "member",
+        actionAccessAction: "edit"
       },
       {
         label: 'Suspend',
-        callback: (member: Member) => this.onSuspendMember(member)
+        callback: (member: Member) => this.onSuspendMember(member),
+        actionAccessEntity: "member",
+        actionAccessAction: "suspend"
       },
       {
         label: 'Reactivate',
-        callback: (member: Member) => this.onReactivateMember(member)
+        callback: (member: Member) => this.onReactivateMember(member),
+        actionAccessEntity: "member",
+        actionAccessAction: "reactivate"
       },
       {
         label: 'Delete',
-        callback: (member: Member) => this.onDeleteMember(member)
+        callback: (member: Member) => this.onDeleteMember(member),
+        actionAccessEntity: "member",
+        actionAccessAction: "delete"
       }
     ],
     showActions: true,

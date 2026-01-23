@@ -78,11 +78,15 @@ export class UnitsComponent {
     actions: [
       {
         label: 'View',
-        callback: (unit: Unit) => this.onViewUnit(unit)
+        callback: (unit: Unit) => this.onViewUnit(unit),
+        actionAccessEntity: "unit",
+        actionAccessAction: "view"
       },
       {
         label: 'Edit',
-        callback: (unit: Unit) => this.onEditUnit(unit)
+        callback: (unit: Unit) => this.onEditUnit(unit),
+        actionAccessEntity: "unit",
+        actionAccessAction: "edit"
       }
     ],
     showActions: true,

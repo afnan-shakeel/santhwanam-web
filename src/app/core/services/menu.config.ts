@@ -64,7 +64,7 @@ export const MENU_CONFIG: MenuItemConfig[] = [
       },
       { 
         label: 'Wallet Management', 
-        route: '/admin/wallet',
+        route: '/admin/wallets',
         icon: 'account_balance',
         permissions: [PERMISSIONS.WALLET.ADJUSTMENT_CREATE, PERMISSIONS.WALLET.REFUND_CREATE]
       },
@@ -98,30 +98,45 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     icon: 'person',
     roles: ['agent']
   },
+  { 
+    label: 'My Member Profile', 
+    route: '/my-profile',
+    icon: 'person',
+    roles: ['member']
+  },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // ORGANIZATION MANAGEMENT
   // ═══════════════════════════════════════════════════════════════════════════
   { 
-    label: 'Forums', 
-    route: '/forums',
-    icon: 'forum',
-    roles: ['forum_admin']
+    label: 'Organization Bodies', 
+    route: '/',
+    icon: '',
+    roles: ['forum_admin', 'area_admin', 'unit_admin'],
     // permissions: [PERMISSIONS.ORG.FORUM.READ]
-  },
-  { 
-    label: 'Areas', 
-    route: '/areas',
-    icon: 'map',
-    roles: ['forum_admin', 'area_admin']
-    // permissions: [PERMISSIONS.ORG.AREA.READ]
-  },
-  { 
-    label: 'Units', 
-    route: '/units',
-    icon: 'business',
-    roles: ['forum_admin', 'area_admin', 'unit_admin']
-    // permissions: [PERMISSIONS.ORG.UNIT.READ]
+    children:[
+      { 
+        label: 'Forums', 
+        route: '/forums',
+        icon: 'forum',
+        roles: ['forum_admin']
+        // permissions: [PERMISSIONS.ORG.FORUM.READ]
+      },
+      { 
+        label: 'Areas', 
+        route: '/areas',
+        icon: 'map',
+        roles: ['forum_admin', 'area_admin']
+        // permissions: [PERMISSIONS.ORG.AREA.READ]
+      },
+      { 
+        label: 'Units', 
+        route: '/units',
+        icon: 'business',
+        roles: ['forum_admin', 'area_admin', 'unit_admin']
+        // permissions: [PERMISSIONS.ORG.UNIT.READ]
+      },
+    ]
   },
   { 
     label: 'Agents', 
@@ -145,13 +160,15 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     label: 'Death Claims', 
     route: '/death-claims',
     icon: 'assignment',
-    permissions: [PERMISSIONS.CLAIM.READ]
+    // permissions: [PERMISSIONS.CLAIM.READ]
+    roles: ['forum_admin', 'area_admin', 'unit_admin', 'agent']
   },
   { 
     label: 'Contributions', 
     route: '/contributions',
     icon: 'payments',
-    permissions: [PERMISSIONS.CONTRIBUTION.READ, PERMISSIONS.CONTRIBUTION.CYCLE.READ]
+    roles: ['forum_admin', 'area_admin', 'unit_admin', 'agent']
+    // permissions: [PERMISSIONS.CONTRIBUTION.READ, PERMISSIONS.CONTRIBUTION.CYCLE.READ]
   },
 
   // ═══════════════════════════════════════════════════════════════════════════

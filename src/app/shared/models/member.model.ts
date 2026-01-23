@@ -23,6 +23,7 @@ export type DocumentType =
   | 'MemberPhoto' 
   | 'NomineeIDProof' 
   | 'Other';
+export type DocumentVerificationStatus = 'Pending' | 'Verified' | 'Rejected';
 export type DocumentCategory = 'MemberIdentity' | 'MemberAddress' | 'MemberPhoto' | 'NomineeProof' | 'Other';
 export type CollectionMode = 'Cash' | 'BankTransfer' | 'Cheque' | 'Online';
 
@@ -199,6 +200,7 @@ export interface MemberDocument {
   mimeType: string;
   expiryDate?: string;
   uploadedAt?: string;
+  verificationStatus: DocumentVerificationStatus; 
   isVerified?: boolean;
   verifiedAt?: string;
   verifiedBy?: string;

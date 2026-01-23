@@ -2,12 +2,13 @@ import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
-import { BreadcrumbsComponent, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs.component';
-import { WalletService } from '../../../core/services/wallet.service';
-import { WalletStore } from '../../../core/state/wallet.store';
-import { ToastService } from '../../../core/services/toast.service';
-import { DepositRequestModalComponent } from './deposit-request-modal/deposit-request-modal.component';
-import { WalletBalanceCardComponent } from '../components/wallet-balance-card/wallet-balance-card.component';
+import { BreadcrumbsComponent, BreadcrumbItem } from '../../../../shared/components/breadcrumbs/breadcrumbs.component';
+import { WalletService } from '../../../../core/services/wallet.service';
+import { WalletStore } from '../../../../core/state/wallet.store';
+import { ToastService } from '../../../../core/services/toast.service';
+// import { DepositRequestModalComponent } from '../../../components/deposit-request-modal/deposit-request-modal.component';
+import { WalletBalanceCardComponent } from '../../components/wallet-balance-card/wallet-balance-card.component';
+import { RecordDepositModalComponent } from '../../components/record-deposit-modal/record-deposit-modal.component';
 
 @Component({
   selector: 'app-my-wallet',
@@ -18,7 +19,8 @@ import { WalletBalanceCardComponent } from '../components/wallet-balance-card/wa
     RouterLink,
     RouterLinkActive,
     BreadcrumbsComponent,
-    DepositRequestModalComponent,
+    // DepositRequestModalComponent,
+    RecordDepositModalComponent,
     WalletBalanceCardComponent
   ],
   templateUrl: './my-wallet.component.html',

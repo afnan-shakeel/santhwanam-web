@@ -1,4 +1,5 @@
 import { TemplateRef } from '@angular/core';
+import { EntityType } from '../../core/services/action-permissions.config';
 
 export type ColumnType = 'text' | 'number' | 'date' | 'badge' | 'boolean' | 'custom' | 'link';
 export type FilterType = 'select' | 'multiselect' | 'date' | 'daterange' | 'text' | 'number';
@@ -43,6 +44,8 @@ export interface DataTableAction<T = any> {
   callback: (row: T) => void;
   visible?: (row: T) => boolean;
   class?: string;
+  actionAccessEntity?: EntityType;
+  actionAccessAction?: string;
 }
 
 export interface DataTableConfig<T = any> {

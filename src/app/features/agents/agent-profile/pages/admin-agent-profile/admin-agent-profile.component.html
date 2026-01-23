@@ -31,21 +31,23 @@
       </div>
 
       <!-- Agent Info Card -->
-      <app-agent-info-card
-        [agent]="profile()"
-        [viewMode]="'admin'"
-        [loading]="loading()"
-        (edit)="openEditModal()"
-        (suspend)="onSuspend()"
-        (activate)="onActivate()"
-        (reassignMembers)="onReassignMembers()" />
+      <div>
+         <app-agent-info-card
+           [agent]="profile()"
+           [loading]="loading()"
+           (edit)="openEditModal()"
+           (suspend)="onSuspend()"
+           (activate)="onActivate()"
+           (reassignMembers)="onReassignMembers()" />
+      </div>
 
       <!-- Hierarchy Card -->
-      <app-agent-hierarchy-card
-        [agent]="profile()"
-        [viewMode]="'admin'"
-        [loading]="loading()"
-        (changeUnit)="onChangeUnit()" />
+      <div>
+        <app-agent-hierarchy-card
+          [agent]="profile()"
+          [loading]="loading()"
+          (changeUnit)="onChangeUnit()" />
+      </div>
 
       <!-- Tabs -->
       <div class="border-b border-gray-200 dark:border-gray-700">

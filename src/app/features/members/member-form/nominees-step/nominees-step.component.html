@@ -14,16 +14,17 @@
         </div>
       </div>
       @if (!showNomineeForm()) {
-        <button
+        <app-button
           type="button"
+          entity="member"
+          action="createNominee"
           (click)="onAddNominee()"
-          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-600"
         >
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
           Add Nominee
-        </button>
+        </app-button>
       }
     </div>
   </div>
@@ -244,22 +245,24 @@
 
           <!-- Form Actions -->
           <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <button
+            <app-button
               type="button"
+              variant="ghost"
               (click)="onCancelNomineeForm()"
               [disabled]="loading()"
-              class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
             >
               Cancel
-            </button>
-            <button
+            </app-button>
+            <app-button
               type="button"
+              variant="primary"
+              entity="member"
+              [action]="editingNomineeId() ? 'editNominee' : 'createNominee'"
               (click)="onSaveNominee()"
               [disabled]="loading()"
-              class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-600 disabled:opacity-50"
             >
               {{ editingNomineeId() ? 'Update Nominee' : 'Add Nominee' }}
-            </button>
+            </app-button>
           </div>
         </form>
       </div>
@@ -268,28 +271,28 @@
 
   <!-- Navigation Buttons -->
   <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex items-center justify-between">
-    <button
+    <app-button
       type="button"
+      variant="ghost"
       (click)="onBack()"
       [disabled]="loading()"
-      class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
     >
       <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
       </svg>
       Back
-    </button>
+    </app-button>
 
-    <button
+    <app-button
       type="button"
       (click)="onContinue()"
       [disabled]="loading() || nominees().length === 0"
-      class="inline-flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
+      variant="primary"
     >
       Continue to Documents
       <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
       </svg>
-    </button>
+    </app-button>
   </div>
 </div>

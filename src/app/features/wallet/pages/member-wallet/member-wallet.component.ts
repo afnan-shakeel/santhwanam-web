@@ -2,20 +2,20 @@ import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet, ActivatedRoute } from '@angular/router';
 
-import { BreadcrumbsComponent, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs.component';
-import { WalletService } from '../../../core/services/wallet.service';
-import { WalletStore } from '../../../core/state/wallet.store';
-import { ToastService } from '../../../core/services/toast.service';
-import { WalletBalanceCardComponent } from '../components/wallet-balance-card/wallet-balance-card.component';
-import { MemberInfoCardComponent } from '../../members/components/member-info-card/member-info-card.component';
-import { RecordDepositModalComponent } from './record-deposit-modal/record-deposit-modal.component';
-import { AdjustmentModalComponent } from './adjustment-modal/adjustment-modal.component';
-import { WalletSummary, WalletWithMember } from '../../../shared/models/wallet.model';
+import { BreadcrumbsComponent, BreadcrumbItem } from '../../../../shared/components/breadcrumbs/breadcrumbs.component';
+import { WalletService } from '../../../../core/services/wallet.service';
+import { WalletStore } from '../../../../core/state/wallet.store';
+import { ToastService } from '../../../../core/services/toast.service';
+import { WalletBalanceCardComponent } from '../../components/wallet-balance-card/wallet-balance-card.component';
+import { MemberInfoCardComponent } from '../../../members/components/member-info-card/member-info-card.component';
+import { RecordDepositModalComponent } from '../../components/record-deposit-modal/record-deposit-modal.component';
+import { AdjustmentModalComponent } from '../../components/adjustment-modal/adjustment-modal.component';
+import { WalletSummary, WalletWithMember } from '../../../../shared/models/wallet.model';
+import { AccessService } from '../../../../core/services/access.service';
 
-export type WalletViewMode = 'agent' | 'admin';
 
 @Component({
-  selector: 'app-member-wallet-v2',
+  selector: 'app-member-wallet',
   standalone: true,
   imports: [
     CommonModule,
@@ -28,18 +28,19 @@ export type WalletViewMode = 'agent' | 'admin';
     RecordDepositModalComponent,
     AdjustmentModalComponent
   ],
-  templateUrl: './member-wallet-v2.component.html',
-  styleUrls: ['./member-wallet-v2.component.css']
+  templateUrl: './member-wallet.component.html',
+  styleUrls: ['./member-wallet.component.css']
 })
-export class MemberWalletV2Component implements OnInit, OnDestroy {
+export class MemberWalletComponent implements OnInit, OnDestroy {
   private walletService = inject(WalletService);
   private walletStore = inject(WalletStore);
   private toastService = inject(ToastService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private accessService = inject(AccessService);
 
   // View mode from route data
-  viewMode = signal<WalletViewMode>('agent');
+  viewMode = this.accessService.viewMode
 
   // Route params
   memberId = signal<string | null>(null);
@@ -124,11 +125,8 @@ export class MemberWalletV2Component implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
-    // Get view mode from route data
-    const routeData = this.route.snapshot.data;
-    if (routeData['viewMode']) {
-      this.viewMode.set(routeData['viewMode'] as WalletViewMode);
-    }
+    // (depracted logic) Get view mode from route data 
+
 
     // Get memberId or walletId from route
     const mId = this.route.snapshot.paramMap.get('memberId');

@@ -31,6 +31,7 @@ import {
 } from '../../../../shared/models/approval-workflow.model';
 import { Role } from '../../../../shared/models/role.model';
 import { User } from '../../../../shared/models/user.model';
+import { ButtonComponent } from "../../../../shared/components/button/button.component";
 
 @Component({
   selector: 'app-workflow-form',
@@ -43,7 +44,8 @@ import { User } from '../../../../shared/models/user.model';
     SelectComponent,
     CheckboxComponent,
     SearchSelectComponent,
-  ],
+    ButtonComponent
+],
   templateUrl: './workflow-form.component.html',
   styleUrls: ['./workflow-form.component.css'],
 })

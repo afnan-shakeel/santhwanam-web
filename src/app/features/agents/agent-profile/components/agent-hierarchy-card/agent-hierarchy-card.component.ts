@@ -1,7 +1,7 @@
-import { Component, input, output, computed } from '@angular/core';
+import { Component, input, output, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AgentProfile } from '../../../../../shared/models/agent-profile.model';
-import { AgentViewMode } from '../agent-info-card/agent-info-card.component';
+import { AccessService } from '../../../../../core/services/access.service';
 
 @Component({
   selector: 'app-agent-hierarchy-card',
@@ -11,9 +11,10 @@ import { AgentViewMode } from '../agent-info-card/agent-info-card.component';
   styleUrls: ['./agent-hierarchy-card.component.css']
 })
 export class AgentHierarchyCardComponent {
+  private accessService = inject(AccessService)
+  readonly viewMode = this.accessService.viewMode
   // Inputs
   agent = input<AgentProfile | null>(null);
-  viewMode = input<AgentViewMode>('self');
   showChangeUnit = input<boolean>(true);
   loading = input<boolean>(false);
 
@@ -22,7 +23,7 @@ export class AgentHierarchyCardComponent {
 
   // Computed
   title = computed(() => {
-    return this.viewMode() === 'self' ? 'My Hierarchy' : 'Hierarchy & Assignment';
+    return this.viewMode() === 'agent' ? 'My Hierarchy' : 'Hierarchy & Assignment';
   });
 
   hasHierarchy = computed(() => {

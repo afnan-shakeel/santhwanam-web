@@ -11,3 +11,9 @@ button {
 table {
   border-collapse: collapse;
 }
+
+a.disabled {
+  pointer-events: none;
+  color: gray;
+  cursor: not-allowed;
+}

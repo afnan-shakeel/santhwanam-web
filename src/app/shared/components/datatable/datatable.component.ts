@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, signal, computed, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, signal, computed, CUSTOM_ELEMENTS_SCHEMA, Inject, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -7,6 +7,7 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { DataTableColumn, DataTableAction, DataTableConfig } from '../../models/datatable.model';
 import { SearchRequest, SearchResponse, Filter } from '../../models/search.model';
+import { AccessService } from '../../../core/services/access.service';
 
 @Component({
   selector: 'app-datatable',
@@ -24,6 +25,7 @@ export class DatatableComponent<T = any> implements OnInit {
   @Output() searchChange = new EventEmitter<SearchRequest>();
   @Output() rowAction = new EventEmitter<{ action: string; row: T }>();
 
+  private accessService = inject(AccessService);
   searchTerm = signal('');
   currentSort = signal<{ field: string; order: 'asc' | 'desc' } | null>(null);
   currentPage = signal(1);
@@ -252,6 +254,13 @@ export class DatatableComponent<T = any> implements OnInit {
 
   isActionVisible(action: DataTableAction<T>, row: T): boolean {
     return action.visible ? action.visible(row) : true;
+  }
+
+  isActionAccessible(action: DataTableAction<T>): boolean {
+    if (action.actionAccessEntity && action.actionAccessAction) {
+      return this.accessService.canPerformAction(action.actionAccessEntity, action.actionAccessAction)
+    }
+    return true;
   }
 
   getSortIcon(column: DataTableColumn<T>): string {

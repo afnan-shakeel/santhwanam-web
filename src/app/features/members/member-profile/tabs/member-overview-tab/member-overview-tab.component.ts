@@ -5,8 +5,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MemberService } from '../../../../../core/services/member.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { MemberProfile, MemberSelfProfile } from '../../../../../shared/models/member.model';
+import { AccessService } from '../../../../../core/services/access.service';
 
-export type MemberViewMode = 'self' | 'agent' | 'admin';
 
 @Component({
   selector: 'app-member-overview-tab',
@@ -20,11 +20,12 @@ export class MemberOverviewTabComponent implements OnInit {
   private toastService = inject(ToastService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private accessService = inject(AccessService);
 
   // State
   profile = signal<MemberProfile | MemberSelfProfile | null>(null);
   loading = signal(true);
-  viewMode = signal<MemberViewMode>('self');
+  viewMode = this.accessService.viewMode
 
   // Computed values
   fullName = computed(() => {
@@ -53,25 +54,13 @@ export class MemberOverviewTabComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.detectViewMode();
     this.loadProfile();
-  }
-
-  private detectViewMode(): void {
-    const url = this.router.url;
-    if (url.includes('/my-profile')) {
-      this.viewMode.set('self');
-    } else if (url.includes('/agents/members/')) {
-      this.viewMode.set('agent');
-    } else if (url.includes('/admin/members/')) {
-      this.viewMode.set('admin');
-    }
   }
 
   private loadProfile(): void {
     this.loading.set(true);
     
-    if (this.viewMode() === 'self') {
+    if (this.viewMode() === 'member') {
       this.memberService.getMyProfile().subscribe({
         next: (profile) => {
           this.profile.set(profile);

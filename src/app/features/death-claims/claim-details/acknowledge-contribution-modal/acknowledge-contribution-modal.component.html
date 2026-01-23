@@ -36,9 +36,9 @@
           </span>
         </dd>
         
-        @if (contribution.collectedAt) {
+        @if (contribution.collectionDate) {
           <dt class="text-gray-500">Collected At</dt>
-          <dd class="font-medium text-gray-900">{{ contribution.collectedAt | date:'medium' }}</dd>
+          <dd class="font-medium text-gray-900">{{ contribution.collectionDate | date:'medium' }}</dd>
         }
       </dl>
     </div>

@@ -25,6 +25,7 @@ import { Agent, RegisterAgentRequest, UpdateDraftRequest, UpdateAgentRequest } f
 import { Forum } from '../../../shared/models/forum.model';
 import { Area } from '../../../shared/models/area.model';
 import { Unit } from '../../../shared/models/unit.model';
+import { ButtonComponent } from "../../../shared/components/button/button.component";
 
 @Component({
   selector: 'app-agent-form',
@@ -36,7 +37,8 @@ import { Unit } from '../../../shared/models/unit.model';
     InputComponent,
     SearchSelectComponent,
     SelectComponent,
-  ],
+    ButtonComponent
+],
   templateUrl: './agent-form.component.html',
   styleUrls: ['./agent-form.component.css'],
 })

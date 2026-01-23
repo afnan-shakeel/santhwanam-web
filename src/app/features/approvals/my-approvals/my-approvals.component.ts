@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { ApprovalWorkflowService } from '../../../core/services/approval-workflow.service';
 import { 
@@ -8,22 +8,33 @@ import {
   ApprovalRequestStatus, 
   ModuleType 
 } from '../../../shared/models/approval-workflow.model';
-import { SearchRequest } from '../../../shared/models/search.model';
+import { SearchRequest, SearchResponse } from '../../../shared/models/search.model';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 import { BreadcrumbsComponent, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs.component';
 
 @Component({
   selector: 'app-my-approvals',
   standalone: true,
-  imports: [CommonModule, BreadcrumbsComponent],
+  imports: [CommonModule, BreadcrumbsComponent, PaginationComponent],
   templateUrl: './my-approvals.component.html',
   styleUrls: ['./my-approvals.component.css']
 })
 export class MyApprovalsComponent implements OnInit {
   private approvalService = inject(ApprovalWorkflowService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   approvals = signal<ApprovalRequest[]>([]);
+  approvalsData = signal<SearchResponse<ApprovalRequest>>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+    totalPages: 0
+  });
   loading = signal(false);
+  currentPage = signal(1);
+  pageSize = 10;
   
   // Tab state
   activeTab = signal<ApprovalRequestStatus>('Pending');
@@ -38,14 +49,15 @@ export class MyApprovalsComponent implements OnInit {
     { label: 'My Approvals', current: true }
   ];
 
-  // Computed counts for tabs
-  pendingCount = computed(() => this.approvals().filter(a => a.status === 'Pending').length);
-  approvedCount = computed(() => this.approvals().filter(a => a.status === 'Approved').length);
-  rejectedCount = computed(() => this.approvals().filter(a => a.status === 'Rejected').length);
+  // Computed counts for tabs - these show counts from current page data
+  // For accurate total counts, you'd need separate API calls
+  pendingCount = computed(() => this.activeTab() === 'Pending' ? this.approvalsData().total : 0);
+  approvedCount = computed(() => this.activeTab() === 'Approved' ? this.approvalsData().total : 0);
+  rejectedCount = computed(() => this.activeTab() === 'Rejected' ? this.approvalsData().total : 0);
 
-  // Filtered approvals based on active tab
+  // Approvals are now filtered server-side, so just return all items
   filteredApprovals = computed(() => {
-    return this.approvals().filter(a => a.status === this.activeTab());
+    return this.approvals();
   });
 
   moduleOptions: { value: ModuleType | ''; label: string }[] = [
@@ -58,7 +70,14 @@ export class MyApprovalsComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.loadApprovals();
+    // Subscribe to query params to read status
+    this.route.queryParamMap.subscribe(params => {
+      const status = params.get('status') as ApprovalRequestStatus;
+      if (status && ['Pending', 'Approved', 'Rejected', 'Cancelled'].includes(status)) {
+        this.activeTab.set(status);
+      }
+      this.loadApprovals();
+    });
   }
 
   loadApprovals(): void {
@@ -81,16 +100,18 @@ export class MyApprovalsComponent implements OnInit {
     }
 
     const request: SearchRequest = {
-      page: 1,
-      pageSize: 100,
+      page: this.currentPage(),
+      pageSize: this.pageSize,
       filters,
       sortBy: 'requestedAt',
-      sortOrder: 'desc'
+      sortOrder: 'desc',
+      eagerLoad: ['workflow', 'requestedByUser']
     };
 
     this.approvalService.searchApprovalRequests(request).subscribe({
       next: (response) => {
         this.approvals.set(response.items);
+        this.approvalsData.set(response);
         this.loading.set(false);
       },
       error: (error) => {
@@ -102,12 +123,25 @@ export class MyApprovalsComponent implements OnInit {
 
   setActiveTab(status: ApprovalRequestStatus): void {
     this.activeTab.set(status);
+    this.currentPage.set(1); // Reset to first page on tab change
+    
+    // Update URL query params
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { status },
+      queryParamsHandling: 'merge'
+    });
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
     this.loadApprovals();
   }
 
   onModuleChange(event: Event): void {
     const select = event.target as HTMLSelectElement;
     this.selectedModule.set(select.value as ModuleType | '');
+    this.currentPage.set(1); // Reset to first page
     this.loadApprovals();
   }
 
@@ -122,6 +156,7 @@ export class MyApprovalsComponent implements OnInit {
   }
 
   applyDateFilter(): void {
+    this.currentPage.set(1); // Reset to first page
     this.loadApprovals();
   }
 
@@ -129,6 +164,7 @@ export class MyApprovalsComponent implements OnInit {
     this.selectedModule.set('');
     this.fromDate.set('');
     this.toDate.set('');
+    this.currentPage.set(1); // Reset to first page
     this.loadApprovals();
   }
 

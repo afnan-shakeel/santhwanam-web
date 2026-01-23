@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
 import { AccessStore } from '../state/access.store';
-import { AccessLogic, AccessMode } from '../../shared/models/auth.types';
+import { AccessLogic, AccessMode, ViewMode } from '../../shared/models/auth.types';
 import { ACTION_PERMISSIONS, ActionConfig, EntityType } from './action-permissions.config';
 
 /**
@@ -147,4 +147,58 @@ export class AccessService {
 
     return false;
   }
+
+  // ============================================
+  // View Mode Methods
+  // ============================================
+
+  /**
+   * Get the current view mode based on user's roles
+   * Returns: 'superadmin' | 'admin' | 'agent' | 'member'
+   */
+  getViewMode(): ViewMode {
+    return this.accessStore.viewMode();
+  }
+
+  /**
+   * Get the view mode as a signal for reactive use in templates
+   */
+  get viewMode() {
+    return this.accessStore.viewMode;
+  }
+
+  /**
+   * Check if current view is admin or superadmin
+   */
+  isAdminView(): boolean {
+    return this.accessStore.isAdminView();
+  }
+
+  /**
+   * Check if current view is agent
+   */
+  isAgentView(): boolean {
+    return this.accessStore.isAgentView();
+  }
+
+  /**
+   * Check if current view is member (self-service)
+   */
+  isMemberView(): boolean {
+    return this.accessStore.isMemberView();
+  }
+
+  /**
+   * Get a simplified view mode for components that use 'self' | 'admin'
+   * Maps: superadmin/admin -> 'admin', agent/member -> 'self'
+   */
+  getSimplifiedViewMode(): 'self' | 'admin' {
+    const mode = this.getViewMode();
+    return mode === 'superadmin' || mode === 'admin' ? 'admin' : 'self';
+  }
+
+  /**
+   * Get simplified view mode as a signal
+   */
+  readonly simplifiedViewMode = () => this.getSimplifiedViewMode();
 }

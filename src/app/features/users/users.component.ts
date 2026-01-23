@@ -65,15 +65,21 @@ export class UsersComponent {
     actions: [
       {
         label: 'View',
-        callback: (user) => this.onViewUser(user)
+        callback: (user) => this.onViewUser(user),
+        actionAccessEntity: "user",
+        actionAccessAction: "view"
       },
       {
         label: 'Manage Roles',
-        callback: (user) => this.onManageRoles(user)
+        callback: (user) => this.onManageRoles(user),
+        actionAccessEntity: "user",
+        actionAccessAction: "edit"
       },
       {
         label: 'Edit',
-        callback: (user) => this.onEditUser(user)
+        callback: (user) => this.onEditUser(user),
+        actionAccessEntity: "user",
+        actionAccessAction: "edit"
       }
     ],
     showActions: true,

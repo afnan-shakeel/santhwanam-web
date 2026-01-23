@@ -14,53 +14,46 @@
     <div class="flex flex-col lg:flex-row gap-4">
       <!-- Search -->
       <div class="flex-1">
-        <div class="relative">
-          <input
+        <div class="">
+          <app-input
             type="text"
             [value]="search()"
             (input)="onSearchChange($event)"
             (keydown)="onSearchKeydown($event)"
             placeholder="Search by name, code, or phone..."
-            class="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 pl-10 pr-4 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
-          <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-            </svg>
-          </div>
+            >
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+            </div>
+          </app-input>
         </div>
       </div>
 
       <!-- Filters -->
-      <div class="flex flex-wrap gap-3">
-        <select
+        <app-select
+          placeholder="Status"
           [value]="statusFilter()"
           (change)="onStatusChange($event)"
-          class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
-          <option value="">All Status</option>
-          <option value="Active">Active</option>
-          <option value="Suspended">Suspended</option>
-          <option value="Frozen">Frozen</option>
-          <option value="Closed">Closed</option>
-          <option value="Deceased">Deceased</option>
-        </select>
+          [options]="[
+            { value: '', label: 'All Status'},
+            { value: 'Active', label: 'Active'},
+            { value: 'Suspended', label: 'Suspended'},
+            { value: 'Frozen', label: 'Frozen'},
+            { value: 'Closed', label: 'Closed'},
+            { value: 'Deceased', label: 'Deceased'},
+          ]"
+          >
+        </app-select>
 
-        <select
-          [value]="tierFilter()"
-          (change)="onTierChange($event)"
-          class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
-          <option value="">All Tiers</option>
-          <option value="A">Tier A</option>
-          <option value="B">Tier B</option>
-          <option value="C">Tier C</option>
-        </select>
-
-        <button
+        <app-button
           type="button"
+          size="xs"
           (click)="onSearch()"
-          class="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
-          Search
-        </button>
-      </div>
+          >
+          Search 
+        </app-button>
     </div>
 
     <!-- Admin: Bulk select header -->
@@ -111,7 +104,7 @@
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
             @for (member of members()?.members; track member.memberId) {
-              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer" (click)="viewMember(member)">
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
                 @if (viewMode() === 'admin') {
                   <td class="px-4 py-4" (click)="$event.stopPropagation()">
                     <input
@@ -219,9 +212,8 @@
       </div>
     }
   </div>
-
   <!-- Quick Actions (Self view only) -->
-  @if (viewMode() === 'self') {
+  @if (viewMode() === 'agent') {
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
       <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Quick Actions</h4>
       <div class="flex flex-wrap gap-3">

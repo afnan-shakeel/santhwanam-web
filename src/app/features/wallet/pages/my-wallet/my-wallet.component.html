@@ -55,13 +55,15 @@
     @if (!loading() && !error() && wallet()) {
       <div class="space-y-6">
         <!-- Balance Card - Using Shared Component -->
-        <app-wallet-balance-card
-          [balance]="currentBalance()"
-          [isLowBalance]="isLowBalance()"
-          [recommendedTopUp]="recommendedTopUp()"
-          [showRequestDeposit]="true"
-          (requestDeposit)="openDepositModal()">
-        </app-wallet-balance-card>
+         <div>
+           <app-wallet-balance-card
+             [balance]="currentBalance()"
+             [isLowBalance]="isLowBalance()"
+             [recommendedTopUp]="recommendedTopUp()"
+             [showRequestDeposit]="true"
+             (requestDeposit)="openDepositModal()">
+           </app-wallet-balance-card>
+         </div>
 
         <!-- Agent Info -->
         @if (agentInfo(); as agent) {
@@ -141,11 +143,11 @@
 
 <!-- Deposit Request Modal -->
 @if (showDepositModal() && memberId()) {
-  <app-deposit-request-modal
+  <app-record-deposit-modal
     [memberId]="memberId()!"
     [agentInfo]="agentInfo()"
     [recommendedAmount]="isLowBalance() ? recommendedTopUp() : undefined"
     (closeModal)="closeDepositModal()"
     (depositCreated)="onDepositRequestCreated()">
-  </app-deposit-request-modal>
+  </app-record-deposit-modal>
 }

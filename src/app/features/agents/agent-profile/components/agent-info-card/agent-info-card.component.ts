@@ -1,20 +1,22 @@
-import { Component, input, output, computed } from '@angular/core';
+import { Component, input, output, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AgentProfile } from '../../../../../shared/models/agent-profile.model';
-
-export type AgentViewMode = 'self' | 'admin';
+import { ButtonComponent } from "../../../../../shared/components/button/button.component";
+import { AccessService } from '../../../../../core/services/access.service';
 
 @Component({
   selector: 'app-agent-info-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ButtonComponent],
   templateUrl: './agent-info-card.component.html',
   styleUrls: ['./agent-info-card.component.css']
 })
 export class AgentInfoCardComponent {
+
+  private accessService = inject(AccessService)
   // Inputs
   agent = input<AgentProfile | null>(null);
-  viewMode = input<AgentViewMode>('self');
+  readonly viewMode = this.accessService.viewMode
   loading = input<boolean>(false);
 
   // Outputs

@@ -82,11 +82,15 @@ export class AgentsComponent {
     actions: [
       {
         label: 'View',
-        callback: (agent: Agent) => this.onViewAgent(agent)
+        callback: (agent: Agent) => this.onViewAgent(agent),
+        actionAccessEntity: "agent",
+        actionAccessAction: "view"
       },
       {
         label: 'Edit',
-        callback: (agent: Agent) => this.onEditAgent(agent)
+        callback: (agent: Agent) => this.onEditAgent(agent),
+        actionAccessEntity: "agent",
+        actionAccessAction: "edit"
       }
     ],
     showActions: true,
@@ -146,7 +150,7 @@ export class AgentsComponent {
   }
 
   onViewAgent(agent: Agent): void {
-    this.router.navigate(['/agents', agent.agentId, 'profile']);
+    this.router.navigate(['/agents', agent.agentId]);
   }
 
   onEditAgent(agent: Agent): void {

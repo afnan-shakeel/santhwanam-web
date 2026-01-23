@@ -11,6 +11,7 @@ import { RoleService } from '../../../core/services/role.service';
 import { PermissionService } from '../../../core/services/permission.service';
 import { Role, ScopeType, CreateRoleRequest, UpdateRoleRequest } from '../../../shared/models/role.model';
 import { Permission } from '../../../shared/models/permission.model';
+import { ButtonComponent } from "../../../shared/components/button/button.component";
 
 interface PermissionGroup {
   module: string;
@@ -27,8 +28,9 @@ interface PermissionGroup {
     BreadcrumbsComponent,
     InputComponent,
     SelectComponent,
-    CheckboxComponent
-  ],
+    CheckboxComponent,
+    ButtonComponent
+],
   templateUrl: './role-form.component.html',
   styleUrls: ['./role-form.component.css']
 })

@@ -2,14 +2,14 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
-import { BreadcrumbsComponent, BreadcrumbItem } from '../../../../shared/components/breadcrumbs/breadcrumbs.component';
-import { WalletService } from '../../../../core/services/wallet.service';
-import { ToastService } from '../../../../core/services/toast.service';
+import { BreadcrumbsComponent, BreadcrumbItem } from '../../../../../shared/components/breadcrumbs/breadcrumbs.component';
+import { WalletService } from '../../../../../core/services/wallet.service';
+import { ToastService } from '../../../../../core/services/toast.service';
 import {
   WalletWithMember,
   WalletDepositRequest,
   WalletStatistics
-} from '../../../../shared/models/wallet.model';
+} from '../../../../../shared/models/wallet.model';
 
 @Component({
   selector: 'app-wallet-dashboard',

@@ -6,6 +6,7 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { AgentService } from '../../../../core/services/agent.service';
 import { AgentProfile, UpdateAgentProfileRequest } from '../../../../shared/models/agent-profile.model';
+import { ButtonComponent } from "../../../../shared/components/button/button.component";
 
 @Component({
   selector: 'app-edit-profile-modal',
@@ -14,8 +15,9 @@ import { AgentProfile, UpdateAgentProfileRequest } from '../../../../shared/mode
     CommonModule,
     ReactiveFormsModule,
     ModalComponent,
-    InputComponent
-  ],
+    InputComponent,
+    ButtonComponent
+],
   templateUrl: './edit-profile-modal.component.html',
   styleUrls: ['./edit-profile-modal.component.css']
 })

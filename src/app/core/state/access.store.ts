@@ -5,7 +5,9 @@ import {
   AuthHierarchy,
   AuthScope,
   AuthUser,
-  RoleAssignment
+  RoleAssignment,
+  ViewMode,
+  ROLE_PRIORITY
 } from '../../shared/models/auth.types';
 
 const ACCESS_STORAGE_KEY = 'santhwanam.access';
@@ -58,6 +60,77 @@ export class AccessStore {
   readonly isSuperAdmin = computed(() => this.state().scope.type === 'None');
   readonly scopeType = computed(() => this.state().scope.type);
   readonly scopeEntityId = computed(() => this.state().scope.entityId);
+
+  /**
+   * View mode based on user's highest priority role
+   * Determines the UI perspective (superadmin, admin, agent, member)
+   */
+  readonly viewMode = computed<ViewMode>(() => {
+    const roles = this.state().roles;
+    
+    if (roles.length === 0) {
+      return 'member'; // Default fallback
+    }
+
+    // Find the role with highest priority
+    let highestPriority = -1;
+    let selectedViewMode: ViewMode = 'member';
+
+    for (const role of roles) {
+      const config = ROLE_PRIORITY[role.roleCode];
+      if (config && config.priority > highestPriority) {
+        highestPriority = config.priority;
+        selectedViewMode = config.viewMode;
+      }
+    }
+
+    // If no matching role found in config, determine from scope type
+    if (highestPriority === -1) {
+
+      return this.getViewModeFromScope();
+    }
+
+    return selectedViewMode;
+  });
+
+  /**
+   * Check if current view mode is admin or higher
+   */
+  readonly isAdminView = computed(() => {
+    const mode = this.viewMode();
+    return mode === 'superadmin' || mode === 'admin';
+  });
+
+  /**
+   * Check if current view mode is agent
+   */
+  readonly isAgentView = computed(() => this.viewMode() === 'agent');
+
+  /**
+   * Check if current view mode is member (self-service)
+   */
+  readonly isMemberView = computed(() => this.viewMode() === 'member');
+
+  /**
+   * Fallback: Determine view mode from scope type
+   */
+  private getViewModeFromScope(): ViewMode {
+    const scopeType = this.state().scope.type;
+    
+    switch (scopeType) {
+      case 'None':
+        return 'superadmin';
+      case 'Forum':
+      case 'Area':
+      case 'Unit':
+        return 'admin';
+      case 'Agent':
+        return 'agent';
+      case 'Member':
+      default:
+        return 'member';
+    }
+  }
 
   /**
    * Set the full auth context from /auth/me response

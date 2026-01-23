@@ -105,6 +105,7 @@ export interface ApprovalExecution {
 export interface ApprovalRequest {
   requestId: string;
   workflowId: string;
+  workflow?: ApprovalWorkflow
   entityType: string;
   entityId: string;
   forumId?: string | null;

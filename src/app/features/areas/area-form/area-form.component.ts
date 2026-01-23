@@ -11,6 +11,7 @@ import { UserService } from '../../../core/services/user.service';
 import { Area, CreateAreaRequest, UpdateAreaRequest } from '../../../shared/models/area.model';
 import { Forum } from '../../../shared/models/forum.model';
 import { User } from '../../../shared/models/user.model';
+import { ButtonComponent } from "../../../shared/components/button/button.component";
 
 @Component({
   selector: 'app-area-form',
@@ -20,8 +21,9 @@ import { User } from '../../../shared/models/user.model';
     ReactiveFormsModule,
     ModalComponent,
     InputComponent,
-    SearchSelectComponent
-  ],
+    SearchSelectComponent,
+    ButtonComponent
+],
   templateUrl: './area-form.component.html',
   styleUrls: ['./area-form.component.css']
 })

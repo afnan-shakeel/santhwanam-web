@@ -200,21 +200,16 @@
 
               <!-- Main Info -->
               <h3 class="text-lg font-semibold text-gray-900 mb-1">
-                {{ approval.entityType }}
+                {{ approval.workflow?.workflowName || 'N/A' }}
               </h3>
               
               <div class="text-sm text-gray-600 space-y-1">
+                
                 <p>
-                  <span class="font-medium">ID:</span> {{ approval.entityId }}
-                  @if (approval.entityDisplayName) {
-                    • <span class="font-medium">Name:</span> {{ approval.entityDisplayName }}
-                  }
+                  <span class="font-medium"></span> {{ approval.workflow?.description || 'N/A' }}
                 </p>
                 <p>
-                  <span class="font-medium">Workflow:</span> {{ approval.workflowName }}
-                </p>
-                <p>
-                  <span class="font-medium">Submitted by:</span> {{ approval.requestedByUserName }}
+                  <span class="font-medium">Submitted by:</span> {{ (approval.requestedByUser.firstName || '') + ' ' + (approval.requestedByUser.lastName || '') }}
                   @if (approval.createdAt || approval.requestedAt) {
                     <span class="text-gray-400 ml-2">{{ getTimeAgo(approval.createdAt || approval.requestedAt!) }}</span>
                   }
@@ -241,5 +236,18 @@
         </div>
       }
     </div>
+
+    <!-- Pagination -->
+    @if (approvalsData().totalPages > 1) {
+      <div class="mt-6">
+        <app-pagination
+          [currentPage]="approvalsData().page"
+          [totalPages]="approvalsData().totalPages"
+          [totalItems]="approvalsData().total"
+          [pageSize]="pageSize"
+          (pageChange)="onPageChange($event)">
+        </app-pagination>
+      </div>
+    }
   }
 </div>

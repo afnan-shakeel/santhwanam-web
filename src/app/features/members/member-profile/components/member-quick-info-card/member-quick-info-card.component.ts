@@ -1,6 +1,7 @@
-import { Component, input, output, computed } from '@angular/core';
+import { Component, input, output, computed, inject } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { MemberSelfProfile, MemberProfile } from '../../../../../shared/models/member.model';
+import { AccessService } from '../../../../../core/services/access.service';
 
 export type MemberViewMode = 'self' | 'agent' | 'admin';
 
@@ -12,9 +13,10 @@ export type MemberViewMode = 'self' | 'agent' | 'admin';
   styleUrls: ['./member-quick-info-card.component.css']
 })
 export class MemberQuickInfoCardComponent {
+  private accessService = inject(AccessService);
   // Inputs
   member = input<MemberSelfProfile | MemberProfile | null>(null);
-  viewMode = input<MemberViewMode>('self');
+  viewMode = this.accessService.viewMode
   loading = input<boolean>(false);
   showReassign = input<boolean>(true);
 
@@ -25,7 +27,7 @@ export class MemberQuickInfoCardComponent {
 
   // Computed
   title = computed(() => {
-    return this.viewMode() === 'self' ? 'Quick Info' : 'Assignment';
+    return this.viewMode() === 'member' ? 'Quick Info' : 'Assignment';
   });
 
   agentFullName = computed(() => {

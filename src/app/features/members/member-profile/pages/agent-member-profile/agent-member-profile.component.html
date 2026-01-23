@@ -89,19 +89,22 @@
           </div>
 
           <!-- Quick Info Card -->
-          <app-member-quick-info-card
-            [member]="profile()"
-            viewMode="agent"
-            [loading]="loading()"
-            [showReassign]="false"
-            (viewWallet)="onViewWallet()"
-            (recordDeposit)="onRecordDeposit()" />
+           <div>
+             <app-member-quick-info-card
+               [member]="profile()"
+               [loading]="loading()"
+               [showReassign]="false"
+               (viewWallet)="onViewWallet()"
+               (recordDeposit)="onRecordDeposit()" />
+           </div>
 
           <!-- Pending Collection Alert (Agent Only) -->
-          <app-pending-collection-alert
-            [pendingContributions]="pendingContributions()"
-            [loading]="loadingPending()"
-            (collect)="onCollectContribution($event)" />
+           <div>
+             <app-pending-collection-alert
+               [pendingContributions]="pendingContributions()"
+               [loading]="loadingPending()"
+               (collect)="onCollectContribution($event)" />
+           </div>
         </div>
 
         <!-- Right Column: Tabs Content -->

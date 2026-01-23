@@ -3,19 +3,19 @@ import { CommonModule, NgTemplateOutlet } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
-import { BreadcrumbsComponent, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs.component';
-import { SelectComponent } from '../../../shared/components/select/select.component';
-import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
-import { WalletService } from '../../../core/services/wallet.service';
-import { WalletStore } from '../../../core/state/wallet.store';
+import { BreadcrumbsComponent, BreadcrumbItem } from '../../../../shared/components/breadcrumbs/breadcrumbs.component';
+import { SelectComponent } from '../../../../shared/components/select/select.component';
+import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
+import { WalletService } from '../../../../core/services/wallet.service';
+import { WalletStore } from '../../../../core/state/wallet.store';
 import {
   WalletTransaction,
   WalletSummary,
   WalletTransactionType,
   WalletTransactionStatus,
   TransactionQueryParams
-} from '../../../shared/models/wallet.model';
-import { SelectOption } from '../../../shared/components/select/select.component';
+} from '../../../../shared/models/wallet.model';
+import { SelectOption } from '../../../../shared/components/select/select.component';
 
 @Component({
   selector: 'app-wallet-transactions',

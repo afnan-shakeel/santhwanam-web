@@ -7,13 +7,14 @@ import { ToastService } from '../../../../../core/services/toast.service';
 import { MemberContribution } from '../../../../../shared/models/death-claim.model';
 import { MemberContributionWithRelations } from '../../../../../shared/models/contribution.model';
 import { RecordCashModalComponent } from "../../../../death-claims/claim-details/record-cash-modal/record-cash-modal.component";
+import { AccessService } from '../../../../../core/services/access.service';
+import { ButtonComponent } from "../../../../../shared/components/button/button.component";
 
-export type MemberViewMode = 'self' | 'agent' | 'admin';
 
 @Component({
   selector: 'app-member-contributions-tab',
   standalone: true,
-  imports: [CommonModule, RecordCashModalComponent],
+  imports: [CommonModule, RecordCashModalComponent, ButtonComponent],
   templateUrl: './member-contributions-tab.component.html',
   styleUrls: ['./member-contributions-tab.component.css']
 })
@@ -21,12 +22,11 @@ export class MemberContributionsTabComponent implements OnInit {
   private contributionsService = inject(ContributionsService);
   private toastService = inject(ToastService);
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
-
+  private accessService = inject(AccessService);
   // State
   contributions = signal<MemberContribution[] | MemberContributionWithRelations[]>([]);
   loading = signal(true);
-  viewMode = signal<MemberViewMode>('self');
+  viewMode = this.accessService.viewMode
   selectedStatus = signal<string>('all');
 
   // Pagination
@@ -54,25 +54,14 @@ export class MemberContributionsTabComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.detectViewMode();
     this.loadContributions();
   }
 
-  private detectViewMode(): void {
-    const url = this.router.url;
-    if (url.includes('/my-profile')) {
-      this.viewMode.set('self');
-    } else if (url.includes('/agents/members/')) {
-      this.viewMode.set('agent');
-    } else if (url.includes('/members/') && url.includes('/profile')) {
-      this.viewMode.set('admin');
-    }
-  }
 
   private loadContributions(): void {
     this.loading.set(true);
     
-    if (this.viewMode() === 'self') {
+    if (this.viewMode() === 'member') {
       this.contributionsService.getMyContributionsHistory({
         status: this.selectedStatus() !== 'all' ? this.selectedStatus() as any : undefined,
         page: this.currentPage(),
@@ -80,7 +69,6 @@ export class MemberContributionsTabComponent implements OnInit {
       }).subscribe({
         next: (response) => {
           this.contributions.set(response.contributions || []);
-          console.log('XXDEBUG',this.contributions().length)
           this.totalItems.set(response.total || 0);
           this.loading.set(false);
         },
@@ -99,7 +87,6 @@ export class MemberContributionsTabComponent implements OnInit {
         }).subscribe({
           next: (response) => {
             this.contributions.set(response?.contributions || []);
-            console.log('XXDEBUG',this.contributions().length)
             this.totalItems.set(response?.total || 0);
             this.loading.set(false);
           },
@@ -158,7 +145,7 @@ export class MemberContributionsTabComponent implements OnInit {
 
   getCollectionDate(contribution: MemberContribution | MemberContributionWithRelations): string | null {
     const c = contribution as MemberContributionWithRelations;
-    return c.collectionDate || (contribution as MemberContribution).collectedAt || null;
+    return c.collectionDate || (contribution as MemberContribution).collectionDate || null;
   }
 
   getPaymentMethod(contribution: MemberContribution | MemberContributionWithRelations): string | null {

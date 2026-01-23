@@ -75,18 +75,20 @@
 
       <!-- Form Actions -->
       <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <button
+        <app-button
           type="button"
+          variant="ghost"
           (click)="onCancel()"
           [disabled]="saving()"
-          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Cancel
-        </button>
-        <button
+        </app-button>
+        <app-button
           type="submit"
+          variant="primary"
+          entity="area"
+          action="create"
           [disabled]="saving() || areaForm.invalid"
-          class="px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
           @if (saving()) {
             <span class="flex items-center">
@@ -99,7 +101,7 @@
           } @else {
             {{ isEditMode() ? 'Update Area' : 'Create Area' }}
           }
-        </button>
+        </app-button>
       </div>
     </form>
   }

@@ -20,6 +20,7 @@ import { ForumService } from '../../../core/services/forum.service';
 import { UserService } from '../../../core/services/user.service';
 import { Forum, CreateForumRequest, UpdateForumRequest } from '../../../shared/models/forum.model';
 import { User } from '../../../shared/models/user.model';
+import { ButtonComponent } from "../../../shared/components/button/button.component";
 
 @Component({
   selector: 'app-forum-form',
@@ -30,7 +31,8 @@ import { User } from '../../../shared/models/user.model';
     ModalComponent,
     InputComponent,
     SearchSelectComponent,
-  ],
+    ButtonComponent
+],
   templateUrl: './forum-form.component.html',
   styleUrls: ['./forum-form.component.css'],
 })

@@ -19,6 +19,7 @@
           <!-- Forum -->
           <app-search-select
             label="Forum"
+            size="small"
             placeholder="Search and select forum"
             [required]="true"
             [mode]="'single'"
@@ -34,6 +35,7 @@
           <!-- Area -->
           <app-search-select
             label="Area"
+            size="small"
             placeholder="Search and select area"
             [required]="true"
             [mode]="'single'"
@@ -48,6 +50,7 @@
 
           <!-- Unit -->
           <app-search-select
+            size="small"
             label="Unit"
             placeholder="Search and select unit"
             [required]="true"
@@ -235,11 +238,13 @@
       <div class="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
         <div>
           @if (!isEditMode() || isDraftMode()) {
-            <button
+            <app-button
               type="button"
+              variant="ghost"
+              entity="agent"
+              action="create"
               (click)="onSaveAsDraft()"
               [disabled]="saving()"
-              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               @if (saving()) {
                 <span class="flex items-center">
@@ -252,22 +257,23 @@
               } @else {
                 Save as Draft
               }
-            </button>
+            </app-button>
           }
         </div>
         <div class="flex space-x-3">
-          <button
+          <app-button
             type="button"
+            variant="ghost"
             (click)="onCancel()"
             [disabled]="saving() || submitting()"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
-          </button>
-          <button
+          </app-button>
+          <app-button
             type="submit"
+            entity="agent"
+            action="create"
             [disabled]="submitting() || saving() || !isFormValid()"
-            class="px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             @if (submitting()) {
               <span class="flex items-center">
@@ -280,7 +286,7 @@
             } @else {
               {{ isDraftMode() ? 'Submit for Approval' : (isEditMode() ? 'Update Agent' : 'Submit for Approval') }}
             }
-          </button>
+          </app-button>
         </div>
       </div>
     </form>

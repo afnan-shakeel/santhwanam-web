@@ -10,6 +10,7 @@ import { ToastService } from '../../../../../core/services/toast.service';
 import { AgentProfile, AgentStats } from '../../../../../shared/models/agent-profile.model';
 import { EditProfileModalComponent } from '../../edit-profile-modal/edit-profile-modal.component';
 import { DevInProgressModalComponent } from '../../modals/dev-in-progress-modal/dev-in-progress-modal.component';
+import { ButtonComponent } from "../../../../../shared/components/button/button.component";
 
 type TabType = 'overview' | 'members' | 'collections' | 'performance' | 'activity';
 
@@ -30,8 +31,9 @@ interface TabItem {
     AgentInfoCardComponent,
     AgentHierarchyCardComponent,
     EditProfileModalComponent,
-    DevInProgressModalComponent
-  ],
+    DevInProgressModalComponent,
+    ButtonComponent
+],
   templateUrl: './admin-agent-profile.component.html',
   styleUrls: ['./admin-agent-profile.component.css']
 })

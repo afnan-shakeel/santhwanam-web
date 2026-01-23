@@ -92,26 +92,30 @@
       <div class="space-y-6">
         <!-- Member Info Card (for agent/admin views) -->
         @if (memberInfo(); as member) {
-          <app-member-info-card
-            [member]="member"
-            [showAgent]="true"
-            [showUnit]="false"
-            [showProfileLink]="isAgentView()"
-            [profileLink]="'/members/' + member.memberId + '/profile'">
-          </app-member-info-card>
+          <div>
+            <app-member-info-card
+              [member]="member"
+              [showAgent]="true"
+              [showUnit]="false"
+              [showProfileLink]="isAgentView()"
+              [profileLink]="'/members/' + member.memberId + '/profile'">
+            </app-member-info-card>
+          </div>
         }
 
         <!-- Balance Card - Role-specific action buttons -->
-        <app-wallet-balance-card
-          [balance]="currentBalance()"
-          [isLowBalance]="isLowBalance()"
-          [recommendedTopUp]="recommendedTopUp()"
-          [showRequestDeposit]="false"
-          [showRecordDeposit]="isAgentView()"
-          [showAdjustment]="isAdminView()"
-          (recordDeposit)="openRecordDepositModal()"
-          (adjust)="openAdjustmentModal()">
-        </app-wallet-balance-card>
+        <div>
+          <app-wallet-balance-card
+            [balance]="currentBalance()"
+            [isLowBalance]="isLowBalance()"
+            [recommendedTopUp]="recommendedTopUp()"
+            [showRequestDeposit]="false"
+            [showRecordDeposit]="isAgentView()"
+            [showAdjustment]="isAdminView()"
+            (recordDeposit)="openRecordDepositModal()"
+            (adjust)="openAdjustmentModal()">
+          </app-wallet-balance-card>
+        </div>
 
         <!-- Agent Info (if available and viewing as agent) -->
         @if (isAgentView() && agentInfo(); as agent) {

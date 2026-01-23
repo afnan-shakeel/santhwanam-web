@@ -22,14 +22,12 @@
         <!-- Agent Info Card -->
         <app-agent-info-card
             [agent]="profile()"
-            [viewMode]="'self'"
             [loading]="loading()"
             (editProfile)="openEditModal()" />
 
         <!-- Hierarchy Card -->
         <app-agent-hierarchy-card
             [agent]="profile()"
-            [viewMode]="'self'"
             [loading]="loading()" />
       </div>
 

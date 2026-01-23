@@ -9,6 +9,38 @@
 export type ScopeType = 'None' | 'Forum' | 'Area' | 'Unit' | 'Agent' | 'Member';
 
 /**
+ * View mode determines the UI perspective based on user's highest priority role
+ * - superadmin: Full system access, all admin features
+ * - admin: Administrative access (forum, area, unit level)
+ * - agent: Agent-specific view for managing members
+ * - member: Member self-service view
+ */
+export type ViewMode = 'superadmin' | 'admin' | 'agent' | 'member';
+
+/**
+ * Role priority configuration for determining view mode
+ * Higher number = higher priority
+ */
+export const ROLE_PRIORITY: Record<string, { priority: number; viewMode: ViewMode }> = {
+  // Super Admin roles
+  'super_admin': { priority: 100, viewMode: 'admin' }, 
+  'system_admin': { priority: 95, viewMode: 'admin' },
+  
+  // Forum/Area/Unit Admin roles
+  'forum_admin': { priority: 80, viewMode: 'admin' },
+  'area_admin': { priority: 75, viewMode: 'admin' },
+  'unit_admin': { priority: 70, viewMode: 'admin' },
+  'admin': { priority: 65, viewMode: 'admin' },
+  
+  // Agent roles
+  'agent': { priority: 50, viewMode: 'agent' },
+  'senior_agent': { priority: 55, viewMode: 'agent' },
+  
+  // Member roles
+  'member': { priority: 10, viewMode: 'member' },
+};
+
+/**
  * User's access scope - defines the boundary of their access
  */
 export interface AuthScope {

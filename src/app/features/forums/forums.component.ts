@@ -78,11 +78,15 @@ export class ForumsComponent {
     actions: [
       {
         label: 'View',
-        callback: (forum: Forum) => this.onViewForum(forum)
+        callback: (forum: Forum) => this.onViewForum(forum),
+        actionAccessEntity: "forum",
+        actionAccessAction: "view"
       },
       {
         label: 'Edit',
-        callback: (forum: Forum) => this.onEditForum(forum)
+        callback: (forum: Forum) => this.onEditForum(forum),
+        actionAccessEntity: "forum",
+        actionAccessAction: "edit"
       }
     ],
     showActions: true,

@@ -35,7 +35,7 @@ export class RolesComponent {
         label: 'Role Name',
         sortable: true,
         type: 'link',
-        linkUrl: (role) => `/roles/${role.roleId}`,
+        linkUrl: (role) => `/admin/roles/${role.roleId}`,
         format: (value) => value || '-'
       },
       {
@@ -71,11 +71,15 @@ export class RolesComponent {
     actions: [
       {
         label: 'View',
-        callback: (role) => this.onViewRole(role)
+        callback: (role) => this.onViewRole(role),
+        actionAccessEntity: "role",
+        actionAccessAction: "view"
       },
       {
         label: 'Edit',
-        callback: (role) => this.onEditRole(role)
+        callback: (role) => this.onEditRole(role),
+        actionAccessEntity: "role",
+        actionAccessAction: "edit"
       }
     ],
     showActions: true,
@@ -117,16 +121,16 @@ export class RolesComponent {
 
   onViewRole(role: Role): void {
     console.log('View role:', role);
-    this.router.navigate(['/roles', role.roleId]);
+    this.router.navigate(['/admin/roles', role.roleId]);
   }
 
   onEditRole(role: Role): void {
     console.log('Edit role:', role);
-    this.router.navigate(['/roles', role.roleId]);
+    this.router.navigate(['/admin/roles', role.roleId]);
   }
 
   protected onAddRole(): void {
     console.log('Add role clicked');
-    this.router.navigate(['/roles', 'new']);
+    this.router.navigate(['/admin/roles', 'new']);
   }
 }
