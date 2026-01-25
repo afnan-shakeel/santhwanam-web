@@ -7,16 +7,13 @@ import { BreadcrumbsComponent, BreadcrumbItem } from '../../../../../shared/comp
 import { PaginationComponent } from '../../../../../shared/components/pagination/pagination.component';
 import { WalletService } from '../../../../../core/services/wallet.service';
 import { ToastService } from '../../../../../core/services/toast.service';
-import { WalletWithMember } from '../../../../../shared/models/wallet.model';
+import { Wallet } from '../../../../../shared/models/wallet.model';
+import { InputComponent } from "../../../../../shared/components/input/input.component";
+import { ButtonComponent } from "../../../../../shared/components/button/button.component";
 
 // Extended interface for low balance with tier info (if available from API)
-interface LowBalanceWallet extends WalletWithMember {
-  tier?: {
-    tierName: string;
-    contributionAmount: number;
-  };
+interface LowBalanceWallet extends Wallet {
   shortfall?: number;
-  agentName?: string;
 }
 
 // Agent summary for the "Summary by Agent" section
@@ -34,8 +31,10 @@ interface AgentSummary {
     CommonModule,
     ReactiveFormsModule,
     BreadcrumbsComponent,
-    PaginationComponent
-  ],
+    PaginationComponent,
+    InputComponent,
+    ButtonComponent
+],
   templateUrl: './low-balance-report.component.html',
   styleUrls: ['./low-balance-report.component.css']
 })
@@ -88,15 +87,11 @@ export class LowBalanceReportComponent implements OnInit {
       threshold: threshold
     }).subscribe({
       next: (response) => {
+        console.log('Low Balance Wallets Response:', response);
         // Map wallets to include calculated shortfall
         const mapped = response.wallets.map(w => ({
           ...w,
           shortfall: Math.max(0, threshold - w.currentBalance),
-          // Tier info would come from API if available
-          tier: {
-            tierName: 'Tier A', // Placeholder
-            contributionAmount: 100 // Placeholder
-          }
         }));
         this.wallets.set(mapped);
         this.total.set(response.total);

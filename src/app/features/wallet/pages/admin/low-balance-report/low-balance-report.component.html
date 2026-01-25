@@ -49,22 +49,25 @@
       <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Filters</h3>
       <form [formGroup]="filterForm" (ngSubmit)="onApplyFilters()" class="flex flex-wrap gap-4 items-end">
         <div class="w-48">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Balance Threshold</label>
-          <input type="number" formControlName="threshold" placeholder="200"
-            class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
-                   bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                   focus:ring-2 focus:ring-primary focus:border-primary">
+          <app-input type="number"
+          label="Balance Threshold"
+          formControlName="threshold" 
+          placeholder="200"
+          ></app-input>
         </div>
 
         <div class="flex gap-2">
-          <button type="submit"
-            class="px-4 py-2.5 bg-primary hover:bg-primary-dark text-white font-medium rounded-lg transition-colors">
+          <app-button type="submit"
+          size="xs"
+          >
             Apply
-          </button>
-          <button type="button" (click)="onClearFilters()"
-            class="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+          </app-button>
+          <app-button type="button" (click)="onClearFilters()"
+          size="xs"
+          variant="ghost"
+          >
             Reset
-          </button>
+          </app-button>
         </div>
       </form>
     </div>
@@ -146,15 +149,15 @@
                 <tr class="hover:bg-yellow-50 dark:hover:bg-yellow-900/10 transition-colors">
                   <td class="px-4 py-4">
                     <span class="text-sm font-medium text-gray-900 dark:text-white">
-                      {{ wallet.member.memberCode }}
+                      {{ wallet.member?.memberCode }}
                     </span>
                   </td>
                   <td class="px-4 py-4">
                     <div>
                       <p class="text-sm text-gray-900 dark:text-white">
-                        {{ wallet.member.firstName }} {{ wallet.member.lastName }}
+                        {{ wallet.member?.firstName }} {{ wallet.member?.lastName }}
                       </p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">Agent: {{ wallet.agentName || '-' }}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">Agent: {{ wallet.member?.agent?.firstName }} {{ wallet.member?.agent?.lastName }}</p>
                     </div>
                   </td>
                   <td class="px-4 py-4 text-right">
@@ -167,8 +170,8 @@
                   </td>
                   <td class="px-4 py-4 text-center">
                     <div>
-                      <span class="text-sm text-gray-900 dark:text-white">{{ formatCurrency(wallet.tier?.contributionAmount || 100) }}</span>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">{{ wallet.tier?.tierName || 'Tier A' }}</p>
+                      <span class="text-sm text-gray-900 dark:text-white">{{ formatCurrency(wallet.member?.tier?.contributionAmount || 100) }}</span>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">{{ wallet.member?.tier?.tierName || 'Tier A' }}</p>
                     </div>
                   </td>
                   <td class="px-4 py-4 text-right">
@@ -191,7 +194,7 @@
 
       <!-- Pagination -->
       @if (totalPages() > 1) {
-        <div class="mt-8 flex justify-center">
+        <div class="mt-4">
           <app-pagination
             [currentPage]="page()"
             [totalPages]="totalPages()"

@@ -215,7 +215,7 @@
                         {{ deposit.member?.memberCode || 'Unknown' }} • {{ deposit.member?.firstName }} {{ deposit.member?.lastName }}
                       </p>
                       <p class="text-xs text-gray-500 dark:text-gray-400">
-                        Agent: {{ deposit.collectedByName || 'Unknown' }} • {{ getTimeAgo(deposit.createdAt) }}
+                        Agent: {{ deposit.member?.agent?.firstName }} {{ deposit.member?.agent?.lastName }} • {{ getTimeAgo(deposit.createdAt) }}
                       </p>
                     </div>
                   </div>
@@ -276,7 +276,7 @@
                     </div>
                     <div>
                       <p class="font-medium text-gray-900 dark:text-white text-sm">
-                        {{ wallet.member.memberCode }} • {{ wallet.member.firstName }} {{ wallet.member.lastName }}
+                        {{ wallet.member?.memberCode }} • {{ wallet.member?.firstName }} {{ wallet.member?.lastName }}
                       </p>
                       <p class="text-xs text-gray-500 dark:text-gray-400">
                         Balance: <span class="font-semibold text-red-600 dark:text-red-400">{{ formatCurrency(wallet.currentBalance) }}</span>

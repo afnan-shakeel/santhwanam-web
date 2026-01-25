@@ -25,6 +25,7 @@
       "post": {
         "tags": ["Authentication"],
         "summary": "User login",
+        "description": "Authenticates user with email and password. Returns JWT access token and full AuthContext with user info, permissions, scope, hierarchy, and roles.",
         "security": [],
         "requestBody": {
           "required": true,
@@ -51,25 +52,18 @@
                   "properties": {
                     "accessToken": {
                       "type": "string",
-                      "description": "JWT access token signed by the server. Token payload contains: sub, userId, authUserId, email, roles"
+                      "description": "JWT access token signed by the server"
                     },
                     "refreshToken": {
                       "type": ["string", "null"],
-                      "description": "Optional refresh token (from Supabase)"
+                      "description": "Optional refresh token from Supabase"
                     },
                     "expiresAt": {
                       "type": ["integer", "null"],
-                      "description": "Optional expiry timestamp (Unix seconds) from Supabase session, if available"
+                      "description": "Optional expiry timestamp (Unix seconds)"
                     },
-                    "user": {
-                      "type": "object",
-                      "nullable": true,
-                      "properties": {
-                        "userId": { "type": "string" },
-                        "email": { "type": "string" },
-                        "firstName": { "type": "string" },
-                        "lastName": { "type": "string" }
-                      }
+                    "authContext": {
+                      "$ref": "#/components/schemas/AuthContext"
                     }
                   }
                 }
@@ -128,6 +122,62 @@
         "responses": {
           "200": { "description": "Password reset successful" },
           "400": { "description": "Invalid or expired token" }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Get current user context",
+        "description": "Returns the full AuthContext for the authenticated user including user info, permissions, scope, hierarchy, and roles.",
+        "responses": {
+          "200": {
+            "description": "AuthContext retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthContext"
+                }
+              }
+            }
+          },
+          "401": { "description": "Not authenticated" }
+        }
+      }
+    },
+    "/api/auth/check-access": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Check resource access",
+        "description": "Check if the current user has access to a specific resource based on their scope and hierarchy.",
+        "parameters": [
+          {
+            "name": "resource",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "enum": ["member", "agent", "wallet"] },
+            "description": "The type of resource to check access for"
+          },
+          {
+            "name": "resourceId",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "The ID of the specific resource"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Access check result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessCheckResult"
+                }
+              }
+            }
+          },
+          "400": { "description": "Missing required query parameters" }
         }
       }
     },
@@ -6227,10 +6277,1345 @@
           }
         }
       }
+    },
+
+    "/api/cash-management/custody/me": {
+      "get": {
+        "tags": ["Cash Management - Custody"],
+        "summary": "Get current user's cash custody",
+        "description": "Returns the cash custody record for the authenticated user",
+        "responses": {
+          "200": {
+            "description": "Cash custody retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": { "$ref": "#/components/schemas/CashCustody" }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "No cash custody record found for current user" }
+        }
+      }
+    },
+    "/api/cash-management/custody/summary/{glAccountCode}": {
+      "get": {
+        "tags": ["Cash Management - Custody"],
+        "summary": "Get custody summary by GL account code",
+        "description": "Returns aggregated custody summary for a specific GL account (1001-1004)",
+        "parameters": [
+          {
+            "name": "glAccountCode",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "pattern": "^100[1-4]$" },
+            "description": "GL Account Code (1001=Agent, 1002=UnitAdmin, 1003=AreaAdmin, 1004=ForumAdmin)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Custody summary retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": { "$ref": "#/components/schemas/CashCustodySummary" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cash-management/custody/user/{userId}": {
+      "get": {
+        "tags": ["Cash Management - Custody"],
+        "summary": "Get custody by user ID",
+        "description": "Returns the cash custody record for a specific user (Admin only)",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cash custody retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": { "$ref": "#/components/schemas/CashCustodyWithRelations" }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Cash custody not found" }
+        }
+      }
+    },
+    "/api/cash-management/custody/{custodyId}": {
+      "get": {
+        "tags": ["Cash Management - Custody"],
+        "summary": "Get custody by ID",
+        "description": "Returns a specific cash custody record by its ID",
+        "parameters": [
+          {
+            "name": "custodyId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cash custody retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": { "$ref": "#/components/schemas/CashCustodyWithRelations" }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Cash custody not found" }
+        }
+      }
+    },
+    "/api/cash-management/custodies": {
+      "get": {
+        "tags": ["Cash Management - Custody"],
+        "summary": "List all custodies with filters",
+        "description": "Returns paginated list of cash custodies with optional filters (Admin only)",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "userRole",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["Agent", "UnitAdmin", "AreaAdmin", "ForumAdmin"] }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["Active", "Inactive", "Suspended"] }
+          },
+          {
+            "name": "forumId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "areaId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "unitId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 20, "maximum": 100 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Custodies retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "custodies": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/CashCustodyWithRelations" }
+                        },
+                        "total": { "type": "integer" },
+                        "page": { "type": "integer" },
+                        "limit": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cash-management/handovers/pending/me": {
+      "get": {
+        "tags": ["Cash Management - Handovers"],
+        "summary": "Get pending handovers for current user",
+        "description": "Returns handovers where current user is the receiver and status is Initiated",
+        "responses": {
+          "200": {
+            "description": "Pending handovers retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/CashHandoverWithRelations" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cash-management/handovers/pending/super-admin": {
+      "get": {
+        "tags": ["Cash Management - Handovers"],
+        "summary": "Get pending bank deposits",
+        "description": "Returns handovers to SuperAdmin pending acknowledgment for bank deposit (SuperAdmin only)",
+        "responses": {
+          "200": {
+            "description": "Pending bank deposits retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/CashHandoverWithRelations" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cash-management/handovers/receivers": {
+      "get": {
+        "tags": ["Cash Management - Handovers"],
+        "summary": "Get valid receivers for current user",
+        "description": "Returns list of users who can receive cash handovers from the current user based on hierarchy",
+        "responses": {
+          "200": {
+            "description": "Valid receivers retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/ValidReceiver" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cash-management/handovers/my-initiated": {
+      "get": {
+        "tags": ["Cash Management - Handovers"],
+        "summary": "Get handovers initiated by current user",
+        "description": "Returns all handovers where current user is the initiator",
+        "responses": {
+          "200": {
+            "description": "Initiated handovers retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/CashHandoverWithRelations" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cash-management/handovers": {
+      "get": {
+        "tags": ["Cash Management - Handovers"],
+        "summary": "List all handovers with filters",
+        "description": "Returns paginated list of cash handovers with optional filters (Admin only)",
+        "parameters": [
+          {
+            "name": "fromUserId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "toUserId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["Initiated", "Acknowledged", "Rejected", "Cancelled"] }
+          },
+          {
+            "name": "forumId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "requiresApproval",
+            "in": "query",
+            "schema": { "type": "boolean" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 20, "maximum": 100 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Handovers retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "handovers": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/CashHandoverWithRelations" }
+                        },
+                        "total": { "type": "integer" },
+                        "page": { "type": "integer" },
+                        "limit": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Cash Management - Handovers"],
+        "summary": "Initiate a new cash handover",
+        "description": "Creates a new cash handover from current user to specified receiver",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/InitiateHandoverRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Handover initiated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": { "$ref": "#/components/schemas/CashHandover" },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid request or insufficient balance" },
+          "403": { "description": "Invalid receiver for current user's role" }
+        }
+      }
+    },
+    "/api/cash-management/handovers/{handoverId}": {
+      "get": {
+        "tags": ["Cash Management - Handovers"],
+        "summary": "Get handover by ID",
+        "description": "Returns a specific cash handover record by its ID",
+        "parameters": [
+          {
+            "name": "handoverId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Handover retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": { "$ref": "#/components/schemas/CashHandoverWithRelations" }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Handover not found" }
+        }
+      }
+    },
+    "/api/cash-management/handovers/{handoverId}/acknowledge": {
+      "post": {
+        "tags": ["Cash Management - Handovers"],
+        "summary": "Acknowledge a cash handover",
+        "description": "Receiver acknowledges receipt of cash. Creates GL entries and updates custody balances.",
+        "parameters": [
+          {
+            "name": "handoverId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "receiverNotes": { "type": "string", "maxLength": 500 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Handover acknowledged successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": { "$ref": "#/components/schemas/CashHandover" },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Handover not in Initiated status" },
+          "403": { "description": "Only receiver can acknowledge" }
+        }
+      }
+    },
+    "/api/cash-management/handovers/{handoverId}/reject": {
+      "post": {
+        "tags": ["Cash Management - Handovers"],
+        "summary": "Reject a cash handover",
+        "description": "Receiver rejects the handover with a reason. Returns funds to initiator's custody.",
+        "parameters": [
+          {
+            "name": "handoverId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["rejectionReason"],
+                "properties": {
+                  "rejectionReason": { "type": "string", "minLength": 5, "maxLength": 500 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Handover rejected successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": { "$ref": "#/components/schemas/CashHandover" },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Handover not in Initiated status" },
+          "403": { "description": "Only receiver can reject" }
+        }
+      }
+    },
+    "/api/cash-management/handovers/{handoverId}/cancel": {
+      "post": {
+        "tags": ["Cash Management - Handovers"],
+        "summary": "Cancel a cash handover",
+        "description": "Initiator cancels a pending handover before it's acknowledged",
+        "parameters": [
+          {
+            "name": "handoverId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Handover cancelled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": { "$ref": "#/components/schemas/CashHandover" },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Handover not in Initiated status" },
+          "403": { "description": "Only initiator can cancel" }
+        }
+      }
+    },
+    "/api/cash-management/custody/me/activity": {
+      "get": {
+        "tags": ["Cash Management - Custody"],
+        "summary": "Get current user's custody activity",
+        "description": "Returns activity log for the current user's cash custody (stub - returns empty array)",
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "query",
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 20 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Custody activity retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "activities": { "type": "array", "items": { "type": "object" } },
+                        "total": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cash-management/handovers/history": {
+      "get": {
+        "tags": ["Cash Management - Handovers"],
+        "summary": "Get handover history for current user",
+        "description": "Returns paginated history of handovers where current user was initiator or receiver",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["initiator", "receiver", "all"] },
+            "description": "Filter by user's role in handover"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["Initiated", "Acknowledged", "Rejected", "Cancelled"] }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 20 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Handover history retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "handovers": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/CashHandoverWithRelations" }
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "page": { "type": "integer" },
+                            "limit": { "type": "integer" },
+                            "total": { "type": "integer" },
+                            "totalPages": { "type": "integer" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cash-management/admin/dashboard": {
+      "get": {
+        "tags": ["Cash Management - Admin"],
+        "summary": "Get admin dashboard statistics",
+        "description": "Returns aggregated statistics for cash management dashboard (Admin only)",
+        "parameters": [
+          {
+            "name": "forumId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" },
+            "description": "Filter by forum (Super Admin only)"
+          },
+          {
+            "name": "areaId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" },
+            "description": "Filter by area"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dashboard statistics retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "totalCash": { "type": "number" },
+                            "bankBalance": { "type": "number" },
+                            "totalInCustody": { "type": "number" },
+                            "pendingHandovers": { "type": "integer" },
+                            "pendingHandoverAmount": { "type": "number" }
+                          }
+                        },
+                        "byLevel": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "object",
+                            "properties": {
+                              "count": { "type": "integer" },
+                              "totalBalance": { "type": "number" },
+                              "glAccountCode": { "type": "string" }
+                            }
+                          }
+                        },
+                        "alerts": {
+                          "type": "object",
+                          "properties": {
+                            "overdueCount": { "type": "integer" },
+                            "overdueAmount": { "type": "number" },
+                            "overdueThresholdDays": { "type": "integer" },
+                            "pendingOverdue": { "type": "integer" },
+                            "pendingOverdueHours": { "type": "integer" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cash-management/admin/custody-by-level": {
+      "get": {
+        "tags": ["Cash Management - Admin"],
+        "summary": "Get custody aggregated by hierarchy level",
+        "description": "Returns cash custody totals grouped by role level (Agent, UnitAdmin, etc.)",
+        "parameters": [
+          {
+            "name": "forumId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "areaId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Custody by level retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "levels": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "level": { "type": "string" },
+                              "glAccountCode": { "type": "string" },
+                              "glAccountName": { "type": "string" },
+                              "userCount": { "type": "integer" },
+                              "totalBalance": { "type": "number" },
+                              "glBalance": { "type": "number" },
+                              "reconciled": { "type": "boolean" }
+                            }
+                          }
+                        },
+                        "totalInCustody": { "type": "number" },
+                        "bankBalance": { "type": "number" },
+                        "totalCash": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cash-management/admin/custody-report": {
+      "get": {
+        "tags": ["Cash Management - Admin"],
+        "summary": "Get detailed custody report by user",
+        "description": "Returns paginated list of all users with cash custody and their balances",
+        "parameters": [
+          {
+            "name": "forumId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "areaId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "unitId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["Agent", "UnitAdmin", "AreaAdmin", "ForumAdmin"] }
+          },
+          {
+            "name": "minBalance",
+            "in": "query",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["Active", "Inactive"] }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 50 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Custody report retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "custodies": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "custodyId": { "type": "string", "format": "uuid" },
+                              "userId": { "type": "string", "format": "uuid" },
+                              "userName": { "type": "string" },
+                              "userRole": { "type": "string" },
+                              "unitName": { "type": "string" },
+                              "areaName": { "type": "string" },
+                              "glAccountCode": { "type": "string" },
+                              "status": { "type": "string" },
+                              "currentBalance": { "type": "number" },
+                              "totalReceived": { "type": "number" },
+                              "totalTransferred": { "type": "number" },
+                              "lastTransactionAt": { "type": "string", "format": "date-time" },
+                              "daysSinceLastTransaction": { "type": "integer" },
+                              "isOverdue": { "type": "boolean" }
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "totalUsers": { "type": "integer" },
+                            "totalBalance": { "type": "number" },
+                            "activeUsers": { "type": "integer" },
+                            "inactiveUsers": { "type": "integer" }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "page": { "type": "integer" },
+                            "limit": { "type": "integer" },
+                            "total": { "type": "integer" },
+                            "totalPages": { "type": "integer" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cash-management/admin/overdue": {
+      "get": {
+        "tags": ["Cash Management - Admin"],
+        "summary": "Get users holding cash beyond threshold",
+        "description": "Returns list of users who haven't transferred cash within threshold days",
+        "parameters": [
+          {
+            "name": "thresholdDays",
+            "in": "query",
+            "schema": { "type": "integer", "default": 7 },
+            "description": "Number of days to consider overdue"
+          },
+          {
+            "name": "forumId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "areaId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["Agent", "UnitAdmin", "AreaAdmin", "ForumAdmin"] }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Overdue users retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "thresholdDays": { "type": "integer" },
+                        "overdueUsers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "custodyId": { "type": "string", "format": "uuid" },
+                              "userId": { "type": "string", "format": "uuid" },
+                              "userName": { "type": "string" },
+                              "userRole": { "type": "string" },
+                              "unitName": { "type": "string" },
+                              "areaName": { "type": "string" },
+                              "currentBalance": { "type": "number" },
+                              "lastTransactionAt": { "type": "string", "format": "date-time" },
+                              "daysSinceLastTransaction": { "type": "integer" }
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "totalOverdueUsers": { "type": "integer" },
+                            "totalOverdueAmount": { "type": "number" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cash-management/admin/reconciliation": {
+      "get": {
+        "tags": ["Cash Management - Admin"],
+        "summary": "Get GL reconciliation report",
+        "description": "Compares custody sub-ledger totals with GL account balances",
+        "parameters": [
+          {
+            "name": "forumId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reconciliation report retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "accounts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "accountCode": { "type": "string" },
+                              "accountName": { "type": "string" },
+                              "glBalance": { "type": "number" },
+                              "custodyTotal": { "type": "number" },
+                              "difference": { "type": "number" },
+                              "isReconciled": { "type": "boolean" },
+                              "userCount": { "type": "integer" }
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "totalGlBalance": { "type": "number" },
+                            "totalCustodyBalance": { "type": "number" },
+                            "totalDifference": { "type": "number" },
+                            "allReconciled": { "type": "boolean" }
+                          }
+                        },
+                        "bankAccount": {
+                          "type": "object",
+                          "properties": {
+                            "accountCode": { "type": "string" },
+                            "accountName": { "type": "string" },
+                            "balance": { "type": "number" }
+                          }
+                        },
+                        "lastCheckedAt": { "type": "string", "format": "date-time" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cash-management/admin/pending-transfers": {
+      "get": {
+        "tags": ["Cash Management - Admin"],
+        "summary": "Get all pending transfers across the organization",
+        "description": "Returns all handovers in Initiated status across the organization",
+        "parameters": [
+          {
+            "name": "forumId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "areaId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "fromRole",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["Agent", "UnitAdmin", "AreaAdmin", "ForumAdmin"] }
+          },
+          {
+            "name": "toRole",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["UnitAdmin", "AreaAdmin", "ForumAdmin", "SuperAdmin"] }
+          },
+          {
+            "name": "minAge",
+            "in": "query",
+            "schema": { "type": "integer" },
+            "description": "Minimum age in hours"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 20 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pending transfers retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "transfers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "handoverId": { "type": "string", "format": "uuid" },
+                              "handoverNumber": { "type": "string" },
+                              "fromUserName": { "type": "string" },
+                              "fromUserRole": { "type": "string" },
+                              "fromUnit": { "type": "string", "nullable": true },
+                              "toUserName": { "type": "string" },
+                              "toUserRole": { "type": "string" },
+                              "amount": { "type": "number" },
+                              "status": { "type": "string" },
+                              "requiresApproval": { "type": "boolean" },
+                              "approvalStatus": { "type": "string", "nullable": true },
+                              "initiatedAt": { "type": "string", "format": "date-time" },
+                              "ageHours": { "type": "number" }
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "total": { "type": "integer" },
+                            "totalAmount": { "type": "number" },
+                            "requiresApproval": { "type": "integer" },
+                            "overdue": { "type": "integer" }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "page": { "type": "integer" },
+                            "limit": { "type": "integer" },
+                            "total": { "type": "integer" },
+                            "totalPages": { "type": "integer" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cash-management/admin/handovers/{handoverId}/approve": {
+      "post": {
+        "tags": ["Cash Management - Admin"],
+        "summary": "Approve bank deposit (SuperAdmin only)",
+        "description": "Approves a bank deposit handover that requires approval before acknowledgment",
+        "parameters": [
+          {
+            "name": "handoverId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "approverNotes": { "type": "string", "maxLength": 500 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bank deposit approved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "handoverId": { "type": "string", "format": "uuid" },
+                        "handoverNumber": { "type": "string" },
+                        "status": { "type": "string" },
+                        "approvalStatus": { "type": "string" },
+                        "approvedAt": { "type": "string", "format": "date-time" },
+                        "approvedBy": { "type": "string", "format": "uuid" }
+                      }
+                    },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Handover doesn't require approval or already approved" },
+          "403": { "description": "Only SuperAdmin can approve bank deposits" },
+          "404": { "description": "Handover not found" }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AuthContext": {
+        "type": "object",
+        "description": "Complete authentication context for the current user",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/AuthUser"
+          },
+          "permissions": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "List of permission codes the user has"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/AuthScope"
+          },
+          "hierarchy": {
+            "$ref": "#/components/schemas/AuthHierarchy"
+          },
+          "roles": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/RoleAssignment" },
+            "description": "List of role assignments with scope details"
+          }
+        },
+        "required": ["user", "permissions", "scope", "hierarchy", "roles"]
+      },
+      "AuthUser": {
+        "type": "object",
+        "description": "Basic user information",
+        "properties": {
+          "userId": { "type": "string", "format": "uuid" },
+          "email": { "type": "string", "format": "email" },
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" }
+        },
+        "required": ["userId", "email", "firstName", "lastName"]
+      },
+      "AuthScope": {
+        "type": "object",
+        "description": "User's primary access scope",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["None", "Forum", "Area", "Unit", "Agent", "Member"],
+            "description": "Scope level (None = Super Admin with global access)"
+          },
+          "entityId": {
+            "type": ["string", "null"],
+            "format": "uuid",
+            "description": "ID of the scoped entity (null for None scope)"
+          }
+        },
+        "required": ["type", "entityId"]
+      },
+      "AuthHierarchy": {
+        "type": "object",
+        "description": "User's position in the organizational hierarchy",
+        "properties": {
+          "forumId": { "type": ["string", "null"], "format": "uuid" },
+          "areaId": { "type": ["string", "null"], "format": "uuid" },
+          "unitId": { "type": ["string", "null"], "format": "uuid" },
+          "agentId": { "type": ["string", "null"], "format": "uuid" },
+          "memberId": { "type": ["string", "null"], "format": "uuid" }
+        },
+        "required": ["forumId", "areaId", "unitId", "agentId", "memberId"]
+      },
+      "RoleAssignment": {
+        "type": "object",
+        "description": "Role assignment with scope details",
+        "properties": {
+          "roleCode": { "type": "string", "description": "Unique role code (e.g., forum_admin, unit_admin)" },
+          "roleName": { "type": "string", "description": "Display name of the role" },
+          "scopeType": {
+            "type": "string",
+            "enum": ["None", "Forum", "Area", "Unit", "Agent", "Member"],
+            "description": "Type of scope this role has"
+          },
+          "scopeEntityId": {
+            "type": ["string", "null"],
+            "format": "uuid",
+            "description": "ID of the entity this role is scoped to"
+          },
+          "scopeEntityName": {
+            "type": ["string", "null"],
+            "description": "Name of the scoped entity (e.g., forum name, unit name)"
+          }
+        },
+        "required": ["roleCode", "roleName", "scopeType", "scopeEntityId", "scopeEntityName"]
+      },
+      "AccessCheckResult": {
+        "type": "object",
+        "description": "Result of an access check operation",
+        "properties": {
+          "allowed": {
+            "type": "boolean",
+            "description": "Whether access is allowed"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Reason for denial (only present when allowed is false)"
+          }
+        },
+        "required": ["allowed"]
+      },
       "UserRoleResponse": {
         "type": "object",
         "description": "User role assignment response",
@@ -6969,6 +8354,250 @@
               "lastName": { "type": "string" }
             }
           }
+        }
+      },
+      "CashCustody": {
+        "type": "object",
+        "description": "Cash custody record for a user",
+        "properties": {
+          "custodyId": { "type": "string", "format": "uuid" },
+          "userId": { "type": "string", "format": "uuid" },
+          "userRole": { 
+            "type": "string", 
+            "enum": ["Agent", "UnitAdmin", "AreaAdmin", "ForumAdmin"],
+            "description": "Role of the user holding custody"
+          },
+          "glAccountCode": { 
+            "type": "string",
+            "description": "GL Account Code (1001=Agent, 1002=UnitAdmin, 1003=AreaAdmin, 1004=ForumAdmin)"
+          },
+          "currentBalance": { "type": "number", "format": "decimal", "description": "Current cash balance in custody" },
+          "status": { 
+            "type": "string", 
+            "enum": ["Active", "Inactive", "Suspended"],
+            "description": "Custody status"
+          },
+          "forumId": { "type": ["string", "null"], "format": "uuid" },
+          "areaId": { "type": ["string", "null"], "format": "uuid" },
+          "unitId": { "type": ["string", "null"], "format": "uuid" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CashCustodyWithRelations": {
+        "type": "object",
+        "description": "Cash custody record with related entities",
+        "allOf": [
+          { "$ref": "#/components/schemas/CashCustody" },
+          {
+            "type": "object",
+            "properties": {
+              "user": {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" },
+                  "email": { "type": "string", "format": "email" },
+                  "firstName": { "type": "string" },
+                  "lastName": { "type": "string" }
+                }
+              },
+              "forum": {
+                "type": ["object", "null"],
+                "properties": {
+                  "forumId": { "type": "string", "format": "uuid" },
+                  "forumName": { "type": "string" }
+                }
+              },
+              "area": {
+                "type": ["object", "null"],
+                "properties": {
+                  "areaId": { "type": "string", "format": "uuid" },
+                  "areaName": { "type": "string" }
+                }
+              },
+              "unit": {
+                "type": ["object", "null"],
+                "properties": {
+                  "unitId": { "type": "string", "format": "uuid" },
+                  "unitName": { "type": "string" }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CashCustodySummary": {
+        "type": "object",
+        "description": "Aggregated summary for a GL account custody",
+        "properties": {
+          "glAccountCode": { "type": "string" },
+          "totalBalance": { "type": "number", "format": "decimal" },
+          "activeCustodies": { "type": "integer" },
+          "custodies": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CashCustodyWithRelations" }
+          }
+        }
+      },
+      "CashHandover": {
+        "type": "object",
+        "description": "Cash handover record",
+        "properties": {
+          "handoverId": { "type": "string", "format": "uuid" },
+          "handoverNumber": { 
+            "type": "string",
+            "description": "Unique handover number (CHO-YYYY-NNNNN)"
+          },
+          "fromUserId": { "type": "string", "format": "uuid" },
+          "fromUserRole": { 
+            "type": "string", 
+            "enum": ["Agent", "UnitAdmin", "AreaAdmin", "ForumAdmin"]
+          },
+          "toUserId": { "type": "string", "format": "uuid" },
+          "toUserRole": { 
+            "type": "string", 
+            "enum": ["UnitAdmin", "AreaAdmin", "ForumAdmin", "SuperAdmin"]
+          },
+          "amount": { "type": "number", "format": "decimal" },
+          "status": { 
+            "type": "string", 
+            "enum": ["Initiated", "Acknowledged", "Rejected", "Cancelled"]
+          },
+          "handoverType": { 
+            "type": "string", 
+            "enum": ["Normal", "AdminTransition"]
+          },
+          "requiresApproval": { "type": "boolean" },
+          "forumId": { "type": ["string", "null"], "format": "uuid" },
+          "areaId": { "type": ["string", "null"], "format": "uuid" },
+          "unitId": { "type": ["string", "null"], "format": "uuid" },
+          "initiatorNotes": { "type": ["string", "null"] },
+          "receiverNotes": { "type": ["string", "null"] },
+          "rejectionReason": { "type": ["string", "null"] },
+          "journalEntryId": { "type": ["string", "null"], "format": "uuid" },
+          "approvalRequestId": { "type": ["string", "null"], "format": "uuid" },
+          "initiatedAt": { "type": "string", "format": "date-time" },
+          "acknowledgedAt": { "type": ["string", "null"], "format": "date-time" },
+          "rejectedAt": { "type": ["string", "null"], "format": "date-time" },
+          "cancelledAt": { "type": ["string", "null"], "format": "date-time" }
+        }
+      },
+      "CashHandoverWithRelations": {
+        "type": "object",
+        "description": "Cash handover record with related entities",
+        "allOf": [
+          { "$ref": "#/components/schemas/CashHandover" },
+          {
+            "type": "object",
+            "properties": {
+              "fromUser": {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" },
+                  "email": { "type": "string", "format": "email" },
+                  "firstName": { "type": "string" },
+                  "lastName": { "type": "string" }
+                }
+              },
+              "toUser": {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" },
+                  "email": { "type": "string", "format": "email" },
+                  "firstName": { "type": "string" },
+                  "lastName": { "type": "string" }
+                }
+              },
+              "forum": {
+                "type": ["object", "null"],
+                "properties": {
+                  "forumId": { "type": "string", "format": "uuid" },
+                  "forumName": { "type": "string" }
+                }
+              },
+              "area": {
+                "type": ["object", "null"],
+                "properties": {
+                  "areaId": { "type": "string", "format": "uuid" },
+                  "areaName": { "type": "string" }
+                }
+              },
+              "unit": {
+                "type": ["object", "null"],
+                "properties": {
+                  "unitId": { "type": "string", "format": "uuid" },
+                  "unitName": { "type": "string" }
+                }
+              },
+              "journalEntry": {
+                "type": ["object", "null"],
+                "properties": {
+                  "entryId": { "type": "string", "format": "uuid" },
+                  "entryNumber": { "type": "string" }
+                }
+              },
+              "approvalRequest": {
+                "type": ["object", "null"],
+                "properties": {
+                  "requestId": { "type": "string", "format": "uuid" },
+                  "requestNumber": { "type": "string" },
+                  "status": { "type": "string" }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "InitiateHandoverRequest": {
+        "type": "object",
+        "description": "Request body for initiating a cash handover",
+        "required": ["toUserId", "toUserRole", "amount"],
+        "properties": {
+          "toUserId": { 
+            "type": "string", 
+            "format": "uuid",
+            "description": "User ID of the receiver"
+          },
+          "toUserRole": { 
+            "type": "string", 
+            "enum": ["UnitAdmin", "AreaAdmin", "ForumAdmin", "SuperAdmin"],
+            "description": "Role of the receiver"
+          },
+          "amount": { 
+            "type": "number",
+            "minimum": 0.01,
+            "description": "Amount to handover"
+          },
+          "initiatorNotes": { 
+            "type": "string",
+            "maxLength": 500,
+            "description": "Optional notes from initiator"
+          },
+          "handoverType": { 
+            "type": "string", 
+            "enum": ["Normal", "AdminTransition"],
+            "default": "Normal",
+            "description": "Type of handover"
+          },
+          "sourceHandoverId": { 
+            "type": "string",
+            "format": "uuid",
+            "description": "Source handover ID for cascade handovers (admin transition)"
+          }
+        }
+      },
+      "ValidReceiver": {
+        "type": "object",
+        "description": "Valid receiver for cash handover",
+        "properties": {
+          "userId": { "type": "string", "format": "uuid" },
+          "email": { "type": "string", "format": "email" },
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "roleCode": { "type": "string" },
+          "roleName": { "type": "string" },
+          "scopeEntityId": { "type": ["string", "null"], "format": "uuid" },
+          "scopeEntityName": { "type": ["string", "null"] }
         }
       }
     },

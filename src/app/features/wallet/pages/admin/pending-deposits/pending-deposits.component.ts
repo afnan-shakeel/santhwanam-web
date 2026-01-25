@@ -8,6 +8,9 @@ import { PaginationComponent } from '../../../../../shared/components/pagination
 import { WalletService } from '../../../../../core/services/wallet.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { WalletDepositRequest } from '../../../../../shared/models/wallet.model';
+import { ButtonComponent } from "../../../../../shared/components/button/button.component";
+import { InputComponent } from "../../../../../shared/components/input/input.component";
+import { SelectComponent } from "../../../../../shared/components/select/select.component";
 
 type SortOption = 'oldest' | 'newest' | 'amount-high' | 'amount-low';
 
@@ -18,8 +21,11 @@ type SortOption = 'oldest' | 'newest' | 'amount-high' | 'amount-low';
     CommonModule,
     ReactiveFormsModule,
     BreadcrumbsComponent,
-    PaginationComponent
-  ],
+    PaginationComponent,
+    ButtonComponent,
+    InputComponent,
+    SelectComponent
+],
   templateUrl: './pending-deposits.component.html',
   styleUrls: ['./pending-deposits.component.css']
 })
@@ -136,7 +142,7 @@ export class PendingDepositsComponent implements OnInit {
   }
 
   viewMemberWallet(memberId: string): void {
-    this.router.navigate(['/members', memberId, 'wallet']);
+    this.router.navigate(['/admin/wallets', memberId, 'overview']);
   }
 
   goBack(): void {

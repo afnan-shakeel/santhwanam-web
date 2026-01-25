@@ -3,6 +3,8 @@
  * Based on OpenAPI specification
  */
 
+import { Member } from "./member.model";
+
 // ==================== ENUMS ====================
 
 export type WalletTransactionType = 'Deposit' | 'Debit' | 'Refund' | 'Adjustment';
@@ -21,18 +23,11 @@ export interface Wallet {
   walletId: string;
   memberId: string;
   currentBalance: number;
+  member?: Member;
   createdAt: string;
   updatedAt: string | null;
 }
 
-export interface WalletWithMember extends Wallet {
-  member: {
-    memberId: string;
-    memberCode: string;
-    firstName: string;
-    lastName: string;
-  };
-}
 
 // ==================== TRANSACTIONS ====================
 
@@ -102,12 +97,7 @@ export interface WalletDepositRequest {
   createdAt: string;
   approvedAt: string | null;
   rejectedAt: string | null;
-  member?: {
-    memberId: string;
-    memberCode: string;
-    firstName: string;
-    lastName: string;
-  };
+  member?: Member;
 }
 
 export interface CreateDepositRequest {
@@ -180,8 +170,8 @@ export interface DebitRequestListResponse extends PaginatedResponse<WalletDebitR
   requests: WalletDebitRequest[];
 }
 
-export interface WalletListResponse extends PaginatedResponse<WalletWithMember> {
-  wallets: WalletWithMember[];
+export interface WalletListResponse extends PaginatedResponse<Wallet> {
+  wallets: Wallet[];
 }
 
 // ==================== QUERY PARAMS ====================

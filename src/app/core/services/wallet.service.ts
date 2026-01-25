@@ -5,7 +5,6 @@ import { HttpService } from '../http/http.service';
 import {
   Wallet,
   WalletSummary,
-  WalletWithMember,
   WalletTransaction,
   WalletDepositRequest,
   WalletDebitRequest,
@@ -200,8 +199,8 @@ export class WalletService {
    * Get wallet details by ID
    * GET /wallet/admin/wallets/:walletId
    */
-  getWalletById(walletId: string): Observable<WalletWithMember> {
-    return this.http.get<WalletWithMember>(`/wallet/admin/wallets/${walletId}`);
+  getWalletById(walletId: string): Observable<Wallet> {
+    return this.http.get<Wallet>(`/wallet/admin/wallets/${walletId}`);
   }
 
   /**

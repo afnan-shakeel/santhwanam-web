@@ -6,7 +6,7 @@ import { BreadcrumbsComponent, BreadcrumbItem } from '../../../../../shared/comp
 import { WalletService } from '../../../../../core/services/wallet.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import {
-  WalletWithMember,
+  Wallet,
   WalletDepositRequest,
   WalletStatistics
 } from '../../../../../shared/models/wallet.model';
@@ -36,7 +36,7 @@ export class WalletDashboardComponent implements OnInit {
   pendingTotal = signal(0);
 
   // Low Balance Preview (top 5)
-  lowBalanceWallets = signal<WalletWithMember[]>([]);
+  lowBalanceWallets = signal<Wallet[]>([]);
   lowBalanceLoading = signal(true);
   lowBalanceTotal = signal(0);
 

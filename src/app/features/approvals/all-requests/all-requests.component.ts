@@ -58,22 +58,16 @@ export class AllRequestsComponent implements OnInit {
       format: (value: string) => value.substring(0, 8)
     },
     {
-      key: 'entityType',
+      key: 'workflow.workflowName',
       label: 'Type',
       sortable: true
-    },
-    {
-      key: 'entityId',
-      label: 'Entity ID',
-      sortable: true,
-      format: (value: string) => value.substring(0, 8)
     },
     {
       key: 'workflow.module',
       label: 'Module',
       sortable: true,
-      // type: 'badge',
-      // format: (value: ModuleType | undefined) => value || '-'
+      type: 'badge',
+      format: (value: ModuleType | undefined) => value || '-'
     },
     {
       key: 'status',
@@ -86,6 +80,16 @@ export class AllRequestsComponent implements OnInit {
       label: 'Current Stage',
       sortable: true,
       format: (value: number | null | undefined) => value ? `Stage ${value}` : 'Completed'
+    },
+    {
+      key: 'requestedByUser.firstName',
+      label: 'Submitted By',
+      sortable: true,
+      type: 'text',
+      format: (value: string, item: ApprovalRequest) => {
+        const lastName = item.requestedByUser?.lastName || '';
+        return `${value} ${lastName}`.trim();
+      }
     },
     {
       key: 'requestedAt',

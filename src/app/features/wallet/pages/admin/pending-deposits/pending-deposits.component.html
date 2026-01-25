@@ -42,41 +42,42 @@
       <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Filters</h3>
       <form [formGroup]="filterForm" (ngSubmit)="onApplyFilters()" class="flex flex-wrap gap-4 items-end">
         <div class="flex-1 min-w-[200px]">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Agent</label>
-          <select formControlName="agentId"
-            class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
-                   bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                   focus:ring-2 focus:ring-primary focus:border-primary">
-            <option value="">All Agents</option>
-            <!-- Note: Agent dropdown would need agent list from API -->
-          </select>
+          <app-select formControlName="agentId"
+          label="Agent"
+          placeholder="Select Agent"
+          [options]="[
+            { label: 'All Agents', value: null }
+          ]"
+          >
+          </app-select>
         </div>
 
         <div class="w-32">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount Min</label>
-          <input type="number" formControlName="amountMin" placeholder="₹0"
-            class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
-                   bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                   focus:ring-2 focus:ring-primary focus:border-primary">
+          <app-input type="number"
+          label="Amount Min" 
+          formControlName="amountMin" 
+          placeholder="₹0"
+          ></app-input>
         </div>
 
         <div class="w-32">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount Max</label>
-          <input type="number" formControlName="amountMax" placeholder="Any"
-            class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg
-                   bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                   focus:ring-2 focus:ring-primary focus:border-primary">
+          <app-input type="number"
+          label="Amount Max" 
+          formControlName="amountMax" 
+          placeholder="Any"
+          ></app-input>
         </div>
 
         <div class="flex gap-2">
-          <button type="submit"
-            class="px-4 py-2.5 bg-primary hover:bg-primary-dark text-white font-medium rounded-lg transition-colors">
+          <app-button type="submit"
+            size="xs">
             Apply
-          </button>
-          <button type="button" (click)="onClearFilters()"
-            class="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+          </app-button>
+          <app-button type="button" (click)="onClearFilters()"
+            size="xs"
+            variant="ghost">
             Clear
-          </button>
+          </app-button>
         </div>
       </form>
     </div>
@@ -85,15 +86,14 @@
     <div class="flex items-center justify-between mb-6">
       <div class="flex items-center gap-3">
         <label class="text-sm text-gray-600 dark:text-gray-400">Sort by:</label>
-        <select [value]="sortBy()" (change)="onSortChange($event)"
-          class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
-                 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm
-                 focus:ring-2 focus:ring-primary focus:border-primary">
-          <option value="oldest">Oldest First</option>
-          <option value="newest">Newest First</option>
-          <option value="amount-high">Amount (High to Low)</option>
-          <option value="amount-low">Amount (Low to High)</option>
-        </select>
+        <app-select (change)="onSortChange($event)"
+          [options]="[
+            { label: 'Oldest First', value: 'oldest'}, 
+            { label: 'Newest First', value: 'newest'}, 
+            { label: 'Amount (High to Low)', value: 'amount-high'}, 
+            { label: 'Amount (Low to High)', value: 'amount-low'}, 
+          ]">
+        </app-select>
       </div>
     </div>
 
@@ -153,7 +153,7 @@
                   <div>
                     <span class="text-gray-500 dark:text-gray-400">Agent:</span>
                     <span class="ml-2 font-medium text-gray-900 dark:text-white">
-                      {{ deposit.collectedByName || 'Unknown' }}
+                      {{ deposit?.member?.agent?.firstName }} {{ deposit.member?.agent?.lastName }}
                     </span>
                   </div>
                   <div>
@@ -174,18 +174,22 @@
 
               <!-- Actions -->
               <div class="flex items-center gap-3 lg:flex-col lg:items-end">
-                <button (click)="reviewApproval(deposit.approvalRequestId)"
-                  class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark rounded-lg transition-colors flex items-center gap-2">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  Review
-                </button>
-                <button (click)="viewMemberWallet(deposit.memberId)"
-                  class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                  View Wallet
-                </button>
+                <div>
+                  <app-button (click)="reviewApproval(deposit.approvalRequestId)"
+                  size="xs" variant="soft">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Review
+                  </app-button>
+                </div>
+                <div>
+                  <app-button (click)="viewMemberWallet(deposit.walletId)"
+                    size="xs" variant="soft">
+                    View Wallet
+                  </app-button>
+                </div>
               </div>
             </div>
           </div>

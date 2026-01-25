@@ -7,7 +7,9 @@ import { BreadcrumbsComponent, BreadcrumbItem } from '../../../../../shared/comp
 import { PaginationComponent } from '../../../../../shared/components/pagination/pagination.component';
 import { WalletService } from '../../../../../core/services/wallet.service';
 import { ToastService } from '../../../../../core/services/toast.service';
-import { WalletWithMember } from '../../../../../shared/models/wallet.model';
+import { Wallet } from '../../../../../shared/models/wallet.model';
+import { InputComponent } from "../../../../../shared/components/input/input.component";
+import { ButtonComponent } from "../../../../../shared/components/button/button.component";
 
 @Component({
   selector: 'app-all-wallets',
@@ -16,8 +18,10 @@ import { WalletWithMember } from '../../../../../shared/models/wallet.model';
     CommonModule,
     ReactiveFormsModule,
     BreadcrumbsComponent,
-    PaginationComponent
-  ],
+    PaginationComponent,
+    InputComponent,
+    ButtonComponent
+],
   templateUrl: './all-wallets.component.html',
   styleUrls: ['./all-wallets.component.css']
 })
@@ -28,7 +32,7 @@ export class AllWalletsComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   // Data
-  wallets = signal<WalletWithMember[]>([]);
+  wallets = signal<Wallet[]>([]);
   loading = signal(true);
   total = signal(0);
   page = signal(1);

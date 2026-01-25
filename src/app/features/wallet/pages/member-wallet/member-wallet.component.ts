@@ -10,7 +10,7 @@ import { WalletBalanceCardComponent } from '../../components/wallet-balance-card
 import { MemberInfoCardComponent } from '../../../members/components/member-info-card/member-info-card.component';
 import { RecordDepositModalComponent } from '../../components/record-deposit-modal/record-deposit-modal.component';
 import { AdjustmentModalComponent } from '../../components/adjustment-modal/adjustment-modal.component';
-import { WalletSummary, WalletWithMember } from '../../../../shared/models/wallet.model';
+import { Wallet, WalletSummary } from '../../../../shared/models/wallet.model';
 import { AccessService } from '../../../../core/services/access.service';
 
 
@@ -52,7 +52,7 @@ export class MemberWalletComponent implements OnInit, OnDestroy {
   error = this.walletStore.error;
 
   // Extended wallet data for admin view (includes member info)
-  walletWithMember = signal<WalletWithMember | null>(null);
+  walletWithMember = signal<Wallet | null>(null);
 
   // Modal states
   showRecordDepositModal = signal(false);
