@@ -363,6 +363,51 @@ export const routes: Routes = [
         path: 'contributions',
         loadComponent: () => import('./features/contributions/my-contributions/my-contributions.component').then((m) => m.MyContributionsComponent)
       },
+      // ═══════════════════════════════════════════════════════════════════════════
+      // CASH MANAGEMENT ROUTES
+      // ═══════════════════════════════════════════════════════════════════════════
+      // Self-service routes (Agent, Admins)
+      {
+        path: 'cash/my-custody',
+        loadComponent: () => import('./features/cash-management/pages/my-custody/my-custody.component').then((m) => m.MyCustodyComponent)
+      },
+      {
+        path: 'cash/handover/new',
+        loadComponent: () => import('./features/cash-management/pages/initiate-handover/initiate-handover.component').then((m) => m.InitiateHandoverComponent)
+      },
+      {
+        path: 'cash/pending-receipts',
+        loadComponent: () => import('./features/cash-management/pages/pending-receipts/pending-receipts.component').then((m) => m.PendingReceiptsComponent)
+      },
+      {
+        path: 'cash/handover/:handoverId/acknowledge',
+        loadComponent: () => import('./features/cash-management/pages/acknowledge-handover/acknowledge-handover.component').then((m) => m.AcknowledgeHandoverComponent)
+      },
+      {
+        path: 'cash/handovers',
+        loadComponent: () => import('./features/cash-management/pages/handover-history/handover-history.component').then((m) => m.HandoverHistoryComponent)
+      },
+      // Admin routes (Forum/Area/Unit Admin, Super Admin)
+      {
+        path: 'admin/cash/dashboard',
+        loadComponent: () => import('./features/cash-management/pages/cash-dashboard/cash-dashboard.component').then((m) => m.CashDashboardComponent)
+      },
+      {
+        path: 'admin/cash/custody-report',
+        loadComponent: () => import('./features/cash-management/pages/custody-report/custody-report.component').then((m) => m.CustodyReportComponent)
+      },
+      {
+        path: 'admin/cash/overdue',
+        loadComponent: () => import('./features/cash-management/pages/overdue-report/overdue-report.component').then((m) => m.OverdueReportComponent)
+      },
+      {
+        path: 'admin/cash/custody/:custodyId',
+        loadComponent: () => import('./features/cash-management/pages/custodian-details/custodian-details.component').then((m) => m.CustodianDetailsComponent)
+      },
+      {
+        path: 'admin/cash/pending-bank-deposits',
+        loadComponent: () => import('./features/cash-management/pages/pending-bank-deposits/pending-bank-deposits.component').then((m) => m.PendingBankDepositsComponent)
+      },
       // Death Claims routes
       {
         path: 'death-claims',

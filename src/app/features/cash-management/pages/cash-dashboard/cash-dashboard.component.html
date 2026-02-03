@@ -1,0 +1,264 @@
+<!-- Cash Dashboard Page (Admin) -->
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Cash Management Dashboard</h1>
+          <p class="mt-1 text-sm text-gray-500">Overview of cash custody and handover statistics</p>
+        </div>
+        <button 
+          (click)="onRefresh()"
+          [disabled]="isLoading()"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors">
+          <svg class="w-4 h-4" [class.animate-spin]="isLoading()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    @if (isLoading()) {
+      <!-- Loading State -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        @for (i of [1, 2, 3, 4]; track i) {
+          <div class="h-32 bg-gray-200 rounded-xl animate-pulse"></div>
+        }
+      </div>
+      <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="h-64 bg-gray-200 rounded-xl animate-pulse"></div>
+        <div class="h-64 bg-gray-200 rounded-xl animate-pulse"></div>
+      </div>
+    } @else if (dashboard()) {
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Total Cash -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-500">Total Cash</p>
+              <p class="text-2xl font-bold text-gray-900 mt-1">{{ formatCurrency(dashboard()!.summary.totalCash) }}</p>
+            </div>
+            <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total in Custody -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-500">Total in Custody</p>
+              <p class="text-2xl font-bold text-gray-900 mt-1">{{ formatCurrency(dashboard()!.summary.totalInCustody) }}</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+          </div>
+          <button 
+            (click)="navigateTo('/admin/cash/custody-report')"
+            class="mt-4 text-sm font-medium text-primary-600 hover:text-primary-700">
+            View Report →
+          </button>
+        </div>
+
+        <!-- Pending Handovers -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-500">Pending Handovers</p>
+              <p class="text-2xl font-bold text-gray-900 mt-1">{{ dashboard()!.summary.pendingHandovers }}</p>
+              @if (dashboard()!.summary.pendingHandoverAmount > 0) {
+                <p class="text-sm text-gray-500 mt-1">{{ formatCurrency(dashboard()!.summary.pendingHandoverAmount) }}</p>
+              }
+            </div>
+            <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Overdue Count -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6" 
+             [class.ring-2]="dashboard()!.alerts.overdueCount > 0"
+             [class.ring-red-500]="dashboard()!.alerts.overdueCount > 0">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-500">Overdue Custodians</p>
+              <p class="text-2xl font-bold mt-1" 
+                 [class]="dashboard()!.alerts.overdueCount > 0 ? 'text-red-600' : 'text-gray-900'">
+                {{ dashboard()!.alerts.overdueCount }}
+              </p>
+              @if (dashboard()!.alerts.overdueAmount > 0) {
+                <p class="text-sm text-red-500 mt-1">{{ formatCurrency(dashboard()!.alerts.overdueAmount) }}</p>
+              }
+            </div>
+            <div class="w-12 h-12 rounded-full flex items-center justify-center"
+                 [class]="dashboard()!.alerts.overdueCount > 0 ? 'bg-red-100' : 'bg-gray-100'">
+              <svg class="w-6 h-6" 
+                   [class]="dashboard()!.alerts.overdueCount > 0 ? 'text-red-600' : 'text-gray-400'"
+                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+          </div>
+          @if (dashboard()!.alerts.overdueCount > 0) {
+            <button 
+              (click)="navigateTo('/admin/cash/overdue')"
+              class="mt-4 text-sm font-medium text-red-600 hover:text-red-700">
+              View Overdue →
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Alerts Section -->
+      @if (!dashboard()!.alerts.reconciled || dashboard()!.alerts.pendingOverdue > 0) {
+        <div class="mt-6 space-y-3">
+          @if (!dashboard()!.alerts.reconciled) {
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+              <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div>
+                <p class="text-sm font-medium text-amber-800">Reconciliation Needed</p>
+                <p class="text-sm text-amber-700 mt-1">Last reconciliation: {{ formatDateTime(dashboard()!.alerts.lastReconciliationAt) }}</p>
+              </div>
+            </div>
+          }
+          @if (dashboard()!.alerts.pendingOverdue > 0) {
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+              <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p class="text-sm font-medium text-red-800">{{ dashboard()!.alerts.pendingOverdue }} handovers pending over {{ dashboard()!.alerts.pendingOverdueHours }} hours</p>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Quick Actions -->
+      <div class="mt-8">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button 
+            (click)="navigateTo('/admin/cash/custody-report')"
+            class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow text-left group">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900">Custody Report</p>
+                <p class="text-sm text-gray-500">View all users with cash</p>
+              </div>
+            </div>
+          </button>
+
+          <button 
+            (click)="navigateTo('/admin/cash/overdue')"
+            class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow text-left group">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900">Overdue Report</p>
+                <p class="text-sm text-gray-500">Users past due date</p>
+              </div>
+            </div>
+          </button>
+
+          <button 
+            (click)="navigateTo('/admin/cash/pending-bank-deposits')"
+            class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow text-left group">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900">Bank Deposits</p>
+                <p class="text-sm text-gray-500">Pending deposit approvals</p>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Custody by Level Breakdown -->
+      @if (hasLevelData()) {
+        <div class="mt-8">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Custody by Level</h2>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+              @for (level of getLevelEntries(); track level.key) {
+                <div class="text-center">
+                  <p class="text-3xl font-bold text-gray-900">{{ level.value.count }}</p>
+                  <p class="text-sm text-gray-500 mt-1">{{ formatLevelName(level.key) }}</p>
+                  <p class="text-sm font-medium text-primary-600 mt-1">{{ formatCurrency(level.value.totalBalance) }}</p>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Recent Activity -->
+      @if (dashboard()!.recentActivity && dashboard()!.recentActivity.length > 0) {
+        <div class="mt-8">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="divide-y divide-gray-200">
+              @for (activity of dashboard()!.recentActivity.slice(0, 5); track $index) {
+                <div class="p-4 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
+                         [class]="activity.direction === 'in' ? 'bg-green-100' : 'bg-red-100'">
+                      <svg class="w-4 h-4" 
+                           [class]="activity.direction === 'in' ? 'text-green-600' : 'text-red-600'"
+                           fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        @if (activity.direction === 'in') {
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        } @else {
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                        }
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-900">{{ activity.description }}</p>
+                      <p class="text-xs text-gray-500">{{ getRelativeTime(activity.createdAt) }}</p>
+                    </div>
+                  </div>
+                  <p class="text-sm font-semibold"
+                     [class]="activity.direction === 'in' ? 'text-green-600' : 'text-red-600'">
+                    {{ activity.direction === 'in' ? '+' : '-' }}{{ formatCurrency(activity.amount) }}
+                  </p>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

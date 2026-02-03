@@ -141,6 +141,28 @@ export const PERMISSIONS = {
     EXPORT: 'contribution.export',
   },
 
+  // ===== CASH MANAGEMENT MODULE =====
+  CASH: {
+    CUSTODY: {
+      READ: 'cash.custody.read',
+      READ_ALL: 'cash.custody.read_all',
+    },
+    HANDOVER: {
+      CREATE: 'cash.handover.create',
+      READ: 'cash.handover.read',
+      ACKNOWLEDGE: 'cash.handover.acknowledge',
+      REJECT: 'cash.handover.reject',
+      CANCEL: 'cash.handover.cancel',
+      APPROVE: 'cash.handover.approve',
+    },
+    REPORT: {
+      DASHBOARD: 'cash.report.dashboard',
+      CUSTODY: 'cash.report.custody',
+      OVERDUE: 'cash.report.overdue',
+      RECONCILIATION: 'cash.report.reconciliation',
+    },
+  },
+
   // ===== APPROVAL WORKFLOW MODULE =====
   APPROVAL: {
     WORKFLOW: {
@@ -236,6 +258,7 @@ export function getPermissionModule(code: string): string | null {
     wallet: 'Wallet',
     claim: 'Claim',
     contribution: 'Contribution',
+    cash: 'Cash Management',
     approval: 'Approval',
     gl: 'General Ledger',
     report: 'Report',

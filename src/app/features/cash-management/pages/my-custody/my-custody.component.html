@@ -1,0 +1,96 @@
+<!-- My Cash Custody Page -->
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">My Cash Custody</h1>
+          <p class="mt-1 text-sm text-gray-500">View your cash balance, pending transfers, and recent activity</p>
+        </div>
+        <button 
+          (click)="onInitiateTransfer()"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9l4 3m0 0l-4 3m4-3H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Initiate Handover
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    @if (isLoading()) {
+      <!-- Loading State -->
+      <div class="space-y-6">
+        <div class="h-48 bg-gray-200 rounded-2xl animate-pulse"></div>
+        <div class="h-64 bg-gray-200 rounded-xl animate-pulse"></div>
+        <div class="h-64 bg-gray-200 rounded-xl animate-pulse"></div>
+      </div>
+    } @else if (error()) {
+      <!-- Error State -->
+      <div class="rounded-xl bg-red-50 border border-red-200 p-6 text-center">
+        <svg class="w-12 h-12 mx-auto text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="text-lg font-medium text-red-800">{{ error() }}</h3>
+        <button 
+          (click)="loadData()"
+          class="mt-4 px-4 py-2 bg-red-100 text-red-700 font-medium rounded-lg hover:bg-red-200 transition-colors">
+          Try Again
+        </button>
+      </div>
+    } @else {
+      <div class="space-y-6">
+        <!-- Balance Card -->
+        @if (custody()) {
+          <div>
+            <app-custody-balance-card
+              [balance]="custody()!.currentBalance"
+              [totalReceived]="0"
+              [totalTransferred]="0"
+              [lastActivityDate]="custody()!.updatedAt"
+              [showTransferButton]="true"
+              (initiateTransfer)="onInitiateTransfer()"
+            />
+          </div>
+        } @else {
+          <!-- No Custody Yet -->
+          <div class="bg-linear-to-br from-gray-100 to-gray-200 rounded-2xl p-8 text-center">
+            <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 class="text-lg font-medium text-gray-700">No Cash Custody</h3>
+            <p class="mt-1 text-sm text-gray-500">You don't have any cash in custody yet.</p>
+          </div>
+        }
+
+        <!-- Two Column Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Pending Handovers -->
+          <app-pending-handover-list
+            title="Pending Outgoing Handovers"
+            [handovers]="pendingHandovers()"
+            direction="outgoing"
+            [currentUserId]="currentUserId"
+            [showCancelAction]="true"
+            emptyMessage="No pending outgoing handovers"
+            (cancel)="onCancelHandover($event)"
+            (viewDetails)="onViewHandoverDetails($event)"
+          />
+
+          <!-- Recent Activity -->
+          <app-custody-activity-list
+            title="Recent Activity"
+            [activities]="activities()"
+            [showViewAll]="true"
+            emptyMessage="No recent activity"
+            (viewAll)="onViewFullHistory()"
+          />
+        </div>
+      </div>
+    }
+  </div>
+</div>

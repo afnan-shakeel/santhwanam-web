@@ -1,0 +1,143 @@
+<!-- Custodian Details Page (Admin) -->
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex items-center gap-4">
+        <button 
+          (click)="onBack()"
+          class="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Custodian Details</h1>
+          <p class="mt-1 text-sm text-gray-500">View cash custody information</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    @if (isLoading()) {
+      <!-- Loading State -->
+      <div class="space-y-6">
+        <div class="h-32 bg-gray-200 rounded-xl animate-pulse"></div>
+        <div class="h-48 bg-gray-200 rounded-xl animate-pulse"></div>
+        <div class="h-64 bg-gray-200 rounded-xl animate-pulse"></div>
+      </div>
+    } @else if (custody()) {
+      <div class="space-y-6">
+        <!-- User Info Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
+                <span class="text-2xl font-bold text-primary-600">
+                  {{ custody()!.user.firstName.charAt(0) }}{{ custody()!.user.lastName.charAt(0) }}
+                </span>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-xl font-bold text-gray-900">
+                    {{ custody()!.user.firstName }} {{ custody()!.user.lastName }}
+                  </h2>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                        [class]="getRoleBadgeClass(custody()!.userRole)">
+                    {{ custody()!.userRole.replace('_', ' ') }}
+                  </span>
+                </div>
+                @if (getScopeEntityName()) {
+                  <p class="text-sm text-gray-500 mt-1">{{ getScopeEntityName() }}</p>
+                }
+              </div>
+            </div>
+            <button 
+              (click)="onSendReminder()"
+              class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-amber-600 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              Send Reminder
+            </button>
+          </div>
+        </div>
+
+        <!-- Balance Card -->
+        <div class="bg-linear-to-r from-primary-600 to-primary-700 rounded-xl shadow-lg p-8 text-white">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-primary-100 uppercase tracking-wider">Current Balance</p>
+              <p class="text-4xl font-bold mt-2">{{ formatCurrency(custody()!.currentBalance) }}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm font-medium text-primary-100">Status</p>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1"
+                    [class]="custody()!.status === 'Active' ? 'bg-white/20 text-white' : 'bg-red-100 text-red-700'">
+                {{ custody()!.status }}
+              </span>
+            </div>
+          </div>
+          <div class="mt-6 grid grid-cols-2 gap-4 pt-4 border-t border-white/20">
+            <div>
+              <p class="text-xs text-primary-200">Last Updated</p>
+              <p class="text-sm font-medium text-white mt-0.5">{{ formatDate(custody()!.updatedAt) }}</p>
+            </div>
+            <div>
+              <p class="text-xs text-primary-200">Custody Since</p>
+              <p class="text-sm font-medium text-white mt-0.5">{{ formatDate(custody()!.createdAt) }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending Handovers -->
+        @if (pendingHandovers().length > 0) {
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900">Pending Handovers</h3>
+            </div>
+            <div class="divide-y divide-gray-200">
+              @for (handover of pendingHandovers(); track handover.handoverId) {
+                <div class="p-6 flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                      <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="font-medium text-gray-900">
+                        To {{ handover.toUser.firstName }} {{ handover.toUser.lastName }}
+                      </p>
+                      <p class="text-sm text-gray-500">{{ formatDate(handover.initiatedAt) }}</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <p class="font-bold text-gray-900">{{ formatCurrency(handover.amount) }}</p>
+                    <app-handover-status-badge [status]="handover.status" />
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Recent Activity -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
+          </div>
+          @if (activities().length === 0) {
+            <div class="p-8 text-center">
+              <p class="text-sm text-gray-500">No activity found</p>
+            </div>
+          } @else {
+            <app-custody-activity-list [activities]="activities()" />
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

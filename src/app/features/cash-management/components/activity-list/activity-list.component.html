@@ -1,0 +1,56 @@
+<!-- Custody Activity List -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200">
+  <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+    <h3 class="text-lg font-semibold text-gray-900">{{ title }}</h3>
+    @if (showViewAll && activities.length > 0) {
+      <button 
+        (click)="viewAll.emit()"
+        class="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1">
+        View Full History
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    }
+  </div>
+
+  @if (activities.length === 0) {
+    <div class="px-6 py-8 text-center text-gray-500">
+      <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      </svg>
+      <p>{{ emptyMessage }}</p>
+    </div>
+  } @else {
+    <div class="divide-y divide-gray-100">
+      @for (activity of activities; track activity.activityId) {
+        <div class="px-6 py-4 flex items-center gap-4">
+          <!-- Direction Arrow -->
+          <div class="shrink-0 w-6 text-center">
+            @if (activity.direction === 'in') {
+              <span class="text-green-500 font-bold">↑</span>
+            } @else {
+              <span class="text-red-500 font-bold">↓</span>
+            }
+          </div>
+
+          <!-- Date -->
+          <div class="shrink-0 w-16 text-sm text-gray-500">
+            {{ formatDate(activity.createdAt) }}
+          </div>
+
+          <!-- Amount -->
+          <div class="shrink-0 w-24 text-sm font-semibold"
+               [class]="activity.direction === 'in' ? 'text-green-600' : 'text-red-600'">
+            {{ activity.direction === 'in' ? '+' : '-' }}{{ formatCurrency(activity.amount) }}
+          </div>
+
+          <!-- Reference -->
+          <div class="flex-1 text-sm text-gray-700">
+            {{ activity.referenceNumber }}
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

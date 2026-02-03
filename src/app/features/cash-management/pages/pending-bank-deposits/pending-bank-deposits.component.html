@@ -1,0 +1,188 @@
+<!-- Pending Bank Deposits Page (Super Admin) -->
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Pending Bank Deposits</h1>
+          <p class="mt-1 text-sm text-gray-500">Review and approve bank deposit requests</p>
+        </div>
+        <button 
+          (click)="onRefresh()"
+          [disabled]="isLoading()"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors">
+          <svg class="w-4 h-4" [class.animate-spin]="isLoading()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    @if (isLoading()) {
+      <!-- Loading State -->
+      <div class="space-y-4">
+        @for (i of [1, 2, 3]; track i) {
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-gray-200 rounded-full animate-pulse"></div>
+                <div class="space-y-2">
+                  <div class="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
+                  <div class="h-3 w-48 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <div class="h-10 w-24 bg-gray-200 rounded-lg animate-pulse"></div>
+                <div class="h-10 w-24 bg-gray-200 rounded-lg animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (deposits().length === 0) {
+      <!-- Empty State -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+          <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h3 class="mt-4 text-lg font-medium text-gray-900">No pending deposits</h3>
+        <p class="mt-2 text-sm text-gray-500">All bank deposit requests have been processed.</p>
+      </div>
+    } @else {
+      <!-- Deposits List -->
+      <div class="space-y-4">
+        @for (deposit of deposits(); track deposit.depositId) {
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+            <div class="p-6">
+              <div class="flex items-start justify-between">
+                <!-- User & Deposit Info -->
+                <div class="flex items-center gap-4">
+                  <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-lg font-semibold text-gray-900">
+                      {{ deposit.depositorName }}
+                    </p>
+                    <p class="text-sm text-gray-500">{{ deposit.depositorRole.replace('_', ' ') }}</p>
+                  </div>
+                </div>
+
+                <!-- Amount -->
+                <div class="text-right">
+                  <p class="text-3xl font-bold text-green-600">{{ formatCurrency(deposit.amount) }}</p>
+                  <p class="text-sm text-gray-500 mt-1">Bank Deposit</p>
+                </div>
+              </div>
+
+              <!-- Deposit Details -->
+              <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 py-4 bg-gray-50 rounded-lg px-4">
+                <div>
+                  <p class="text-xs text-gray-500">Bank Name</p>
+                  <p class="text-sm font-medium text-gray-900 mt-0.5">{{ deposit.bankName }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">Account Number</p>
+                  <p class="text-sm font-medium text-gray-900 mt-0.5">{{ deposit.accountNumber }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">Reference No.</p>
+                  <p class="text-sm font-medium text-gray-900 mt-0.5">{{ deposit.referenceNumber }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">Deposit Date</p>
+                  <p class="text-sm font-medium text-gray-900 mt-0.5">{{ formatDate(deposit.depositDate) }}</p>
+                </div>
+              </div>
+
+              <!-- Notes -->
+              @if (deposit.notes) {
+                <div class="mt-4 bg-blue-50 rounded-lg p-3">
+                  <p class="text-sm text-blue-700">
+                    <span class="font-medium">Notes:</span> {{ deposit.notes }}
+                  </p>
+                </div>
+              }
+
+              <!-- Actions -->
+              <div class="mt-6 flex items-center justify-between">
+                <p class="text-xs text-gray-400">
+                  Submitted on {{ formatDate(deposit.createdAt) }}
+                </p>
+                <div class="flex items-center gap-3">
+                  <button 
+                    (click)="onReject(deposit)"
+                    [disabled]="processingId() === deposit.depositId"
+                    class="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    Reject
+                  </button>
+                  <button 
+                    (click)="onApprove(deposit)"
+                    [disabled]="processingId() === deposit.depositId"
+                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    @if (processingId() === deposit.depositId) {
+                      <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Processing...
+                    } @else {
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      Approve
+                    }
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="mt-6 flex items-center justify-between">
+          <p class="text-sm text-gray-500">
+            Showing {{ currentPage() * pageSize() + 1 }} to {{ Math.min((currentPage() + 1) * pageSize(), totalElements()) }} of {{ totalElements() }} results
+          </p>
+          <div class="flex items-center gap-2">
+            <button 
+              (click)="onPageChange(currentPage() - 1)"
+              [disabled]="currentPage() === 0"
+              class="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            @for (page of getPages(); track page) {
+              <button 
+                (click)="onPageChange(page)"
+                class="px-3 py-1 rounded-lg text-sm font-medium transition-colors"
+                [class]="page === currentPage() ? 'bg-primary-600 text-white' : 'text-gray-600 hover:bg-gray-100'">
+                {{ page + 1 }}
+              </button>
+            }
+            <button 
+              (click)="onPageChange(currentPage() + 1)"
+              [disabled]="currentPage() >= totalPages() - 1"
+              class="p-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

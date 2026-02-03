@@ -28,6 +28,7 @@ The Cash Management UI provides interfaces for:
 | 6 | Cash Dashboard | `/admin/cash/dashboard` | Super Admin | Overview of all cash |
 | 7 | Custody Report | `/admin/cash/custody-report` | Admins | Cash by level/user |
 | 8 | Overdue Report | `/admin/cash/overdue` | Admins | Cash held too long |
+| 9 | View Custodian Details | `/admin/cash/custody/:userId` | Super Admin | View any user's custody |
 
 ---
 
@@ -475,7 +476,8 @@ For Super Admin, shows approval + acknowledge combined:
 ## Screen 7: Custody Report
 
 **Route:** `/admin/cash/custody-report`
-**Users:** Super Admin, Forum Admin, Area Admin (within scope)
+**Users:** Super Admin, Forum Admin, Area Admin (within scope) [FOR CURRENT VERSION< ONLY SUPER ADMIN WILL ACCESS THIS]
+
 **Purpose:** Detailed view of cash custody by user
 
 ### Layout
@@ -519,7 +521,7 @@ For Super Admin, shows approval + acknowledge combined:
 ## Screen 8: Overdue Report
 
 **Route:** `/admin/cash/overdue`
-**Users:** Super Admin, Forum Admin, Area Admin
+**Users:** Super Admin, Forum Admin, Area Admin [FOR CURRENT VERSION< ONLY SUPER ADMIN WILL ACCESS THIS]
 **Purpose:** Identify users holding cash beyond threshold
 
 ### Layout
@@ -556,6 +558,92 @@ For Super Admin, shows approval + acknowledge combined:
 │  Total Overdue: ₹27,700                                    │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Screen 9: View Custodian Details
+
+**Route:** `/admin/cash/custody/:userId`
+**Users:** Super Admin (expandable to Forum/Area Admin within scope)
+**Purpose:** View any user's custody details (third-person view of "My Cash Custody")
+
+### Layout
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ ← Back to Custody Report                                    │
+│                                                             │
+│ Custodian Details                                           │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  👤 John Doe (Agent)                                       │
+│     Ruwi Central Unit • Muscat Area                        │
+│     Contact: +968 9123 4567                                │
+│     Status: Active                                          │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │                                                      │   │
+│  │  💰 Current Balance                                 │   │
+│  │                                                      │   │
+│  │     ₹ 8,500                                         │   │
+│  │                                                      │   │
+│  │  Total Received: ₹30,000  |  Total Transferred: ₹21,500│
+│  │  Last Activity: 8 days ago ⚠️                       │   │
+│  │                                                      │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  Pending Handovers                                          │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ 📤 Outgoing to Sarah Ahmed (Unit Admin)             │   │
+│  │    ₹2,000 • Initiated 3 days ago                   │   │
+│  │    Status: Awaiting Acknowledgment                   │   │
+│  ├─────────────────────────────────────────────────────┤   │
+│  │ 📥 Incoming from Mary Johnson (Agent)               │   │
+│  │    ₹1,500 • Initiated 1 day ago                    │   │
+│  │    Status: Awaiting Acknowledgment                   │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  Recent Activity                                            │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ ↑ Jan 10 │ +₹500  │ Contribution CC-2025-00045     │   │
+│  │ ↑ Jan 10 │ +₹300  │ Wallet Deposit WD-2025-00120   │   │
+│  │ ↓ Jan 08 │ -₹5,000│ Handover CHO-2025-00030        │   │
+│  │ ↑ Jan 07 │ +₹200  │ Contribution CC-2025-00044     │   │
+│  │ ↑ Jan 06 │ +₹1,000│ Wallet Deposit WD-2025-00118   │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                               [View Full History →]         │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │                                    [Send Reminder]   │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Key Differences from "My Cash Custody"
+
+| Aspect | My Cash Custody | View Custodian Details |
+|--------|-----------------|------------------------|
+| Header | "My Cash Custody" | User's name, role, unit/area |
+| Contact info | Not shown | Shown (email, phone) |
+| Actions | [Initiate Handover], [Cancel] on pending | [Send Reminder] only |
+| Navigation | Main menu | Back to Custody Report |
+| Pending | Only outgoing shown | Both incoming & outgoing |
+
+### Access from Custody Report
+
+Row click in Custody Report → Opens this screen:
+
+```
+┌────────────────────────────────────────────────────────────┐
+│ Agent Custody (15 users)                        ₹35,000   │
+├────────────────────────────────────────────────────────────┤
+│ Name          │ Unit        │ Balance  │ Last Activity    │
+├───────────────┼─────────────┼──────────┼──────────────────┤
+│ John Doe  [→] │ Ruwi Central│ ₹5,000  │ 2 hours ago      │  ← Click row
+│ Ahmed Ali [→] │ Seeb Unit   │ ₹8,500  │ ⚠️ 8 days ago    │
+└────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -602,6 +690,7 @@ For Super Admin, shows approval + acknowledge combined:
 | Cash Dashboard | - | - | ✓ Area | ✓ Forum | ✓ All |
 | Custody Report | - | ✓ Unit | ✓ Area | ✓ Forum | ✓ All |
 | Overdue Report | - | ✓ Unit | ✓ Area | ✓ Forum | ✓ All |
+| View Custodian Details | - | - | - | - | ✓ All |
 
 ---
 
@@ -649,7 +738,7 @@ For Super Admin, shows approval + acknowledge combined:
 
 ## Summary
 
-### 8 Screens
+### 9 Screens
 1. My Cash Custody - Personal balance and activity
 2. Initiate Handover - Create transfer request
 3. Pending Receipts - Handovers awaiting acknowledgment
@@ -658,6 +747,7 @@ For Super Admin, shows approval + acknowledge combined:
 6. Cash Dashboard - Admin overview
 7. Custody Report - Detailed by-user report
 8. Overdue Report - Cash held too long
+9. View Custodian Details - Admin view of any user's custody
 
 ### Key UI Simplifications
 - **No approval workflow indicators** for admin-to-admin transfers

@@ -172,6 +172,109 @@ export const MENU_CONFIG: MenuItemConfig[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
+  // CASH MANAGEMENT
+  // ═══════════════════════════════════════════════════════════════════════════
+  // For Agents (simplified menu)
+  {
+    label: 'Cash Management',
+    route: '/cash',
+    icon: 'account_balance_wallet',
+    roles: ['agent'],
+    children: [
+      {
+        label: 'My Cash Custody',
+        route: '/cash/my-custody',
+        icon: 'wallet',
+        roles: ['agent']
+      },
+      {
+        label: 'Transfer Cash',
+        route: '/cash/handover/new',
+        icon: 'send',
+        roles: ['agent']
+      },
+      {
+        label: 'Handover History',
+        route: '/cash/handovers',
+        icon: 'history',
+        roles: ['agent']
+      }
+    ]
+  },
+  // For Unit/Area/Forum Admins (with pending receipts)
+  {
+    label: 'Cash Management',
+    route: '/cash',
+    icon: 'account_balance_wallet',
+    roles: ['unit_admin', 'area_admin', 'forum_admin'],
+    children: [
+      {
+        label: 'My Cash Custody',
+        route: '/cash/my-custody',
+        icon: 'wallet',
+        roles: ['unit_admin', 'area_admin', 'forum_admin']
+      },
+      {
+        label: 'Pending Receipts',
+        route: '/cash/pending-receipts',
+        icon: 'inbox',
+        roles: ['unit_admin', 'area_admin', 'forum_admin']
+      },
+      {
+        label: 'Transfer Cash',
+        route: '/cash/handover/new',
+        icon: 'send',
+        roles: ['unit_admin', 'area_admin', 'forum_admin']
+      },
+      {
+        label: 'Handover History',
+        route: '/cash/handovers',
+        icon: 'history',
+        roles: ['unit_admin', 'area_admin', 'forum_admin']
+      },
+      {
+        label: 'Custody Report',
+        route: '/admin/cash/custody-report',
+        icon: 'summarize',
+        roles: ['unit_admin', 'area_admin', 'forum_admin']
+      }
+    ]
+  },
+  // For Super Admin (full admin access)
+  {
+    label: 'Cash Management',
+    route: '/admin/cash',
+    icon: 'account_balance_wallet',
+    roles: ['super_admin'],
+    children: [
+      {
+        label: 'Dashboard',
+        route: '/admin/cash/dashboard',
+        icon: 'dashboard',
+        roles: ['super_admin']
+      },
+      {
+        label: 'Pending Bank Deposits',
+        route: '/admin/cash/pending-bank-deposits',
+        icon: 'account_balance',
+        roles: ['super_admin']
+      },
+      {
+        label: 'Custody Report',
+        route: '/admin/cash/custody-report',
+        icon: 'summarize',
+        roles: ['super_admin']
+      },
+      {
+        label: 'Overdue Report',
+        route: '/admin/cash/overdue',
+        icon: 'warning',
+        roles: ['super_admin']
+      }
+    ]
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // FINANCE (Optional - enable if needed)
   // ═══════════════════════════════════════════════════════════════════════════
   {
