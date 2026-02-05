@@ -90,7 +90,7 @@ export class ForumFormComponent implements OnInit, OnChanges {
         this.forumForm.reset();
         // Ensure all fields are enabled for create
         this.forumForm.get('forumCode')?.enable();
-        this.forumForm.get('adminUserId')?.enable();
+        // this.forumForm.get('adminUserId')?.enable();
       }
     }
 
@@ -139,7 +139,6 @@ export class ForumFormComponent implements OnInit, OnChanges {
         // Disable forumCode in edit mode as it's not updatable
         if (this.isEditMode()) {
           this.forumForm.get('forumCode')?.disable();
-          this.forumForm.get('adminUserId')?.disable();
         }
 
         this.loading.set(false);

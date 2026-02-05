@@ -49,7 +49,7 @@ export class AuthStore {
   }
 
   constructor() {
-    // Auto-persist to localStorage whenever state changes
+    // Auto-persist to sessionStorage whenever state changes
     effect(() => {
       const state = this.authState();
       this.saveToStorage(state);
@@ -95,7 +95,7 @@ export class AuthStore {
 
   private loadFromStorage(): AuthState {
     try {
-      const stored = localStorage.getItem(AUTH_STORAGE_KEY);
+      const stored = sessionStorage.getItem(AUTH_STORAGE_KEY);
       if (stored) {
         return JSON.parse(stored);
       }
@@ -111,7 +111,7 @@ export class AuthStore {
 
   private saveToStorage(state: AuthState): void {
     try {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(state));
+      sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(state));
     } catch (error) {
       console.error('Failed to save auth state to storage:', error);
     }

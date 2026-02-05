@@ -1,7 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 
 import { AccessStore } from '../state/access.store';
-import { AccessLogic, AccessMode, ViewMode } from '../../shared/models/auth.types';
+import {
+  AccessLogic,
+  AccessMode,
+  ViewMode,
+  AdminLevel,
+  ProfileEntityType
+} from '../../shared/models/auth.types';
 import { ACTION_PERMISSIONS, ActionConfig, EntityType } from './action-permissions.config';
 
 /**
@@ -201,4 +207,80 @@ export class AccessService {
    * Get simplified view mode as a signal
    */
   readonly simplifiedViewMode = () => this.getSimplifiedViewMode();
+
+  // ============================================
+  // Admin Level & Entity Access Methods
+  // ============================================
+
+  /**
+   * Get the current admin level
+   * Returns: 'forum' | 'area' | 'unit' | null
+   */
+  getAdminLevel(): AdminLevel {
+    return this.accessStore.adminLevel();
+  }
+
+  /**
+   * Get admin level as a signal for reactive use
+   */
+  get adminLevel() {
+    return this.accessStore.adminLevel;
+  }
+
+  /**
+   * Check if user is a forum admin
+   */
+  isForumAdmin(): boolean {
+    return this.accessStore.isForumAdmin();
+  }
+
+  /**
+   * Check if user is an area admin
+   */
+  isAreaAdmin(): boolean {
+    return this.accessStore.isAreaAdmin();
+  }
+
+  /**
+   * Check if user is a unit admin
+   */
+  isUnitAdmin(): boolean {
+    return this.accessStore.isUnitAdmin();
+  }
+
+  /**
+   * Check if user can access entities at a given level
+   */
+  canAccessLevel(targetLevel: ProfileEntityType): boolean {
+    return this.accessStore.canAccessLevel(targetLevel);
+  }
+
+  /**
+   * Check if user is viewing their own assigned entity
+   */
+  isOwnEntity(entityType: ProfileEntityType, entityId: string): boolean {
+    return this.accessStore.isOwnEntity(entityType, entityId);
+  }
+
+  /**
+   * Check if a specific entity is within user's scope
+   */
+  isEntityInScope(
+    entityType: ProfileEntityType,
+    entityId: string,
+    entityHierarchy?: { forumId?: string; areaId?: string }
+  ): boolean {
+    return this.accessStore.isEntityInScope(entityType, entityId, entityHierarchy);
+  }
+
+  /**
+   * Check if user can perform management actions on an entity
+   */
+  canManageEntity(
+    entityType: ProfileEntityType,
+    entityId: string,
+    action: 'edit' | 'reassignAdmin' | 'createSubordinate'
+  ): boolean {
+    return this.accessStore.canManageEntity(entityType, entityId, action);
+  }
 }

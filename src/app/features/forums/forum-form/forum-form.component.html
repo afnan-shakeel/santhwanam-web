@@ -42,7 +42,6 @@
           [loading]="usersLoading()"
           formControlName="adminUserId"
           [error]="getFieldError('adminUserId')"
-          [disabled]="isEditMode()"
           hint="User who will administer this forum"
           (search)="onUserSearch($event)"
         ></app-search-select>

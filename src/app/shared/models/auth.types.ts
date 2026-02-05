@@ -18,24 +18,46 @@ export type ScopeType = 'None' | 'Forum' | 'Area' | 'Unit' | 'Agent' | 'Member';
 export type ViewMode = 'superadmin' | 'admin' | 'agent' | 'member';
 
 /**
+ * Admin level in the organizational hierarchy
+ * Used for entity profile pages to determine viewing permissions
+ * - null: Not an admin (super admin transcends levels, or non-admin user)
+ */
+export type AdminLevel = 'forum' | 'area' | 'unit' | null;
+
+/**
+ * Entity types that can have profiles
+ */
+export type ProfileEntityType = 'forum' | 'area' | 'unit';
+
+/**
+ * Hierarchy level numeric values for comparison
+ * Higher number = higher in hierarchy = more access
+ */
+export const ADMIN_LEVEL_HIERARCHY: Record<string, number> = {
+  'forum': 3,
+  'area': 2,
+  'unit': 1
+};
+
+/**
  * Role priority configuration for determining view mode
  * Higher number = higher priority
  */
 export const ROLE_PRIORITY: Record<string, { priority: number; viewMode: ViewMode }> = {
   // Super Admin roles
-  'super_admin': { priority: 100, viewMode: 'admin' }, 
-  'system_admin': { priority: 95, viewMode: 'admin' },
-  
+  'super_admin': { priority: 100, viewMode: 'superadmin' },
+  'system_admin': { priority: 95, viewMode: 'superadmin' },
+
   // Forum/Area/Unit Admin roles
   'forum_admin': { priority: 80, viewMode: 'admin' },
   'area_admin': { priority: 75, viewMode: 'admin' },
   'unit_admin': { priority: 70, viewMode: 'admin' },
   'admin': { priority: 65, viewMode: 'admin' },
-  
+
   // Agent roles
   'agent': { priority: 50, viewMode: 'agent' },
   'senior_agent': { priority: 55, viewMode: 'agent' },
-  
+
   // Member roles
   'member': { priority: 10, viewMode: 'member' },
 };
