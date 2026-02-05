@@ -1,0 +1,36 @@
+<header class="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 lg:px-6 shrink-0">
+  <!-- Left Section -->
+  <div class="flex items-center gap-4">
+    <!-- Mobile Menu Toggle -->
+    <button
+      type="button"
+      (click)="menuToggle.emit()"
+      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg lg:hidden dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800"
+      aria-label="Toggle menu">
+      <app-icon name="bars-3" [size]="6" />
+    </button>
+    
+    <!-- Page Title -->
+    <h1 class="text-lg font-semibold text-gray-900 dark:text-white">
+      {{ pageTitle() }}
+    </h1>
+  </div>
+
+  <!-- Right Section -->
+  <div class="flex items-center gap-3">
+    <!-- Notifications (non-functional placeholder) -->
+    <button
+      type="button"
+      class="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800"
+      aria-label="Notifications">
+      <app-icon name="bell" [size]="5" />
+      <!-- Notification Badge -->
+      @if (notificationCount() > 0) {
+        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-primary-500 rounded-full"></span>
+      }
+    </button>
+
+    <!-- User Menu -->
+    <app-user-menu />
+  </div>
+</header>

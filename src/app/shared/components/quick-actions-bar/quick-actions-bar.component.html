@@ -1,0 +1,95 @@
+<!-- Quick Actions Bar - Shown only on own profile -->
+<div class="flex items-center justify-between py-3 px-6 bg-slate-50 border-b border-slate-200">
+  <!-- Cash Balance -->
+  <div class="flex items-center gap-2">
+    @if (isLoading()) {
+      <div class="animate-pulse flex items-center gap-2">
+        <div class="h-5 w-5 bg-slate-200 rounded"></div>
+        <div class="h-6 w-24 bg-slate-200 rounded"></div>
+      </div>
+    } @else {
+      <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+      <span class="text-lg font-semibold text-slate-900">
+        {{ formattedBalance() | currency:currencyCode():'symbol':'1.0-0' }}
+      </span>
+      <span class="text-sm text-slate-500">in custody</span>
+    }
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="flex items-center gap-3">
+    <!-- Receive Cash Button -->
+    <app-button
+      variant="secondary"
+      size="sm"
+      [disabled]="isLoading()"
+      (click)="handleReceiveCash()"
+    >
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+      </svg>
+      Receive Cash
+      @if (hasPendingReceives()) {
+        <app-badge color="warning" size="sm">
+          {{ pendingReceiveCount() }}
+        </app-badge>
+      }
+    </app-button>
+
+    <!-- Transfer Cash Button (Unit/Area) -->
+    @if (!showForumActions()) {
+      <app-button
+        variant="secondary"
+        size="sm"
+        [disabled]="isLoading()"
+        (click)="handleTransferCash()"
+      >
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
+        Transfer Cash
+      </app-button>
+    }
+
+    <!-- Forum-specific actions -->
+    @if (showForumActions()) {
+      <!-- Transfer to Bank Button -->
+      <app-button
+        variant="secondary"
+        size="sm"
+        [disabled]="isLoading()"
+        (click)="handleTransferToBank()"
+      >
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+        </svg>
+        Transfer to Bank
+      </app-button>
+
+      <!-- Pending Approvals Button -->
+      <app-button
+        variant="secondary"
+        size="sm"
+        [disabled]="isLoading()"
+        (click)="handleViewApprovals()"
+      >
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+        Approvals
+        @if (hasPendingApprovals()) {
+          <app-badge color="warning" size="sm">
+            {{ pendingApprovalsCount() }}
+          </app-badge>
+        }
+      </app-button>
+    }
+  </div>
+</div>

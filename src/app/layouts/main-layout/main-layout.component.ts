@@ -1,57 +1,39 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
-import { MenuService } from '../../core/services/menu.service';
-import { AuthService } from '../../core/services/auth.service';
-import { AuthStore } from '../../core/state/auth.store';
-import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
+import { SidebarComponent } from '../sidebar/sidebar.component';
+import { HeaderComponent } from '../header/header.component';
+import { SidebarService } from '../sidebar/sidebar.service';
+import { LayoutService } from '../layout.service';
 import { ToastContainerComponent } from '../../shared/components/toast/toast-container.component';
-import { AccessStore } from '../../core/state/access.store';
 
 @Component({
   selector: 'app-main-layout',
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, AvatarComponent, ToastContainerComponent],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  imports: [RouterOutlet, SidebarComponent, HeaderComponent, ToastContainerComponent],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.css'
 })
 export class MainLayoutComponent {
-  menuService = inject(MenuService);
-  authStore = inject(AuthStore);
-  accessStore = inject(AccessStore)
-  private authService = inject(AuthService);
-  private router = inject(Router);
+  private sidebarService = inject(SidebarService);
+  private layoutService = inject(LayoutService);
 
-  readonly currentYear = new Date().getFullYear();
-  isProfileDropdownOpen = signal(false);
-  isMobileMenuOpen = signal(false);
+  // Sidebar state
+  sidebarExpanded = this.sidebarService.expanded;
+  mobileSidebarOpen = this.sidebarService.mobileOpen;
+  
+  // Page title from route data
+  pageTitle = this.layoutService.pageTitle;
 
-  toggleProfileDropdown(): void {
-    this.isProfileDropdownOpen.update(v => !v);
+  onSidebarExpandedChange(expanded: boolean): void {
+    this.sidebarService.setExpanded(expanded);
   }
 
-  toggleMobileMenu(): void {
-    this.isMobileMenuOpen.update(v => !v);
+  onMobileSidebarClose(): void {
+    this.sidebarService.closeMobile();
   }
 
-  onLogout(): void {
-    this.authService.logout();
-    this.router.navigate(['/auth/login']);
-  }
-
-  getUserDisplayName(): string {
-    const user = this.accessStore.user();
-    if (!user) return 'User';
-    
-    if (user.firstName && user.lastName) {
-      return `${user.firstName} ${user.lastName}`;
-    }
-    return user.firstName || user.email;
-  }
-
-  getUserEmail(): string {
-    return this.accessStore.user()?.email || '';
+  onMenuToggle(): void {
+    this.sidebarService.toggleMobile();
   }
 }
 

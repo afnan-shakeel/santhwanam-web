@@ -1,6 +1,6 @@
 <app-modal
   [open]="open()"
-  (openChange)="onClose()"
+  (openChange)="$event || onClose()"
   title="Feature In Development"
   size="sm">
   

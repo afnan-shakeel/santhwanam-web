@@ -1,0 +1,32 @@
+<!-- Tabs Component -->
+<div class="border-b border-slate-200 bg-white">
+  <nav class="flex -mb-px" aria-label="Tabs">
+    @for (tab of tabs(); track tab.id) {
+      <button
+        type="button"
+        [class]="getTabClasses(tab)"
+        [disabled]="tab.disabled"
+        (click)="selectTab(tab)"
+        [attr.aria-current]="isActive(tab.id) ? 'page' : null"
+      >
+        <span class="flex items-center gap-2">
+          @if (tab.icon) {
+            <span class="text-base">{{ tab.icon }}</span>
+          }
+          {{ tab.label }}
+          @if (tab.badge !== undefined && tab.badge > 0) {
+            <span
+              class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium rounded-full"
+              [ngClass]="{
+                'bg-primary-100 text-primary-700': isActive(tab.id),
+                'bg-slate-100 text-slate-600': !isActive(tab.id)
+              }"
+            >
+              {{ tab.badge }}
+            </span>
+          }
+        </span>
+      </button>
+    }
+  </nav>
+</div>

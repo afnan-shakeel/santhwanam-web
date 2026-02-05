@@ -76,17 +76,134 @@ export const routes: Routes = [
         path: 'admin/approvals/all-requests',
         loadComponent: () => import('./features/approvals/all-requests/all-requests.component').then((m) => m.AllRequestsComponent)
       },
+      // Forum routes
       {
         path: 'forums',
-        loadComponent: () => import('./features/forums/forums.component').then((m) => m.ForumsComponent)
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/forums/forums.component').then((m) => m.ForumsComponent)
+          },
+          // My Forum Profile (redirect based on user's hierarchy)
+          {
+            path: 'my-profile',
+            loadComponent: () => import('./features/forums/my-forum-profile.component').then((m) => m.MyForumProfileComponent)
+          },
+          // Forum profile route
+          {
+            path: ':forumId',
+            loadComponent: () => import('./features/forums/forum-profile/forum-profile.component').then((m) => m.ForumProfileComponent),
+            children: [
+              {
+                path: '',
+                redirectTo: 'overview',
+                pathMatch: 'full'
+              },
+              {
+                path: 'overview',
+                loadComponent: () => import('./features/forums/forum-profile/tabs/forum-overview-tab/forum-overview-tab.component').then((m) => m.ForumOverviewTabComponent)
+              },
+              {
+                path: 'areas',
+                loadComponent: () => import('./features/forums/forum-profile/tabs/forum-areas-tab/forum-areas-tab.component').then((m) => m.ForumAreasTabComponent)
+              },
+              {
+                path: 'cash-custody',
+                loadComponent: () => import('./features/forums/forum-profile/tabs/forum-cash-custody-tab/forum-cash-custody-tab.component').then((m) => m.ForumCashCustodyTabComponent)
+              },
+              {
+                path: 'activity',
+                loadComponent: () => import('./features/forums/forum-profile/tabs/forum-activity-tab/forum-activity-tab.component').then((m) => m.ForumActivityTabComponent)
+              }
+            ]
+          }
+        ]
       },
+      // Area routes
       {
         path: 'areas',
-        loadComponent: () => import('./features/areas/areas.component').then((m) => m.AreasComponent)
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/areas/areas.component').then((m) => m.AreasComponent)
+          },
+          // My Area Profile (redirect based on user's hierarchy)
+          {
+            path: 'my-profile',
+            loadComponent: () => import('./features/areas/my-area-profile.component').then((m) => m.MyAreaProfileComponent)
+          },
+          // Area profile route
+          {
+            path: ':areaId',
+            loadComponent: () => import('./features/areas/area-profile/area-profile.component').then((m) => m.AreaProfileComponent),
+            children: [
+              {
+                path: '',
+                redirectTo: 'overview',
+                pathMatch: 'full'
+              },
+              {
+                path: 'overview',
+                loadComponent: () => import('./features/areas/area-profile/tabs/area-overview-tab/area-overview-tab.component').then((m) => m.AreaOverviewTabComponent)
+              },
+              {
+                path: 'units',
+                loadComponent: () => import('./features/areas/area-profile/tabs/area-units-tab/area-units-tab.component').then((m) => m.AreaUnitsTabComponent)
+              },
+              {
+                path: 'cash-custody',
+                loadComponent: () => import('./features/areas/area-profile/tabs/area-cash-custody-tab/area-cash-custody-tab.component').then((m) => m.AreaCashCustodyTabComponent)
+              },
+              {
+                path: 'activity',
+                loadComponent: () => import('./features/areas/area-profile/tabs/area-activity-tab/area-activity-tab.component').then((m) => m.AreaActivityTabComponent)
+              }
+            ]
+          }
+        ]
       },
+      // Unit routes
       {
         path: 'units',
-        loadComponent: () => import('./features/units/units.component').then((m) => m.UnitsComponent)
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/units/units.component').then((m) => m.UnitsComponent)
+          },
+          // My Unit Profile (redirect based on user's hierarchy)
+          {
+            path: 'my-profile',
+            loadComponent: () => import('./features/units/my-unit-profile.component').then((m) => m.MyUnitProfileComponent)
+          },
+          // Unit profile route
+          {
+            path: ':unitId',
+            loadComponent: () => import('./features/units/unit-profile/unit-profile.component').then((m) => m.UnitProfileComponent),
+            children: [
+              {
+                path: '',
+                redirectTo: 'overview',
+                pathMatch: 'full'
+              },
+              {
+                path: 'overview',
+                loadComponent: () => import('./features/units/unit-profile/tabs/unit-overview-tab/unit-overview-tab.component').then((m) => m.UnitOverviewTabComponent)
+              },
+              {
+                path: 'agents',
+                loadComponent: () => import('./features/units/unit-profile/tabs/unit-agents-tab/unit-agents-tab.component').then((m) => m.UnitAgentsTabComponent)
+              },
+              {
+                path: 'cash-custody',
+                loadComponent: () => import('./features/units/unit-profile/tabs/unit-cash-custody-tab/unit-cash-custody-tab.component').then((m) => m.UnitCashCustodyTabComponent)
+              },
+              {
+                path: 'activity',
+                loadComponent: () => import('./features/units/unit-profile/tabs/unit-activity-tab/unit-activity-tab.component').then((m) => m.UnitActivityTabComponent)
+              }
+            ]
+          }
+        ]
       },
       // Member's own profile route (self-view)
       {

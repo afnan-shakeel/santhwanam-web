@@ -1,0 +1,62 @@
+<div class="relative" #menuContainer>
+  <!-- Trigger Button -->
+  <button
+    type="button"
+    (click)="toggleMenu()"
+    class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+    [attr.aria-expanded]="isOpen()"
+    aria-haspopup="true">
+    
+    <!-- Avatar -->
+    <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center overflow-hidden">
+      <span class="text-sm font-medium text-primary-700 dark:text-primary-300">
+        {{ userInitials() }}
+      </span>
+    </div>
+    
+    <!-- Chevron -->
+    <app-icon 
+      [name]="isOpen() ? 'chevron-up' : 'chevron-down'" 
+      [size]="4"
+      class="text-gray-500 dark:text-gray-400 transition-transform" />
+  </button>
+
+  <!-- Dropdown Menu -->
+  @if (isOpen()) {
+    <div 
+      class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
+      role="menu"
+      aria-orientation="vertical">
+      
+      <!-- User Info -->
+      <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+        <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ getUserDisplayName() }}</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ user()?.email }}</p>
+      </div>
+      
+      <!-- Menu Items -->
+      <div class="py-1">
+        <a 
+          routerLink="/settings"
+          (click)="closeMenu()"
+          class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+          role="menuitem">
+          <app-icon name="cog-6-tooth" [size]="5" class="text-gray-400 dark:text-gray-500" />
+          Settings
+        </a>
+      </div>
+      
+      <!-- Sign Out -->
+      <div class="border-t border-gray-100 dark:border-gray-700 py-1">
+        <button
+          type="button"
+          (click)="signOut()"
+          class="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+          role="menuitem">
+          <app-icon name="arrow-right-on-rectangle" [size]="5" class="text-gray-400 dark:text-gray-500" />
+          Sign Out
+        </button>
+      </div>
+    </div>
+  }
+</div>

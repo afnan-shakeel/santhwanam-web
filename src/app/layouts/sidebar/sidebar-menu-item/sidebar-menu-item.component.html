@@ -1,0 +1,54 @@
+<div class="mb-1">
+  <!-- Menu Item Button -->
+  <button
+    type="button"
+    (click)="onClick()"
+    [class]="itemClasses()"
+    [attr.aria-expanded]="hasChildren() ? isOpen() : null"
+    [attr.aria-current]="isActive() ? 'page' : null"
+    [title]="!sidebarExpanded() ? item().label : null">
+    
+    <!-- Icon -->
+    @if (item().icon) {
+      <app-icon 
+        [name]="item().icon!" 
+        [size]="5"
+        [class]="iconClasses()" />
+    } @else {
+      <span class="w-5 h-5 rounded-full bg-gray-300 dark:bg-gray-600 shrink-0"></span>
+    }
+    
+    <!-- Label (hidden when sidebar is collapsed) -->
+    @if (sidebarExpanded()) {
+      <span class="flex-1 text-left text-sm font-medium truncate">
+        {{ item().label }}
+      </span>
+      
+      <!-- Chevron for items with children -->
+      @if (hasChildren()) {
+        <app-icon 
+          [name]="isOpen() ? 'chevron-up' : 'chevron-down'" 
+          [size]="4"
+          class="text-gray-400 transition-transform duration-200" />
+      }
+    }
+  </button>
+
+  <!-- Children (Submenu) -->
+  @if (hasChildren() && sidebarExpanded() && isOpen()) {
+    <div 
+      class="mt-1 ml-4 pl-4 border-l border-gray-200 dark:border-gray-700"
+      role="menu"
+      [attr.aria-label]="item().label + ' submenu'">
+      @for (child of item().children; track child.label) {
+        <app-sidebar-menu-item
+          [item]="child"
+          [sidebarExpanded]="sidebarExpanded()"
+          [isOpen]="false"
+          [activeRoute]="activeRoute()"
+          [depth]="depth() + 1"
+          (navigateTo)="navigateTo.emit($event)" />
+      }
+    </div>
+  }
+</div>

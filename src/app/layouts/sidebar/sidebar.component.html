@@ -1,0 +1,53 @@
+<aside 
+  [class]="sidebarClasses()"
+  [attr.aria-expanded]="expanded()">
+  
+  <!-- Logo Section -->
+  <div class="h-16 flex items-center px-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
+    <a routerLink="/" class="flex items-center gap-3">
+      <!-- Logo Icon -->
+      <div class="w-10 h-10 rounded-xl bg-primary-600 flex items-center justify-center shrink-0">
+        <span class="text-white font-bold text-lg">S</span>
+      </div>
+      <!-- Logo Text (hidden when collapsed) -->
+      @if (expanded()) {
+        <span class="font-semibold text-gray-900 dark:text-white tracking-tight whitespace-nowrap">
+          Santhwanam
+        </span>
+      }
+    </a>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex-1 overflow-y-auto py-4 px-3 sidebar-scroll" aria-label="Main navigation">
+    @for (item of menuItems(); track item.label) {
+      <app-sidebar-menu-item
+        [item]="item"
+        [sidebarExpanded]="expanded()"
+        [isOpen]="isMenuOpen(item.label)"
+        [activeRoute]="activeRoute()"
+        (toggle)="onMenuToggle(item.label)"
+        (navigateTo)="onNavigate($event)" />
+    }
+  </nav>
+
+  <!-- Collapse Toggle (Desktop only) -->
+  <div class="p-3 border-t border-gray-200 dark:border-gray-700 shrink-0 hidden lg:block">
+    <button
+      type="button"
+      (click)="onCollapseToggle()"
+      class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
+      [attr.aria-label]="expanded() ? 'Collapse sidebar' : 'Expand sidebar'">
+      
+      <!-- Collapse/Expand Icon -->
+      <app-icon 
+        [name]="expanded() ? 'chevron-left' : 'chevron-right'" 
+        [size]="5"
+        class="transition-transform" />
+      
+      @if (expanded()) {
+        <span class="text-sm">Collapse</span>
+      }
+    </button>
+  </div>
+</aside>

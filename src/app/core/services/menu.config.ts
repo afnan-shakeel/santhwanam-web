@@ -104,6 +104,25 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     icon: 'person',
     roles: ['member']
   },
+  // Entity Admin Self-Profile Links
+  { 
+    label: 'My Forum Profile', 
+    route: '/forums/my-profile',
+    icon: 'forum',
+    roles: ['forum_admin']
+  },
+  { 
+    label: 'My Area Profile', 
+    route: '/areas/my-profile',
+    icon: 'map',
+    roles: ['area_admin']
+  },
+  { 
+    label: 'My Unit Profile', 
+    route: '/units/my-profile',
+    icon: 'business',
+    roles: ['unit_admin']
+  },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // ORGANIZATION MANAGEMENT
@@ -150,7 +169,7 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     route: '/members',
     icon: 'groups',
     // permissions: [PERMISSIONS.MEMBER.READ]
-    roles: ['forum_admin', 'area_admin', 'unit_admin']
+    roles: ['super_admin', 'forum_admin', 'area_admin', 'unit_admin']
   },
 
   // ═══════════════════════════════════════════════════════════════════════════

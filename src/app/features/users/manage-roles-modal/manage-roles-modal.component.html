@@ -269,7 +269,7 @@
   title="Revoke Role"
   size="sm"
   [open]="showRevokeConfirm()"
-  (openChange)="cancelRevoke()"
+  (openChange)="$event || cancelRevoke()"
 >
   <div class="p-6">
     <div class="flex items-start gap-4">
