@@ -1,0 +1,331 @@
+<div class="space-y-0">
+
+  <!-- Breadcrumb -->
+  <div class="mb-5">
+    <app-breadcrumbs [items]="breadcrumbs()" />
+  </div>
+
+  <!-- Loading skeleton -->
+  @if (claimLoading()) {
+    <div class="space-y-4">
+      <div class="bg-white border border-gray-200 rounded-xl p-6">
+        <div class="flex justify-between mb-5">
+          <div>
+            <div class="h-6 w-48 bg-gray-100 rounded animate-pulse mb-2"></div>
+            <div class="h-4 w-32 bg-gray-100 rounded animate-pulse"></div>
+          </div>
+          <div class="h-7 w-28 bg-gray-100 rounded-full animate-pulse"></div>
+        </div>
+        <div class="border-t border-gray-100 pt-4 grid grid-cols-4 gap-6">
+          @for (i of [1,2,3,4]; track i) {
+            <div>
+              <div class="h-3 w-16 bg-gray-100 rounded animate-pulse mb-2"></div>
+              <div class="h-5 w-24 bg-gray-100 rounded animate-pulse"></div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  } @else if (claim()) {
+    <!-- ZONE 1: Header Card (always visible) -->
+    <app-claim-header-card [claim]="claim()!" />
+
+    <!-- ZONE 2: Action Banner (contextual) -->
+    <app-claim-action-banner
+      [claim]="claim()!"
+      [viewMode]="viewMode()"
+      (bannerAction)="onBannerAction($event)"
+    />
+
+    <!-- ZONE 3: Tabs -->
+    <div class="mt-5">
+      <app-tabs
+        [tabs]="tabs()"
+        [activeTab]="activeTab()"
+        (tabChange)="onTabChange($event)"
+      />
+    </div>
+
+    <!-- Tab Content -->
+    <div class="mt-5">
+
+      <!-- ==================== TAB 1: Details & Documents ==================== -->
+      @if (activeTab() === 'details') {
+        <div class="space-y-4 animate-fadeIn">
+
+          <!-- Two-column: Death Details + Nominee Details -->
+          <div class="grid grid-cols-2 gap-4">
+
+            <!-- Death Details -->
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+              <div class="px-5 py-3.5 border-b border-gray-100">
+                <span class="text-sm font-semibold text-gray-900">Death Details</span>
+              </div>
+              <div class="p-5">
+                <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+                  <div>
+                    <div class="text-xs text-gray-400 mb-0.5">Cause of Death</div>
+                    <div class="text-sm font-medium text-gray-900">{{ claim()!.causeOfDeath || '—' }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-400 mb-0.5">Place of Death</div>
+                    <div class="text-sm font-medium text-gray-900">{{ claim()!.deathPlace || '—' }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-400 mb-0.5">Death Date</div>
+                    <div class="text-sm font-medium text-gray-900">{{ claim()!.deathDate | date:'mediumDate' }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-400 mb-0.5">Additional Notes</div>
+                    <div class="text-sm font-medium text-gray-900">{{ claim()!.initialNotes || '—' }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Nominee Details -->
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+              <div class="px-5 py-3.5 border-b border-gray-100">
+                <span class="text-sm font-semibold text-gray-900">Nominee Details</span>
+              </div>
+              <div class="p-5">
+                <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+                  <div>
+                    <div class="text-xs text-gray-400 mb-0.5">Name</div>
+                    <div class="text-sm font-medium text-gray-900">{{ claim()!.nomineeName || '—' }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-400 mb-0.5">Relationship</div>
+                    <div class="text-sm font-medium text-gray-900">{{ claim()!.nomineeRelation || '—' }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-400 mb-0.5">Contact Number</div>
+                    <div class="text-sm font-medium text-gray-900">{{ claim()!.nomineeContactNumber || '—' }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-400 mb-0.5">Address</div>
+                    <div class="text-sm font-medium text-gray-900">
+                      @if (claim()!.nomineeAddress) {
+                        {{ claim()!.nomineeAddress!.city || '' }} {{ claim()!.nomineeAddress!.state || '' }}
+                      } @else {
+                        —
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Documents -->
+          <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+            <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
+              <span class="text-sm font-semibold text-gray-900">Documents</span>
+              @if (canUpload()) {
+                <button class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                  + Upload
+                </button>
+              }
+            </div>
+            <div class="p-5">
+              @if (documentsLoading()) {
+                <div class="space-y-2">
+                  @for (i of [1,2,3]; track i) {
+                    <div class="h-14 bg-gray-50 rounded-md animate-pulse"></div>
+                  }
+                </div>
+              } @else {
+                <app-document-list
+                  [documents]="documents()"
+                  [canVerify]="canVerify()"
+                  [canUpload]="canUpload()"
+                  (viewDocument)="onViewDocument($event)"
+                  (verifyDocument)="onVerifyDocument($event)"
+                  (rejectDocument)="onRejectDocument($event)"
+                />
+              }
+            </div>
+          </div>
+
+          <!-- Deceased Member Summary -->
+          <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+            <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
+              <span class="text-sm font-semibold text-gray-900">Deceased Member Summary</span>
+              @if (claim()!.memberId) {
+                <a
+                  [routerLink]="['/members', claim()!.memberId, 'profile']"
+                  class="text-xs text-blue-600 hover:underline cursor-pointer"
+                >
+                  View Full Profile →
+                </a>
+              }
+            </div>
+            <div class="p-5">
+              <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+                <div>
+                  <div class="text-xs text-gray-400 mb-0.5">Tier</div>
+                  <div class="text-sm font-medium text-gray-900">{{ claim()!.tier?.tierName || '—' }}</div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-400 mb-0.5">Agent</div>
+                  <div class="text-sm font-medium text-gray-900">
+                    @if (claim()!.agent) {
+                      {{ claim()!.agent!.firstName }} {{ claim()!.agent!.lastName }}
+                    } @else {
+                      —
+                    }
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-400 mb-0.5">Forum / Area / Unit</div>
+                  <div class="text-sm font-medium text-gray-900">
+                    {{ claim()!.forum?.forumName || '—' }} / {{ claim()!.area?.areaName || '—' }} / {{ claim()!.unit?.unitName || '—' }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-400 mb-0.5">Member Code</div>
+                  <div class="text-sm font-medium text-blue-600">{{ claim()!.memberCode }}</div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-400 mb-0.5">Claim Filed</div>
+                  <div class="text-sm font-medium text-gray-900">{{ claim()!.reportedDate | date:'mediumDate' }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ==================== TAB 2: Contributions ==================== -->
+      @if (activeTab() === 'contributions') {
+        <div class="animate-fadeIn">
+          @if (!hasCycle()) {
+            <!-- No cycle yet -->
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+              <div class="text-center py-12 px-6">
+                <div class="text-3xl mb-3">📊</div>
+                <h3 class="text-sm font-semibold text-gray-600 mb-1">No contribution cycle yet</h3>
+                <p class="text-xs text-gray-400">A contribution cycle will be created automatically when this claim is approved.</p>
+              </div>
+            </div>
+          } @else {
+            <div class="space-y-4">
+              <!-- Cycle Progress Card -->
+              <app-contribution-progress-card [cycle]="contributionCycle()!" />
+
+              <!-- Member Contributions Table -->
+              <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+                <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
+                  <span class="text-sm font-semibold text-gray-900">Member Contributions</span>
+                  <button
+                    class="px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-100 border border-gray-200 rounded-md cursor-not-allowed"
+                    disabled
+                    title="Coming soon"
+                  >
+                    Bulk Actions
+                  </button>
+                </div>
+                <div class="p-5">
+                  <app-contribution-table
+                    [cycleId]="contributionCycle()!.cycleId"
+                    [membersCollected]="contributionCycle()!.membersCollected"
+                    [membersPending]="contributionCycle()!.membersPending"
+                    [membersMissed]="contributionCycle()!.membersMissed"
+                    [totalMembers]="contributionCycle()!.membersCollected + contributionCycle()!.membersPending + contributionCycle()!.membersMissed"
+                    [canRecordPayment]="canRecordPayment()"
+                    (recordPayment)="onRecordPayment($event)"
+                    (markMissed)="onMarkMissed($event)"
+                  />
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ==================== TAB 3: Activity Log ==================== -->
+      @if (activeTab() === 'activity') {
+        <div class="animate-fadeIn">
+          <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+            <div class="text-center py-12 px-6">
+              <div class="text-3xl mb-3">🚧</div>
+              <h3 class="text-sm font-semibold text-gray-600 mb-1">Activity Log</h3>
+              <p class="text-xs text-gray-400">This feature is under development. A detailed timeline of claim events will appear here.</p>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Record Cash Collection Modal -->
+  <app-record-cash-modal
+    [open]="showRecordCashModal()"
+    [contribution]="selectedContribution()"
+    (closed)="showRecordCashModal.set(false); selectedContribution.set(null)"
+    (recorded)="onCashRecorded()"
+  />
+
+  <!-- Mark Missed Dialog -->
+  <app-mark-missed-dialog
+    [open]="showMarkMissedDialog()"
+    [contribution]="selectedContribution()"
+    (closed)="showMarkMissedDialog.set(false); selectedContribution.set(null)"
+    (marked)="onMissedMarked()"
+  />
+
+  <!-- Settlement Modal -->
+  @if (showSettlementModal()) {
+    <app-modal
+      id="settlement-modal"
+      title="Record Settlement"
+      [open]="showSettlementModal()"
+      size="sm"
+      (closed)="showSettlementModal.set(false)"
+    >
+      <div class="space-y-4">
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-500">Nominee</span>
+            <span class="font-medium text-gray-900">{{ claim()?.nomineeName }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">Benefit Amount</span>
+            <span class="font-semibold text-blue-600">OMR {{ claim()?.benefitAmount | number:'1.3-3' }}</span>
+          </div>
+        </div>
+
+        <hr class="border-gray-100" />
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Payment Reference</label>
+          <input
+            type="text"
+            class="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Bank transfer reference"
+            [ngModel]="settlementPaymentRef()"
+            (ngModelChange)="settlementPaymentRef.set($event)"
+          />
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer"
+            (click)="showSettlementModal.set(false)"
+          >
+            Cancel
+          </button>
+          <button
+            class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 disabled:opacity-50 cursor-pointer"
+            [disabled]="actionLoading()"
+            (click)="onConfirmSettlement()"
+          >
+            {{ actionLoading() ? 'Recording...' : 'Record Settlement' }}
+          </button>
+        </div>
+      </div>
+    </app-modal>
+  }
+</div>

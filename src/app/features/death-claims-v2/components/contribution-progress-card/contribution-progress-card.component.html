@@ -1,0 +1,45 @@
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+  <!-- Header -->
+  <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
+    <span class="text-sm font-semibold text-gray-900">Cycle {{ cycle().cycleNumber }}</span>
+    <span class="text-xs text-gray-500">
+      @if (cycle().collectionDeadline) {
+        Deadline: {{ cycle().collectionDeadline | date:'mediumDate' }}
+      }
+      <span class="ml-1 font-semibold" [ngClass]="deadlineLabelClass()">{{ deadlineLabel() }}</span>
+    </span>
+  </div>
+
+  <!-- Body -->
+  <div class="p-5">
+    <!-- Amount + percentage -->
+    <div class="flex items-baseline justify-between mb-2.5">
+      <div class="text-[22px] font-bold tracking-tight text-gray-900">
+        OMR {{ cycle().totalCollectedAmount | number:'1.3-3' }}
+        <span class="text-sm font-normal text-gray-400">
+          / OMR {{ cycle().totalExpectedAmount | number:'1.3-3' }}
+        </span>
+      </div>
+      <div class="text-sm font-semibold text-green-600">{{ percentage() }}%</div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
+      <div
+        class="h-full rounded-full transition-all duration-500"
+        [style.width.%]="percentage()"
+        [ngClass]="{
+          'bg-gradient-to-r from-blue-500 to-blue-400': percentage() < 100,
+          'bg-gradient-to-r from-green-500 to-green-400': percentage() >= 100
+        }"
+      ></div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="flex items-center gap-6 text-xs text-gray-400">
+      <span><strong class="text-gray-700">{{ cycle().membersCollected }}</strong> collected</span>
+      <span><strong class="text-gray-700">{{ cycle().membersPending }}</strong> pending</span>
+      <span><strong class="text-gray-700">{{ cycle().membersMissed }}</strong> missed</span>
+    </div>
+  </div>
+</div>

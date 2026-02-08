@@ -1,0 +1,54 @@
+<div class="space-y-5">
+  <!-- Breadcrumb -->
+  <app-breadcrumbs [items]="breadcrumbs" />
+
+  <!-- Page Header -->
+  <app-listing-page-header
+    title="Contribution Cycles"
+    description="Monitor contribution collection cycles across all claims"
+  />
+
+  <!-- Stats Strip -->
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+    <div class="flex items-stretch divide-x divide-gray-100">
+      @if (statsLoading()) {
+        @for (i of [1,2,3]; track i) {
+          <div class="flex-1 px-5 py-4">
+            <div class="h-3 w-16 bg-gray-100 rounded animate-pulse mb-2"></div>
+            <div class="h-6 w-10 bg-gray-100 rounded animate-pulse"></div>
+          </div>
+        }
+      } @else if (stats()) {
+        <!-- Active Cycles -->
+        <div class="flex-1 px-5 py-4">
+          <div class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1">Active Cycles</div>
+          <div class="text-xl font-bold text-blue-600">{{ stats()!.activeCyclesCount }}</div>
+        </div>
+
+        <!-- Total Collecting -->
+        <div class="flex-1 px-5 py-4">
+          <div class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1">Total Collecting</div>
+          <div class="text-xl font-bold text-gray-900">
+            OMR {{ stats()!.totalCollecting | number:'1.3-3' }}
+          </div>
+        </div>
+
+        <!-- Avg Completion -->
+        <div class="flex-1 px-5 py-4">
+          <div class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1">Avg Completion</div>
+          <div class="text-xl font-bold text-green-600">{{ stats()!.avgCompletionPercentage }}%</div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Cycles Table -->
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+    <app-datatable
+      [config]="tableConfig"
+      [data]="cyclesData()"
+      [loading]="tableLoading()"
+      (searchChange)="onSearch($event)"
+    />
+  </div>
+</div>

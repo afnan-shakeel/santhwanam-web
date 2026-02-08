@@ -1,0 +1,51 @@
+<div class="space-y-5">
+  <!-- Breadcrumb -->
+  <app-breadcrumbs [items]="breadcrumbs" />
+
+  <!-- Page Header -->
+  <app-listing-page-header
+    title="Death Claims"
+    description="Manage death claims and benefit payouts"
+    actionLabel="+ Submit Claim"
+    (actionClick)="onSubmitClaim()"
+  />
+
+  <!-- Stats Strip -->
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+    <div class="flex items-stretch divide-x divide-gray-100">
+      @if (statsLoading()) {
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="flex-1 px-5 py-4">
+            <div class="h-3 w-16 bg-gray-100 rounded animate-pulse mb-2"></div>
+            <div class="h-6 w-10 bg-gray-100 rounded animate-pulse"></div>
+          </div>
+        }
+      } @else {
+        @for (stat of statItems(); track stat.label) {
+          <button
+            class="flex-1 px-5 py-4 text-left transition-colors cursor-pointer hover:bg-gray-50/60"
+            [class.bg-blue-50/50]="activeStatFilter() && stat.filterStatus && activeStatFilter() === (stat.filterStatus | json)"
+            (click)="onStatClick(stat)"
+          >
+            <div class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1">
+              {{ stat.label }}
+            </div>
+            <div class="text-xl font-bold" [ngClass]="stat.color">
+              {{ stat.value }}
+            </div>
+          </button>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- Claims Table -->
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+    <app-datatable
+      [config]="tableConfig"
+      [data]="claimsData()"
+      [loading]="tableLoading()"
+      (searchChange)="onSearch($event)"
+    />
+  </div>
+</div>

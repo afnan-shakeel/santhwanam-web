@@ -177,17 +177,30 @@ export const MENU_CONFIG: MenuItemConfig[] = [
   // ═══════════════════════════════════════════════════════════════════════════
   { 
     label: 'Death Claims', 
-    route: '/death-claims',
+    route: '/claims',
     icon: 'assignment',
     // permissions: [PERMISSIONS.CLAIM.READ]
-    roles: ['super_admin', 'forum_admin', 'area_admin', 'unit_admin', 'agent']
-  },
-  { 
-    label: 'Contributions', 
-    route: '/contributions',
-    icon: 'payments',
-    roles: ['super_admin', 'forum_admin', 'area_admin', 'unit_admin', 'agent']
-    // permissions: [PERMISSIONS.CONTRIBUTION.READ, PERMISSIONS.CONTRIBUTION.CYCLE.READ]
+    roles: ['super_admin', 'forum_admin', 'area_admin', 'unit_admin', 'agent'],
+    children: [
+      {
+        label: 'Claims',
+        route: '/claims',
+        icon: 'list_alt',
+        roles: ['super_admin', 'forum_admin', 'area_admin', 'unit_admin', 'agent']
+      },
+      {
+        label: 'Submit Claim',
+        route: '/claims/new',
+        icon: 'add_circle',
+        roles: ['super_admin', 'forum_admin', 'area_admin', 'unit_admin', 'agent']
+      },
+      {
+        label: 'Contribution Cycles',
+        route: '/claims/cycles',
+        icon: 'cycle',
+        roles: ['super_admin', 'forum_admin', 'area_admin', 'unit_admin']
+      }
+    ]
   },
 
   // ═══════════════════════════════════════════════════════════════════════════

@@ -533,7 +533,7 @@ export const routes: Routes = [
         path: 'admin/cash/pending-bank-deposits',
         loadComponent: () => import('./features/cash-management/pages/pending-bank-deposits/pending-bank-deposits.component').then((m) => m.PendingBankDepositsComponent)
       },
-      // Death Claims routes
+      // Death Claims routes (v1 — kept for backward compatibility)
       {
         path: 'death-claims',
         children: [
@@ -548,6 +548,28 @@ export const routes: Routes = [
           {
             path: ':claimId',
             loadComponent: () => import('./features/death-claims/claim-details/claim-details.component').then((m) => m.ClaimDetailsComponent)
+          }
+        ]
+      },
+      // Death Claims routes (v2 — redesigned)
+      {
+        path: 'claims',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/death-claims-v2/pages/claims-listing/claims-listing.component').then((m) => m.ClaimsListingComponent)
+          },
+          {
+            path: 'new',
+            loadComponent: () => import('./features/death-claims/submit-claim/submit-claim.component').then((m) => m.SubmitClaimComponent)
+          },
+          {
+            path: 'cycles',
+            loadComponent: () => import('./features/death-claims-v2/pages/contribution-cycles/contribution-cycles.component').then((m) => m.ContributionCyclesComponent)
+          },
+          {
+            path: ':claimId',
+            loadComponent: () => import('./features/death-claims-v2/pages/claim-details/claim-details.component').then((m) => m.ClaimDetailsV2Component)
           }
         ]
       },

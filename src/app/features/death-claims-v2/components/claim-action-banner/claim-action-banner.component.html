@@ -1,0 +1,34 @@
+@if (config(); as cfg) {
+  <div
+    class="border border-t-0 rounded-b-xl px-6 py-3.5 flex items-center justify-between gap-4"
+    [ngClass]="cfg.bgClass + ' ' + cfg.borderClass"
+  >
+    <!-- Left: icon + text -->
+    <div class="flex items-center gap-3 flex-1 min-w-0">
+      <div
+        class="w-9 h-9 rounded-lg flex items-center justify-center text-base shrink-0"
+        [ngClass]="cfg.iconBgClass"
+      >
+        {{ cfg.icon }}
+      </div>
+      <div class="min-w-0">
+        <h3 class="text-[13px] font-semibold text-gray-900 leading-tight">{{ cfg.title }}</h3>
+        <p class="text-xs text-gray-500 leading-snug mt-0.5 truncate">{{ cfg.description }}</p>
+      </div>
+    </div>
+
+    <!-- Right: action buttons -->
+    @if (cfg.actions.length > 0) {
+      <div class="flex items-center gap-2 shrink-0">
+        @for (action of cfg.actions; track action.action) {
+          <button
+            [class]="getButtonClass(action.type)"
+            (click)="onAction(action.action)"
+          >
+            {{ action.label }}
+          </button>
+        }
+      </div>
+    }
+  </div>
+}

@@ -1,0 +1,59 @@
+<!-- Header Card — Always visible -->
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+  <!-- Top row: identity + status -->
+  <div class="flex items-start justify-between mb-5">
+    <div>
+      <h1 class="text-xl font-bold tracking-tight text-gray-900">
+        {{ claim().memberName }}
+        <span class="font-normal text-gray-400 text-base ml-1">— Death Claim</span>
+      </h1>
+      <p class="text-sm text-gray-400 mt-0.5">
+        {{ claim().claimNumber }} · {{ claim().memberCode }}
+      </p>
+    </div>
+    <app-claim-status-badge [status]="claim().claimStatus" />
+  </div>
+
+  <!-- Facts row: 4 columns -->
+  <div class="grid grid-cols-4 gap-0 border-t border-gray-100 pt-4">
+    <!-- Death Date -->
+    <div class="px-4 border-r border-gray-100 first:pl-0">
+      <div class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1">Death Date</div>
+      <div class="text-sm font-semibold text-gray-900">{{ claim().deathDate | date:'mediumDate' }}</div>
+      @if (claim().deathPlace) {
+        <div class="text-xs text-gray-400 mt-0.5">{{ claim().deathPlace }}</div>
+      }
+    </div>
+
+    <!-- Benefit Amount -->
+    <div class="px-4 border-r border-gray-100">
+      <div class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1">Benefit Amount</div>
+      <div class="text-sm font-semibold text-blue-600">
+        @if (claim().benefitAmount) {
+          OMR {{ claim().benefitAmount | number:'1.3-3' }}
+        } @else {
+          —
+        }
+      </div>
+      @if (claim().tier) {
+        <div class="text-xs text-gray-400 mt-0.5">{{ claim().tier?.tierName }}</div>
+      }
+    </div>
+
+    <!-- Filed By -->
+    <div class="px-4 border-r border-gray-100">
+      <div class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1">Filed By</div>
+      <div class="text-sm font-semibold text-gray-900">{{ claim().reportedBy || '—' }}</div>
+      <div class="text-xs text-gray-400 mt-0.5">{{ claim().reportedDate | date:'mediumDate' }}</div>
+    </div>
+
+    <!-- Nominee -->
+    <div class="px-4 last:border-r-0">
+      <div class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1">Nominee</div>
+      <div class="text-sm font-semibold text-gray-900">{{ claim().nomineeName || '—' }}</div>
+      @if (claim().nomineeRelation) {
+        <div class="text-xs text-gray-400 mt-0.5">{{ claim().nomineeRelation }}</div>
+      }
+    </div>
+  </div>
+</div>
