@@ -294,4 +294,22 @@ export class MemberService {
   unverifyDocument(memberId: string, documentId: string): Observable<void> {
     return this.http.post<void>(`/members/${memberId}/documents/${documentId}/unverify`, {});
   }
+
+  // ==================== NOTIFICATIONS ====================
+
+  /**
+   * Send notification to a member
+   */
+  notifyMember(
+    memberId: string,
+    payload: {
+      type: 'low_balance' | 'pending_contribution' | 'general';
+      channel?: 'sms' | 'email' | 'push';
+    }
+  ): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `/members/${memberId}/notify`,
+      payload
+    );
+  }
 }

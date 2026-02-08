@@ -109,6 +109,7 @@ export interface MemberRelation {
   firstName: string;
   lastName: string;
   agentId: string;
+  isLowBalance: boolean;
 }
 
 // Agent relation for contribution history

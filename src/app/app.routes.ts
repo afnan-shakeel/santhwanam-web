@@ -236,7 +236,7 @@ export const routes: Routes = [
       // Agent's own profile route
       {
         path: 'agent/profile',
-        loadComponent: () => import('./features/agents/agent-profile/pages/my-agent-profile/my-agent-profile.component').then((m) => m.MyAgentProfileComponent),
+        loadComponent: () => import('./features/agents/agent-profile/agent-profile.component').then((m) => m.AgentProfileComponent),
         children: [
           {
             path: '',
@@ -252,12 +252,16 @@ export const routes: Routes = [
             loadComponent: () => import('./features/agents/agent-profile/tabs/agent-members-tab/agent-members-tab.component').then((m) => m.AgentMembersTabComponent)
           },
           {
-            path: 'collections',
-            loadComponent: () => import('./features/agents/agent-profile/tabs/agent-collections-tab/agent-collections-tab.component').then((m) => m.AgentCollectionsTabComponent)
+            path: 'pending-contributions',
+            loadComponent: () => import('./features/agents/agent-profile/tabs/pending-contributions-tab/pending-contributions-tab.component').then((m) => m.PendingContributionsTabComponent)
           },
           {
-            path: 'performance',
-            loadComponent: () => import('./features/agents/agent-profile/tabs/agent-performance-tab/agent-performance-tab.component').then((m) => m.AgentPerformanceTabComponent)
+            path: 'low-balance',
+            loadComponent: () => import('./features/agents/agent-profile/tabs/low-balance-tab/low-balance-tab.component').then((m) => m.LowBalanceTabComponent)
+          },
+          {
+            path: 'cash-custody',
+            loadComponent: () => import('./features/agents/agent-profile/tabs/agent-cash-custody-tab/agent-cash-custody-tab.component').then((m) => m.AgentCashCustodyTabComponent)
           }
         ]
       },
@@ -272,7 +276,7 @@ export const routes: Routes = [
           // Admin viewing agent profile
           {
             path: ':agentId',
-            loadComponent: () => import('./features/agents/agent-profile/pages/admin-agent-profile/admin-agent-profile.component').then((m) => m.AdminAgentProfileComponent),
+            loadComponent: () => import('./features/agents/agent-profile/agent-profile.component').then((m) => m.AgentProfileComponent),
             children: [
               {
                 path: '',
@@ -288,12 +292,16 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/agents/agent-profile/tabs/agent-members-tab/agent-members-tab.component').then((m) => m.AgentMembersTabComponent)
               },
               {
-                path: 'collections',
-                loadComponent: () => import('./features/agents/agent-profile/tabs/agent-collections-tab/agent-collections-tab.component').then((m) => m.AgentCollectionsTabComponent)
+                path: 'pending-contributions',
+                loadComponent: () => import('./features/agents/agent-profile/tabs/pending-contributions-tab/pending-contributions-tab.component').then((m) => m.PendingContributionsTabComponent)
               },
               {
-                path: 'performance',
-                loadComponent: () => import('./features/agents/agent-profile/tabs/agent-performance-tab/agent-performance-tab.component').then((m) => m.AgentPerformanceTabComponent)
+                path: 'low-balance',
+                loadComponent: () => import('./features/agents/agent-profile/tabs/low-balance-tab/low-balance-tab.component').then((m) => m.LowBalanceTabComponent)
+              },
+              {
+                path: 'cash-custody',
+                loadComponent: () => import('./features/agents/agent-profile/tabs/agent-cash-custody-tab/agent-cash-custody-tab.component').then((m) => m.AgentCashCustodyTabComponent)
               },
               {
                 path: 'activity',

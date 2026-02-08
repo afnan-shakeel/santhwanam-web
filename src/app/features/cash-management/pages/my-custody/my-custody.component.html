@@ -8,14 +8,14 @@
           <h1 class="text-2xl font-bold text-gray-900">My Cash Custody</h1>
           <p class="mt-1 text-sm text-gray-500">View your cash balance, pending transfers, and recent activity</p>
         </div>
-        <button 
-          (click)="onInitiateTransfer()"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors">
+        <app-button 
+          variant="primary"
+          (click)="onInitiateTransfer()">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9l4 3m0 0l-4 3m4-3H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
           Initiate Handover
-        </button>
+        </app-button>
       </div>
     </div>
   </div>

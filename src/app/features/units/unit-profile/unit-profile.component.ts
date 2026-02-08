@@ -204,7 +204,7 @@ export class UnitProfileComponent implements OnInit, OnDestroy {
       .subscribe({
         next: ({ custody, pending }) => {
           this.custody.set(custody.custody);
-          this.pendingReceiveCount.set(pending.data?.length ?? 0);
+          this.pendingReceiveCount.set(pending.incoming?.length ?? 0);
         },
         error: () => {
           // Custody failed but profile can still be shown
@@ -245,14 +245,14 @@ export class UnitProfileComponent implements OnInit, OnDestroy {
   }
 
   onReceiveCash(): void {
-    this.router.navigate(['/cash-management/pending-receipts']);
+    this.router.navigate(['/cash/pending-receipts']);
   }
 
   onTransferCash(): void {
-    this.router.navigate(['/cash-management/handover/new']);
+    this.router.navigate(['/cash/handover/new']);
   }
 
-  onNavigateToHierarchy(event: { type: 'forum' | 'area'; id: string }): void {
+  onNavigateToHierarchy(event: { type: 'forum' | 'area' | 'unit'; id: string }): void {
     if (event.type === 'forum') {
       this.router.navigate(['/forums', event.id]);
     } else if (event.type === 'area') {

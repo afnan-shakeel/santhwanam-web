@@ -32,13 +32,12 @@ export class ForumAreasTabComponent implements OnInit {
   totalItems = computed(() => this.pagination()?.totalItems || 0);
 
   ngOnInit(): void {
-    // Get forumId from parent route data
-    this.route.parent?.data.subscribe(data => {
-      if (data['forumId']) {
-        this.forumId.set(data['forumId']);
-        this.loadAreas();
-      }
-    });
+    // Get forumId from parent route params
+    const forumId = this.route.parent?.snapshot.params['forumId'];
+    if (forumId) {
+      this.forumId.set(forumId);
+      this.loadAreas();
+    }
   }
 
   loadAreas(): void {

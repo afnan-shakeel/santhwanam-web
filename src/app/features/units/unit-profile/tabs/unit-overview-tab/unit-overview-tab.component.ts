@@ -49,7 +49,7 @@ export class UnitOverviewTabComponent implements OnInit {
       {
         title: 'Active Members',
         value: s.activeMembers,
-        icon: 'user-check',
+        icon: 'user',
         color: 'primary' as const
       },
       {

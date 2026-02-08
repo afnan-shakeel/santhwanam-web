@@ -31,33 +31,33 @@ export class ForumOverviewTabComponent implements OnInit {
       {
         title: 'Total Areas',
         value: s.totalAreas,
-        icon: '📍',
+        icon: 'map-pin',
         color: 'primary' as const
       },
       {
         title: 'Total Units',
         value: s.totalUnits,
-        icon: '🏢',
+        icon: 'building-office',
         color: 'secondary' as const
       },
       {
         title: 'Active Agents',
         value: s.activeAgents,
         subtitle: `of ${s.totalAgents} total`,
-        icon: '👤',
+        icon: 'user',
         color: 'success' as const
       },
       {
         title: 'Active Members',
         value: s.activeMembers,
         subtitle: `of ${s.totalMembers} total`,
-        icon: '👥',
+        icon: 'user-group',
         color: 'success' as const
       },
       {
         title: 'Pending Approvals',
         value: s.pendingApprovals,
-        icon: '⏳',
+        icon: 'clock',
         color: s.pendingApprovals > 0 ? 'warning' as const : 'neutral' as const
       }
     ];

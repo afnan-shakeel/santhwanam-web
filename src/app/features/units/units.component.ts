@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { BreadcrumbsComponent, BreadcrumbItem } from '../../shared/components/breadcrumbs/breadcrumbs.component';
 import { ListingPageHeaderComponent } from '../../shared/components/listing-page-header/listing-page-header.component';
 import { DatatableComponent } from '../../shared/components/datatable/datatable.component';
+import { AdminAssignmentModalComponent, EntityInfo } from '../../shared/components/organization-bodies/admin-assignment-modal/admin-assignment-modal.component';
 import { DataTableConfig } from '../../shared/models/datatable.model';
 import { UnitService } from '../../core/services/unit.service';
 import { Unit } from '../../shared/models/unit.model';
@@ -19,7 +20,8 @@ import { UnitFormComponent } from './unit-form/unit-form.component';
     BreadcrumbsComponent,
     ListingPageHeaderComponent,
     DatatableComponent,
-    UnitFormComponent
+    UnitFormComponent,
+    AdminAssignmentModalComponent
   ],
   templateUrl: './units.component.html',
   styleUrls: ['./units.component.css']
@@ -39,6 +41,11 @@ export class UnitsComponent {
   loading = signal(false);
   showUnitForm = signal(false);
   selectedUnitId = signal<string | undefined>(undefined);
+
+  // Admin assignment modal state
+  showAssignAdminModal = signal(false);
+  selectedEntityForAdmin = signal<EntityInfo | null>(null);
+  selectedAdminUserId = signal<string | null>(null);
 
   breadcrumbs: BreadcrumbItem[] = [
     { label: 'Units', current: true }
@@ -87,6 +94,12 @@ export class UnitsComponent {
         callback: (unit: Unit) => this.onEditUnit(unit),
         actionAccessEntity: "unit",
         actionAccessAction: "edit"
+      },
+      {
+        label: 'Assign Admin',
+        callback: (unit: Unit) => this.onAssignAdminClick(unit),
+        // actionAccessEntity: "unit",
+        // actionAccessAction: "reassignAdmin"
       }
     ],
     showActions: true,
@@ -173,5 +186,25 @@ export class UnitsComponent {
   onFormCancelled(): void {
     this.showUnitForm.set(false);
     this.selectedUnitId.set(undefined);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // ADMIN ASSIGNMENT
+  // ═══════════════════════════════════════════════════════════════════════
+
+  onAssignAdminClick(unit: Unit): void {
+    this.selectedEntityForAdmin.set({
+      entityType: 'unit',
+      entityId: unit.unitId,
+      entityName: unit.unitName,
+      entityCode: unit.unitCode
+    });
+    this.selectedAdminUserId.set(unit.adminUserId || null);
+    this.showAssignAdminModal.set(true);
+  }
+
+  onAdminAssigned(event: { entityId: string; newAdminUserId: string }): void {
+    // Refresh the list
+    this.loadUnits();
   }
 }

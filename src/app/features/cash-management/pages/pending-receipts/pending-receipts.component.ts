@@ -6,6 +6,7 @@ import { CashManagementService } from '../../../../core/services/cash-management
 import { ToastService } from '../../../../core/services/toast.service';
 import { CashHandoverWithRelations } from '../../../../shared/models/cash-management.model';
 import { HandoverStatusBadgeComponent } from '../../components/handover-status-badge/handover-status-badge.component';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
 
 /**
  * PendingReceiptsComponent
@@ -18,7 +19,7 @@ import { HandoverStatusBadgeComponent } from '../../components/handover-status-b
 @Component({
   selector: 'app-pending-receipts',
   standalone: true,
-  imports: [CommonModule, HandoverStatusBadgeComponent],
+  imports: [CommonModule, HandoverStatusBadgeComponent, ButtonComponent],
   templateUrl: './pending-receipts.component.html',
   styleUrl: './pending-receipts.component.css'
 })
@@ -40,8 +41,8 @@ export class PendingReceiptsComponent implements OnInit {
 
     this.cashService.getReceivedHandovers({ status: 'Initiated' }).subscribe({
       next: (response) => {
-        if (response.success) {
-          this.pendingHandovers.set(response.data.content);
+        if (response.items) {
+          this.pendingHandovers.set(response.items);
         }
         this.isLoading.set(false);
       },
@@ -85,7 +86,15 @@ export class PendingReceiptsComponent implements OnInit {
   }
 
   onAcknowledge(handover: CashHandoverWithRelations): void {
-    this.router.navigate(['/cash/handover', handover.handoverId, 'acknowledge']);
+    console.log('Acknowledging handover:', handover.handoverId);
+    this.router.navigate(['/cash/handover', handover.handoverId, 'acknowledge']).then(
+      (x) => {
+        // Navigation successful
+        console.log('Navigation to acknowledge page successful', x);
+      }, (err) => {
+        console.error('Navigation error:', err);
+      }
+    )
   }
 
   onRefresh(): void {

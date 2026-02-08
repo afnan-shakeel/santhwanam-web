@@ -26,15 +26,13 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">
-          <label class="text-sm font-medium text-gray-500">Role:</label>
-          <select 
-            [value]="roleFilter()"
-            (change)="onRoleFilterChange($any($event.target).value)"
-            class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
-            @for (option of roleOptions; track option.value) {
-              <option [value]="option.value">{{ option.label }}</option>
-            }
-          </select>
+          <app-select
+            label="Role"
+            placeholder="All Roles"
+            size="sm"
+            [options]="roleOptions"
+            [ngModel]="roleFilter()"
+            (valueChange)="onRoleFilterChange($event)" />
         </div>
       </div>
     </div>

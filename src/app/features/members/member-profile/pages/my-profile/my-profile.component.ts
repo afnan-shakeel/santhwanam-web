@@ -7,7 +7,7 @@ import { MemberQuickInfoCardComponent } from '../../components/member-quick-info
 import { MemberService } from '../../../../../core/services/member.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { MemberSelfProfile } from '../../../../../shared/models/member.model';
-import { DevInProgressModalComponent } from '../../../../agents/agent-profile/modals/dev-in-progress-modal/dev-in-progress-modal.component';
+import { DevInProgressModalComponent } from '../../../../../shared/components/dev-in-progress-modal/dev-in-progress-modal.component';
 import { ButtonComponent } from "../../../../../shared/components/button/button.component";
 
 type TabType = 'overview' | 'contributions' | 'nominees' | 'documents';

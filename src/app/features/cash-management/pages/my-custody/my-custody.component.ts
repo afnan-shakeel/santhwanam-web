@@ -16,6 +16,7 @@ import {
   PendingHandoverListComponent,
   ActivityListComponent
 } from '../../components';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
 
 /**
  * MyCustodyComponent
@@ -32,7 +33,8 @@ import {
     CommonModule,
     CustodyBalanceCardComponent,
     PendingHandoverListComponent,
-    ActivityListComponent
+    ActivityListComponent,
+    ButtonComponent
   ],
   templateUrl: './my-custody.component.html',
   styleUrl: './my-custody.component.css'

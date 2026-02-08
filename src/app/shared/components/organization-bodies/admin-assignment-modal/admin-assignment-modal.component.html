@@ -1,0 +1,122 @@
+<app-modal
+  id="admin-assignment-modal"
+  [open]="open()"
+  title="Assign Admin"
+  (closed)="onClose()"
+  size="md"
+>
+  <div class="space-y-6">
+
+    <!-- Error Alert -->
+    @if (error()) {
+      <div class="rounded-lg bg-amber-50 p-4 dark:bg-amber-900/20">
+        <div class="flex gap-3">
+          <app-icon name="exclamation-triangle" [size]="5" class="text-amber-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 class="text-sm font-medium text-amber-800 dark:text-amber-200">Cannot reassign admin</h4>
+            <p class="mt-1 text-sm text-amber-700 dark:text-amber-300">{{ error() }}</p>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Entity Info -->
+    <!-- <div>
+      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Entity</label>
+      <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <app-icon [name]="entityIcon()" [size]="5" class="text-gray-500 dark:text-gray-400" />
+        <div>
+          <p class="font-medium text-gray-900 dark:text-gray-100">{{ entity().entityName }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">{{ entity().entityCode }}</p>
+        </div>
+      </div>
+    </div> -->
+
+    <!-- Current Admin -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Current Admin</label>
+      <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        @if (isLoadingCurrentAdmin()) {
+          <p class="text-gray-500 dark:text-gray-400">Loading admin info...</p>
+        } @else if (displayedCurrentAdmin()) {
+          <app-icon name="user" [size]="5" class="text-gray-500 dark:text-gray-400" />
+          <div>
+            <p class="font-medium text-gray-900 dark:text-gray-100">{{ displayedCurrentAdmin()!.name }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ displayedCurrentAdmin()!.email }}</p>
+          </div>
+        } @else {
+          <p class="text-gray-500 dark:text-gray-400">No admin assigned</p>
+        }
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <hr class="border-dashed border-gray-300 dark:border-gray-600" />
+
+    <!-- New Admin Selection -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        New Admin <span class="text-red-500">*</span>
+      </label>
+
+      @if (selectedUser()) {
+        <!-- Selected User Display -->
+        <div class="flex items-center justify-between gap-3 p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-700">
+          <div class="flex items-center gap-3">
+            <app-icon name="user" [size]="5" class="text-primary-600 dark:text-primary-400" />
+            <div>
+              <p class="font-medium text-gray-900 dark:text-gray-100">{{ selectedUser()!.name }}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ selectedUser()!.email }}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="p-1 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+            (click)="clearSelectedUser()"
+          >
+            <app-icon name="x-mark" [size]="5" />
+          </button>
+        </div>
+      } @else {
+        <!-- User Search Select -->
+        <app-user-search-select
+          [label]="''"
+          placeholder="Search users..."
+          mode="single"
+          (selectionChange)="onUserSelected($event)"
+        />
+        @if (isLoadingUser()) {
+          <p class="mt-2 text-sm text-gray-500">Loading user details...</p>
+        }
+      }
+    </div>
+
+    <!-- Footer Buttons -->
+    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <button
+        type="button"
+        class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition bg-white text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:ring-gray-600 dark:hover:bg-gray-600"
+        (click)="onClose()"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="!canSubmit()"
+        (click)="onAssignClick()"
+      >
+        @if (isSubmitting()) {
+          <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Assigning...
+        } @else {
+          Assign Admin
+        }
+      </button>
+    </div>
+
+  </div>
+</app-modal>

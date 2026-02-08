@@ -3,38 +3,43 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 
 import { CashManagementService } from '../../../../../core/services/cash-management.service';
+import { AccessService } from '../../../../../core/services/access.service';
 import { CashCustody, CashHandoverWithRelations } from '../../../../../shared/models/cash-management.model';
+import { BadgeComponent } from '../../../../../shared/components/badge/badge.component';
+
 @Component({
   selector: 'app-unit-cash-custody-tab',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, BadgeComponent],
   templateUrl: './unit-cash-custody-tab.component.html',
   styleUrls: ['./unit-cash-custody-tab.component.css']
 })
 export class UnitCashCustodyTabComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private cashService = inject(CashManagementService);
+  private accessService = inject(AccessService);
 
   unitId = signal<string>('');
-  isOwnProfile = signal<boolean>(false);
   loading = signal(true);
   custody = signal<CashCustody | null>(null);
+  pendingHandovers = signal<CashHandoverWithRelations[]>([]);
   recentTransactions = signal<CashHandoverWithRelations[]>([]);
 
   currentBalance = computed(() => this.custody()?.currentBalance ?? 0);
+  
+  /** Computed isOwnProfile using AccessService */
+  isOwnProfile = computed(() => {
+    const id = this.unitId();
+    if (!id) return false;
+    return this.accessService.isOwnEntity('unit', id);
+  });
 
   ngOnInit(): void {
     this.route.parent?.params.subscribe(params => {
       if (params['unitId']) {
         this.unitId.set(params['unitId']);
+        this.loadCustodyData();
       }
-    });
-    
-    this.route.parent?.data.subscribe(data => {
-      if (data['isOwnProfile'] !== undefined) {
-        this.isOwnProfile.set(data['isOwnProfile']);
-      }
-      this.loadCustodyData();
     });
   }
 
@@ -45,6 +50,7 @@ export class UnitCashCustodyTabComponent implements OnInit {
       this.cashService.getMyCustody().subscribe({
         next: (response) => {
           this.custody.set(response.custody);
+          this.loadPendingHandovers();
           this.loadRecentTransactions();
         },
         error: (err) => {
@@ -57,10 +63,21 @@ export class UnitCashCustodyTabComponent implements OnInit {
     }
   }
 
-  loadRecentTransactions(): void {
-    this.cashService.getMyInitiatedHandovers().subscribe({
+  loadPendingHandovers(): void {
+    this.cashService.getPendingHandovers().subscribe({
       next: (response) => {
-        this.recentTransactions.set(response.items.slice(0, 5));
+        this.pendingHandovers.set(response.incoming || []);
+      },
+      error: (err) => {
+        console.error('Error loading pending handovers:', err);
+      }
+    });
+  }
+
+  loadRecentTransactions(): void {
+    this.cashService.getHandoverHistory({ limit: 5 }).subscribe({
+      next: (response) => {
+        this.recentTransactions.set(response.items || []);
         this.loading.set(false);
       },
       error: (err) => {
@@ -78,31 +95,20 @@ export class UnitCashCustodyTabComponent implements OnInit {
     }).format(amount);
   }
 
-  getTransactionType(transaction: CashHandoverWithRelations): 'received' | 'transfer' {
-    return 'transfer';
-  }
-
-  getTransactionParty(transaction: CashHandoverWithRelations): string {
-    return '→ ' + (transaction.toUser?.firstName + ' ' + transaction.toUser?.lastName);
-  }
-
-  getStatusIcon(status: string): string {
-    switch (status) {
-      case 'Acknowledged': return '✓';
-      case 'Initiated': return '⏳';
-      case 'Rejected': return '✗';
-      case 'Cancelled': return '⊘';
-      default: return '?';
+  getTransactionParty(transaction: CashHandoverWithRelations, type: 'from' | 'to' = 'to'): string {
+    if (type === 'from') {
+      return transaction.fromUser?.firstName + ' ' + transaction.fromUser?.lastName;
     }
+    return transaction.toUser?.firstName + ' ' + transaction.toUser?.lastName;
   }
 
-  getStatusColor(status: string): string {
+  getStatusBadgeColor(status: string): 'success' | 'warning' | 'danger' | 'neutral' {
     switch (status) {
-      case 'Acknowledged': return 'text-green-600';
-      case 'Initiated': return 'text-yellow-600';
-      case 'Rejected': return 'text-red-600';
-      case 'Cancelled': return 'text-gray-400';
-      default: return 'text-gray-500';
+      case 'Acknowledged': return 'success';
+      case 'Initiated': return 'warning';
+      case 'Rejected': return 'danger';
+      case 'Cancelled': return 'neutral';
+      default: return 'neutral';
     }
   }
 }

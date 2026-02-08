@@ -12,7 +12,11 @@ import {
   AgentMembersQueryParams,
   AgentPerformance,
   AgentHierarchy,
-  UpdateAgentProfileRequest
+  UpdateAgentProfileRequest,
+  AgentContributionsResponse,
+  AgentContributionsQueryParams,
+  AgentLowBalanceMembersResponse,
+  AgentLowBalanceQueryParams
 } from '../../shared/models/agent-profile.model';
 
 @Injectable({
@@ -148,5 +152,42 @@ export class AgentService {
     };
 
     return this.searchAgents(request).pipe(map((response) => response.items));
+  }
+
+  // ============ Agent Contributions Methods ============
+
+  /**
+   * Get agent's contributions (with optional filtering)
+   */
+  getAgentContributions(agentId: string, params?: AgentContributionsQueryParams): Observable<AgentContributionsResponse> {
+    const queryParams: Record<string, string | number> = {};
+    if (params) {
+      if (params.page) queryParams['page'] = params.page;
+      if (params.limit) queryParams['limit'] = params.limit;
+      if (params.status) queryParams['status'] = params.status;
+      if (params.cycleId) queryParams['cycleId'] = params.cycleId;
+      if (params.search) queryParams['search'] = params.search;
+    }
+    return this.http.get<AgentContributionsResponse>(`/agents/${agentId}/contributions`, { params: queryParams });
+  }
+
+  /**
+   * Get agent's pending contributions (convenience method)
+   */
+  getPendingContributions(agentId: string, params?: Omit<AgentContributionsQueryParams, 'status'>): Observable<AgentContributionsResponse> {
+    return this.getAgentContributions(agentId, { ...params, status: 'Pending' });
+  }
+
+  /**
+   * Get agent's members with low wallet balance
+   */
+  getLowBalanceMembers(agentId: string, params?: AgentLowBalanceQueryParams): Observable<AgentLowBalanceMembersResponse> {
+    const queryParams: Record<string, string | number> = {};
+    if (params) {
+      if (params.page) queryParams['page'] = params.page;
+      if (params.limit) queryParams['limit'] = params.limit;
+      if (params.search) queryParams['search'] = params.search;
+    }
+    return this.http.get<AgentLowBalanceMembersResponse>(`/agents/${agentId}/members/low-balance`, { params: queryParams });
   }
 }

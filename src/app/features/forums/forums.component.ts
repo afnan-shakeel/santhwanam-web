@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { BreadcrumbsComponent, BreadcrumbItem } from '../../shared/components/breadcrumbs/breadcrumbs.component';
 import { ListingPageHeaderComponent } from '../../shared/components/listing-page-header/listing-page-header.component';
 import { DatatableComponent } from '../../shared/components/datatable/datatable.component';
+import { AdminAssignmentModalComponent, EntityInfo } from '../../shared/components/organization-bodies/admin-assignment-modal/admin-assignment-modal.component';
 import { DataTableConfig } from '../../shared/models/datatable.model';
 import { ForumService } from '../../core/services/forum.service';
 import { Forum } from '../../shared/models/forum.model';
@@ -19,7 +20,8 @@ import { ForumFormComponent } from './forum-form/forum-form.component';
     BreadcrumbsComponent,
     ListingPageHeaderComponent,
     DatatableComponent,
-    ForumFormComponent
+    ForumFormComponent,
+    AdminAssignmentModalComponent
   ],
   templateUrl: './forums.component.html',
   styleUrls: ['./forums.component.css']
@@ -39,6 +41,11 @@ export class ForumsComponent {
   loading = signal(false);
   showForumForm = signal(false);
   selectedForumId = signal<string | undefined>(undefined);
+
+  // Admin assignment modal state
+  showAssignAdminModal = signal(false);
+  selectedEntityForAdmin = signal<EntityInfo | null>(null);
+  selectedAdminUserId = signal<string | null>(null);
 
   breadcrumbs: BreadcrumbItem[] = [
     { label: 'Forums', current: true }
@@ -87,6 +94,12 @@ export class ForumsComponent {
         callback: (forum: Forum) => this.onEditForum(forum),
         actionAccessEntity: "forum",
         actionAccessAction: "edit"
+      },
+      {
+        label: 'Assign Admin',
+        callback: (forum: Forum) => this.onAssignAdminClick(forum),
+        // actionAccessEntity: "forum",
+        // actionAccessAction: "reassignAdmin"
       }
     ],
     showActions: true,
@@ -176,5 +189,25 @@ export class ForumsComponent {
   onForumFormCancelled(): void {
     this.showForumForm.set(false);
     this.selectedForumId.set(undefined);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // ADMIN ASSIGNMENT
+  // ═══════════════════════════════════════════════════════════════════════
+
+  onAssignAdminClick(forum: Forum): void {
+    this.selectedEntityForAdmin.set({
+      entityType: 'forum',
+      entityId: forum.forumId,
+      entityName: forum.forumName,
+      entityCode: forum.forumCode
+    });
+    this.selectedAdminUserId.set(forum.adminUserId || null);
+    this.showAssignAdminModal.set(true);
+  }
+
+  onAdminAssigned(event: { entityId: string; newAdminUserId: string }): void {
+    // Refresh the list
+    this.loadForums();
   }
 }

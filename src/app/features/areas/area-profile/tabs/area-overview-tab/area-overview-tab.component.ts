@@ -31,7 +31,7 @@ export class AreaOverviewTabComponent implements OnInit {
       {
         title: 'Total Units',
         value: s.totalUnits,
-        icon: 'location',
+        icon: 'building-office',
         color: 'primary' as StatsCardColor
       },
       {
@@ -55,7 +55,7 @@ export class AreaOverviewTabComponent implements OnInit {
       {
         title: 'Active Members',
         value: s.activeMembers,
-        icon: 'user-check',
+        icon: 'user',
         color: 'neutral' as StatsCardColor
       }
     ];

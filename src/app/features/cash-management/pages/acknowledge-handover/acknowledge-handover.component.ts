@@ -38,7 +38,7 @@ export class AcknowledgeHandoverComponent implements OnInit {
   private handoverId: string = '';
 
   ngOnInit(): void {
-    this.handoverId = this.route.snapshot.paramMap.get('id') || '';
+    this.handoverId = this.route.snapshot.paramMap.get('handoverId') || '';
     if (this.handoverId) {
       this.loadHandover();
     } else {
@@ -51,8 +51,8 @@ export class AcknowledgeHandoverComponent implements OnInit {
 
     this.cashService.getHandoverById(this.handoverId).subscribe({
       next: (response) => {
-        if (response.success) {
-          this.handover.set(response.data);
+        if (response) {
+          this.handover.set(response);
         }
         this.isLoading.set(false);
       },

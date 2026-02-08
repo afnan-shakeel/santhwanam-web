@@ -131,28 +131,28 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     label: 'Organization Bodies', 
     route: '/',
     icon: '',
-    roles: ['forum_admin', 'area_admin', 'unit_admin'],
+    roles: ['super_admin','forum_admin', 'area_admin', 'unit_admin'],
     // permissions: [PERMISSIONS.ORG.FORUM.READ]
     children:[
       { 
         label: 'Forums', 
         route: '/forums',
         icon: 'forum',
-        roles: ['forum_admin']
+        roles: ['super_admin','forum_admin']
         // permissions: [PERMISSIONS.ORG.FORUM.READ]
       },
       { 
         label: 'Areas', 
         route: '/areas',
         icon: 'map',
-        roles: ['forum_admin', 'area_admin']
+        roles: ['super_admin','forum_admin', 'area_admin']
         // permissions: [PERMISSIONS.ORG.AREA.READ]
       },
       { 
         label: 'Units', 
         route: '/units',
         icon: 'business',
-        roles: ['forum_admin', 'area_admin', 'unit_admin']
+        roles: ['super_admin','forum_admin', 'area_admin', 'unit_admin']
         // permissions: [PERMISSIONS.ORG.UNIT.READ]
       },
     ]
@@ -162,7 +162,7 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     route: '/agents',
     icon: 'support_agent',
     // permissions: [PERMISSIONS.AGENT.READ],
-    roles: ['forum_admin', 'area_admin', 'unit_admin']
+    roles: ['super_admin', 'forum_admin', 'area_admin', 'unit_admin']
   },
   { 
     label: 'Members', 
@@ -180,13 +180,13 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     route: '/death-claims',
     icon: 'assignment',
     // permissions: [PERMISSIONS.CLAIM.READ]
-    roles: ['forum_admin', 'area_admin', 'unit_admin', 'agent']
+    roles: ['super_admin', 'forum_admin', 'area_admin', 'unit_admin', 'agent']
   },
   { 
     label: 'Contributions', 
     route: '/contributions',
     icon: 'payments',
-    roles: ['forum_admin', 'area_admin', 'unit_admin', 'agent']
+    roles: ['super_admin', 'forum_admin', 'area_admin', 'unit_admin', 'agent']
     // permissions: [PERMISSIONS.CONTRIBUTION.READ, PERMISSIONS.CONTRIBUTION.CYCLE.READ]
   },
 
@@ -194,33 +194,33 @@ export const MENU_CONFIG: MenuItemConfig[] = [
   // CASH MANAGEMENT
   // ═══════════════════════════════════════════════════════════════════════════
   // For Agents (simplified menu)
-  {
-    label: 'Cash Management',
-    route: '/cash',
-    icon: 'account_balance_wallet',
-    roles: ['agent'],
-    children: [
-      {
-        label: 'My Cash Custody',
-        route: '/cash/my-custody',
-        icon: 'wallet',
-        roles: ['agent']
-      },
-      {
-        label: 'Transfer Cash',
-        route: '/cash/handover/new',
-        icon: 'send',
-        roles: ['agent']
-      },
-      {
-        label: 'Handover History',
-        route: '/cash/handovers',
-        icon: 'history',
-        roles: ['agent']
-      }
-    ]
-  },
-  // For Unit/Area/Forum Admins (with pending receipts)
+  // {
+  //   label: 'Cash Management',
+  //   route: '/cash',
+  //   icon: 'account_balance_wallet',
+  //   roles: ['super_admin', 'forum_admin', 'area_admin', 'unit_admin', 'agent'],
+  //   children: [
+  //     {
+  //       label: 'My Cash Custody',
+  //       route: '/cash/my-custody',
+  //       icon: 'wallet',
+  //       roles: ['agent']
+  //     },
+  //     {
+  //       label: 'Transfer Cash',
+  //       route: '/cash/handover/new',
+  //       icon: 'send',
+  //       roles: ['agent']
+  //     },
+  //     {
+  //       label: 'Handover History',
+  //       route: '/cash/handovers',
+  //       icon: 'history',
+  //       roles: ['agent']
+  //     }
+  //   ]
+  // },
+  // For Unit/Area/Forum Admins & Agents (with pending receipts)
   {
     label: 'Cash Management',
     route: '/cash',
@@ -231,25 +231,25 @@ export const MENU_CONFIG: MenuItemConfig[] = [
         label: 'My Cash Custody',
         route: '/cash/my-custody',
         icon: 'wallet',
-        roles: ['unit_admin', 'area_admin', 'forum_admin']
+        roles: ['unit_admin', 'area_admin', 'forum_admin', 'agent']
       },
       {
         label: 'Pending Receipts',
         route: '/cash/pending-receipts',
         icon: 'inbox',
-        roles: ['unit_admin', 'area_admin', 'forum_admin']
+        roles: [ 'unit_admin', 'area_admin', 'forum_admin']
       },
       {
         label: 'Transfer Cash',
         route: '/cash/handover/new',
         icon: 'send',
-        roles: ['unit_admin', 'area_admin', 'forum_admin']
+        roles: ['unit_admin', 'area_admin', 'forum_admin', 'agent']
       },
       {
         label: 'Handover History',
         route: '/cash/handovers',
         icon: 'history',
-        roles: ['unit_admin', 'area_admin', 'forum_admin']
+        roles: ['unit_admin', 'area_admin', 'forum_admin', 'agent']
       },
       {
         label: 'Custody Report',
@@ -300,13 +300,13 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     label: 'Finance',
     route: '/finance',
     icon: 'account_balance',
-    roles: ['forum_admin'],
+    roles: ['super_admin', 'forum_admin'],
     children: [
       {
         label: 'Chart of Accounts',
         route: '/finance/accounts',
         icon: 'list_alt',
-        roles: ['forum_admin']
+        roles: ['super_admin', 'forum_admin']
       },
       {
         label: 'Journal Entries',
@@ -330,7 +330,7 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     label: 'Reports',
     route: '/reports',
     icon: 'analytics',
-    roles: ['forum_admin'],
+    roles: ['super_admin', 'forum_admin'],
     children: [
       {
         label: 'Member Reports',

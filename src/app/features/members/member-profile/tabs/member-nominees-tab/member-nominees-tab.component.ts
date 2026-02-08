@@ -6,7 +6,7 @@ import { MemberService } from '../../../../../core/services/member.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { Nominee, MemberProfile, MemberSelfProfile } from '../../../../../shared/models/member.model';
 import { NomineeCardComponent } from '../../components/nominee-card/nominee-card.component';
-import { DevInProgressModalComponent } from '../../../../agents/agent-profile/modals/dev-in-progress-modal/dev-in-progress-modal.component';
+import { DevInProgressModalComponent } from '../../../../../shared/components/dev-in-progress-modal/dev-in-progress-modal.component';
 import { AccessService } from '../../../../../core/services/access.service';
 
 

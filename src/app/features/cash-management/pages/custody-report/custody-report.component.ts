@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { CashManagementService } from '../../../../core/services/cash-management.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { CustodyReportItem, UserRole } from '../../../../shared/models/cash-management.model';
+import { SelectComponent } from '../../../../shared/components/select/select.component';
 
 /**
  * CustodyReportComponent
@@ -18,7 +19,7 @@ import { CustodyReportItem, UserRole } from '../../../../shared/models/cash-mana
 @Component({
   selector: 'app-custody-report',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SelectComponent],
   templateUrl: './custody-report.component.html',
   styleUrl: './custody-report.component.css'
 })
@@ -108,8 +109,8 @@ export class CustodyReportComponent implements OnInit {
     return Math.floor(diffMs / 86400000);
   }
 
-  onRoleFilterChange(role: string): void {
-    this.roleFilter.set(role as UserRole | '');
+  onRoleFilterChange(role: string | null): void {
+    this.roleFilter.set((role ?? '') as UserRole | '');
     this.currentPage.set(0);
     this.loadReport();
   }

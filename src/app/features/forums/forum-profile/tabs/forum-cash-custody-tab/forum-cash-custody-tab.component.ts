@@ -3,49 +3,56 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 
 import { CashManagementService } from '../../../../../core/services/cash-management.service';
+import { AccessService } from '../../../../../core/services/access.service';
 import { CashCustody, CashHandoverWithRelations } from '../../../../../shared/models/cash-management.model';
+import { BadgeComponent } from '../../../../../shared/components/badge/badge.component';
+
 @Component({
   selector: 'app-forum-cash-custody-tab',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, BadgeComponent],
   templateUrl: './forum-cash-custody-tab.component.html',
   styleUrls: ['./forum-cash-custody-tab.component.css']
 })
 export class ForumCashCustodyTabComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private cashService = inject(CashManagementService);
+  private accessService = inject(AccessService);
 
   forumId = signal<string>('');
-  isOwnProfile = signal<boolean>(false);
   loading = signal(true);
   custody = signal<CashCustody | null>(null);
+  pendingHandovers = signal<CashHandoverWithRelations[]>([]);
   recentTransactions = signal<CashHandoverWithRelations[]>([]);
 
   // Computed values
   currentBalance = computed(() => this.custody()?.currentBalance ?? 0);
+  
+  /** Computed isOwnProfile using AccessService */
+  isOwnProfile = computed(() => {
+    const id = this.forumId();
+    if (!id) return false;
+    return this.accessService.isOwnEntity('forum', id);
+  });
 
   ngOnInit(): void {
-    // Get forumId and isOwnProfile from parent route data
-    this.route.parent?.data.subscribe(data => {
-      if (data['forumId']) {
-        this.forumId.set(data['forumId']);
+    // Get forumId from parent route params
+    this.route.parent?.params.subscribe(params => {
+      if (params['forumId']) {
+        this.forumId.set(params['forumId']);
+        this.loadCustodyData();
       }
-      if (data['isOwnProfile'] !== undefined) {
-        this.isOwnProfile.set(data['isOwnProfile']);
-      }
-      this.loadCustodyData();
     });
   }
 
   loadCustodyData(): void {
     this.loading.set(true);
     
-    // Load custody for this user/entity
-    // If own profile, use getMyCustody, otherwise we'd need the admin's userId
     if (this.isOwnProfile()) {
       this.cashService.getMyCustody().subscribe({
         next: (response) => {
           this.custody.set(response.custody);
+          this.loadPendingHandovers();
           this.loadRecentTransactions();
         },
         error: (err) => {
@@ -54,18 +61,25 @@ export class ForumCashCustodyTabComponent implements OnInit {
         }
       });
     } else {
-      // For viewing another admin's profile, we would need their userId
-      // This would be available from the profile data
       this.loading.set(false);
     }
   }
 
-  loadRecentTransactions(): void {
-    // Load recent transactions (handover history)
-    this.cashService.getMyInitiatedHandovers().subscribe({
+  loadPendingHandovers(): void {
+    this.cashService.getPendingHandovers().subscribe({
       next: (response) => {
-        // Get last 5 transactions
-        this.recentTransactions.set(response.items.slice(0, 5));
+        this.pendingHandovers.set(response.incoming || []);
+      },
+      error: (err) => {
+        console.error('Error loading pending handovers:', err);
+      }
+    });
+  }
+
+  loadRecentTransactions(): void {
+    this.cashService.getHandoverHistory({ limit: 5 }).subscribe({
+      next: (response) => {
+        this.recentTransactions.set(response.items || []);
         this.loading.set(false);
       },
       error: (err) => {
@@ -83,48 +97,20 @@ export class ForumCashCustodyTabComponent implements OnInit {
     }).format(amount);
   }
 
-  getTransactionType(transaction: CashHandoverWithRelations): 'received' | 'transfer' {
-    // If the current admin is the receiver, it's a received transaction
-    // Otherwise it's a transfer
-    // For now, since we load initiated handovers, they are all transfers
-    return 'transfer';
-  }
-
-  getTransactionParty(transaction: CashHandoverWithRelations): string {
-    if (this.getTransactionType(transaction) === 'received') {
+  getTransactionParty(transaction: CashHandoverWithRelations, type: 'from' | 'to' = 'to'): string {
+    if (type === 'from') {
       return transaction.fromUser?.firstName + ' ' + transaction.fromUser?.lastName;
-    } else {
-      return '→ ' + (transaction.toUser?.firstName + ' ' + transaction.toUser?.lastName);
     }
+    return transaction.toUser?.firstName + ' ' + transaction.toUser?.lastName;
   }
 
-  getStatusIcon(status: string): string {
+  getStatusBadgeColor(status: string): 'success' | 'warning' | 'danger' | 'neutral' {
     switch (status) {
-      case 'Acknowledged':
-        return '✓';
-      case 'Initiated':
-        return '⏳';
-      case 'Rejected':
-        return '✗';
-      case 'Cancelled':
-        return '⊘';
-      default:
-        return '?';
-    }
-  }
-
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'Acknowledged':
-        return 'text-green-600';
-      case 'Initiated':
-        return 'text-yellow-600';
-      case 'Rejected':
-        return 'text-red-600';
-      case 'Cancelled':
-        return 'text-gray-400';
-      default:
-        return 'text-gray-500';
+      case 'Acknowledged': return 'success';
+      case 'Initiated': return 'warning';
+      case 'Rejected': return 'danger';
+      case 'Cancelled': return 'neutral';
+      default: return 'neutral';
     }
   }
 }

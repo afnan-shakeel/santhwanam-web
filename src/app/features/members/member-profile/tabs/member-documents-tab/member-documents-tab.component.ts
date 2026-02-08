@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MemberService } from '../../../../../core/services/member.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { MemberDocument, MemberProfile, MemberSelfProfile } from '../../../../../shared/models/member.model';
-import { DevInProgressModalComponent } from '../../../../agents/agent-profile/modals/dev-in-progress-modal/dev-in-progress-modal.component';
+import { DevInProgressModalComponent } from '../../../../../shared/components/dev-in-progress-modal/dev-in-progress-modal.component';
 import { AccessService } from '../../../../../core/services/access.service';
 import { ButtonComponent } from "../../../../../shared/components/button/button.component";
 

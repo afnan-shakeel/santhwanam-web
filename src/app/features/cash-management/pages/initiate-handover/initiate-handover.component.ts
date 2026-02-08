@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { CashManagementService } from '../../../../core/services/cash-management.service';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { ToastService } from '../../../../core/services/toast.service';
 import { 
   CashCustody, 
@@ -22,7 +23,7 @@ import {
 @Component({
   selector: 'app-initiate-handover',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ButtonComponent],
   templateUrl: './initiate-handover.component.html',
   styleUrl: './initiate-handover.component.css'
 })

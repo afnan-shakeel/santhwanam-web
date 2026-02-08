@@ -7,6 +7,7 @@ import { CashManagementService } from '../../../../core/services/cash-management
 import { ToastService } from '../../../../core/services/toast.service';
 import { CashHandoverWithRelations } from '../../../../shared/models/cash-management.model';
 import { HandoverStatusBadgeComponent } from '../../components/handover-status-badge/handover-status-badge.component';
+import { SelectComponent } from '../../../../shared/components/select/select.component';
 
 /**
  * HandoverHistoryComponent
@@ -19,7 +20,7 @@ import { HandoverStatusBadgeComponent } from '../../components/handover-status-b
 @Component({
   selector: 'app-handover-history',
   standalone: true,
-  imports: [CommonModule, FormsModule, HandoverStatusBadgeComponent],
+  imports: [CommonModule, FormsModule, HandoverStatusBadgeComponent, SelectComponent],
   templateUrl: './handover-history.component.html',
   styleUrl: './handover-history.component.css'
 })
@@ -128,8 +129,8 @@ export class HandoverHistoryComponent implements OnInit {
     this.loadHandovers();
   }
 
-  onStatusFilterChange(status: string): void {
-    this.statusFilter.set(status);
+  onStatusFilterChange(status: string | null): void {
+    this.statusFilter.set(status ?? '');
     this.currentPage.set(1);
     this.loadHandovers();
   }

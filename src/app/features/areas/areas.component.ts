@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { BreadcrumbsComponent, BreadcrumbItem } from '../../shared/components/breadcrumbs/breadcrumbs.component';
 import { ListingPageHeaderComponent } from '../../shared/components/listing-page-header/listing-page-header.component';
 import { DatatableComponent } from '../../shared/components/datatable/datatable.component';
+import { AdminAssignmentModalComponent, EntityInfo } from '../../shared/components/organization-bodies/admin-assignment-modal/admin-assignment-modal.component';
 import { DataTableConfig } from '../../shared/models/datatable.model';
 import { AreaService } from '../../core/services/area.service';
 import { Area } from '../../shared/models/area.model';
@@ -19,7 +20,8 @@ import { AreaFormComponent } from './area-form/area-form.component';
     BreadcrumbsComponent,
     ListingPageHeaderComponent,
     DatatableComponent,
-    AreaFormComponent
+    AreaFormComponent,
+    AdminAssignmentModalComponent
   ],
   templateUrl: './areas.component.html',
   styleUrls: ['./areas.component.css']
@@ -39,6 +41,11 @@ export class AreasComponent {
   loading = signal(false);
   showAreaForm = signal(false);
   selectedAreaId = signal<string | undefined>(undefined);
+
+  // Admin assignment modal state
+  showAssignAdminModal = signal(false);
+  selectedEntityForAdmin = signal<EntityInfo | null>(null);
+  selectedAdminUserId = signal<string | null>(null);
 
   breadcrumbs: BreadcrumbItem[] = [
     { label: 'Areas', current: true }
@@ -87,6 +94,12 @@ export class AreasComponent {
         callback: (area: Area) => this.onEditArea(area),
         actionAccessEntity: "area",
         actionAccessAction: "edit"
+      },
+      {
+        label: 'Assign Admin',
+        callback: (area: Area) => this.onAssignAdminClick(area),
+        // actionAccessEntity: "area",
+        // actionAccessAction: "reassignAdmin"
       }
     ],
     showActions: true,
@@ -176,5 +189,25 @@ export class AreasComponent {
   onAreaFormCancelled(): void {
     this.showAreaForm.set(false);
     this.selectedAreaId.set(undefined);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // ADMIN ASSIGNMENT
+  // ═══════════════════════════════════════════════════════════════════════
+
+  onAssignAdminClick(area: Area): void {
+    this.selectedEntityForAdmin.set({
+      entityType: 'area',
+      entityId: area.areaId,
+      entityName: area.areaName,
+      entityCode: area.areaCode
+    });
+    this.selectedAdminUserId.set(area.adminUserId || null);
+    this.showAssignAdminModal.set(true);
+  }
+
+  onAdminAssigned(event: { entityId: string; newAdminUserId: string }): void {
+    // Refresh the list
+    this.loadAreas();
   }
 }

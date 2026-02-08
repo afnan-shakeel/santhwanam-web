@@ -47,14 +47,14 @@
             <div class="flex items-center gap-4">
               <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
                 <span class="text-2xl font-bold text-primary-600">
-                  {{ handover()!.fromUser.firstName.charAt(0) }}{{ handover()!.fromUser.lastName.charAt(0) }}
+                  {{ handover()!.fromUser.fullName?.charAt(0) }}
                 </span>
               </div>
               <div>
                 <p class="text-xl font-semibold text-gray-900">
-                  {{ handover()!.fromUser.firstName }} {{ handover()!.fromUser.lastName }}
+                  {{ handover()!.fromUser.fullName }}
                 </p>
-                <p class="text-sm text-gray-500 mt-0.5">{{ handover()!.fromUserRole }}</p>
+                <p class="text-sm text-gray-500 mt-0.5">{{ handover()!.fromUser.role }}</p>
               </div>
             </div>
           </div>

@@ -127,15 +127,15 @@ export class CashManagementService {
   /**
    * Get handover by ID
    */
-  getHandoverById(handoverId: string): Observable<ApiResponse<CashHandoverWithRelations>> {
-    return this.http.get<ApiResponse<CashHandoverWithRelations>>(`${this.basePath}/handovers/${handoverId}`);
+  getHandoverById(handoverId: string): Observable<CashHandoverWithRelations> {
+    return this.http.get<CashHandoverWithRelations>(`${this.basePath}/handovers/${handoverId}`);
   }
 
   /**
    * Get pending handovers for current user (to acknowledge)
    */
-  getPendingHandovers(): Observable<ApiResponse<CashHandoverWithRelations[]>> {
-    return this.http.get<ApiResponse<CashHandoverWithRelations[]>>(`${this.basePath}/handovers/pending/me`);
+  getPendingHandovers(): Observable<{incoming: CashHandoverWithRelations[], outgoing: CashHandoverWithRelations[]}> {
+    return this.http.get<{incoming: CashHandoverWithRelations[], outgoing: CashHandoverWithRelations[]}>(`${this.basePath}/handovers/pending/me`);
   }
 
   /**
@@ -315,9 +315,9 @@ export class CashManagementService {
   /**
    * Get handovers received by current user with filters
    */
-  getReceivedHandovers(params?: { page?: number; size?: number; status?: string }): Observable<ApiResponse<{ content: any[]; totalElements: number; totalPages: number }>> {
-    return this.http.get<ApiResponse<{ content: any[]; totalElements: number; totalPages: number }>>(
-      `${this.basePath}/handovers/history/received`,
+  getReceivedHandovers(params?: { page?: number; size?: number; status?: string }): Observable<SearchApiResponse<CashHandoverWithRelations>> {
+    return this.http.get<SearchApiResponse<CashHandoverWithRelations>>(
+      `${this.basePath}/handovers/history`,
       { params: this.buildParams(params) }
     );
   }

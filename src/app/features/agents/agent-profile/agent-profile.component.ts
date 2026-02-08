@@ -1,342 +1,308 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
+import { Subject, forkJoin } from 'rxjs';
+import { takeUntil, finalize } from 'rxjs/operators';
 
 import { BreadcrumbsComponent, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs.component';
-import { AgentService } from '../../../core/services/agent.service';
-import { ToastService } from '../../../core/services/toast.service';
-import {
-  AgentProfile,
-  AgentStats,
-  AgentPerformance,
-  AgentMembersResponse,
-  AgentMembersQueryParams
-} from '../../../shared/models/agent-profile.model';
-import { EditProfileModalComponent } from './edit-profile-modal/edit-profile-modal.component';
+import { EntityProfileHeaderComponent } from '../../../shared/components/entity-profile-header/entity-profile-header.component';
+import { QuickActionsBarComponent } from '../../../shared/components/quick-actions-bar/quick-actions-bar.component';
+import { TabsComponent, TabItem } from '../../../shared/components/tabs/tabs.component';
 
-type TabType = 'overview' | 'members' | 'performance';
+import { AgentService } from '../../../core/services/agent.service';
+import { CashManagementService } from '../../../core/services/cash-management.service';
+import { AccessService } from '../../../core/services/access.service';
+import { ToastService } from '../../../core/services/toast.service';
+
+import { AgentProfile, AgentStats } from '../../../shared/models/agent-profile.model';
+import { CashCustody } from '../../../shared/models/cash-management.model';
 
 @Component({
   selector: 'app-agent-profile',
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     BreadcrumbsComponent,
-    EditProfileModalComponent
+    EntityProfileHeaderComponent,
+    QuickActionsBarComponent,
+    TabsComponent
   ],
   templateUrl: './agent-profile.component.html',
-  styleUrls: ['./agent-profile.component.css']
+  styleUrl: './agent-profile.component.css'
 })
-export class AgentProfileComponent implements OnInit {
+export class AgentProfileComponent implements OnInit, OnDestroy {
   private agentService = inject(AgentService);
+  private cashService = inject(CashManagementService);
+  private accessService = inject(AccessService);
   private toastService = inject(ToastService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private destroy$ = new Subject<void>();
 
-  // Expose Math for template
-  Math = Math;
+  // ═══════════════════════════════════════════════════════════════════════════
+  // STATE
+  // ═══════════════════════════════════════════════════════════════════════════
 
-  // Route params
-  agentIdFromRoute = signal<string | null>(null);
-  isMyProfile = signal(true);
-
-  // State
-  profile = signal<AgentProfile | null>(null);
+  agentId = signal<string>('');
+  agent = signal<AgentProfile | null>(null);
   stats = signal<AgentStats | null>(null);
-  performance = signal<AgentPerformance | null>(null);
-  members = signal<AgentMembersResponse | null>(null);
+  custody = signal<CashCustody | null>(null);
+  pendingReceiveCount = signal<number>(0);
 
   loading = signal(true);
-  loadingStats = signal(false);
-  loadingPerformance = signal(false);
-  loadingMembers = signal(false);
+  statsLoading = signal(true);
+  custodyLoading = signal(true);
 
-  activeTab = signal<TabType>('overview');
-  showEditModal = signal(false);
+  activeTab = signal<string>('overview');
 
-  // Members tab state
-  membersSearch = signal('');
-  membersStatusFilter = signal<string>('');
-  membersTierFilter = signal<string>('');
-  membersPage = signal(1);
-  membersLimit = signal(10);
+  // ═══════════════════════════════════════════════════════════════════════════
+  // COMPUTED
+  // ═══════════════════════════════════════════════════════════════════════════
 
-  // Performance tab state
-  performancePeriod = signal<'thisMonth' | 'lastMonth' | 'thisYear'>('thisMonth');
+  /** Whether viewing own profile */
+  isOwnProfile = computed(() => {
+    const agent = this.agent();
+    if (!agent) return false;
+    return this.accessService.isOwnEntity('agent', agent.agentId);
+  });
 
-  // Breadcrumbs - now a signal for dynamic updates
-  breadcrumbs = signal<BreadcrumbItem[]>([
-    { label: 'Home', route: '/' },
-    { label: 'My Profile', route: '/agents/my-profile' }
-  ]);
+  /** Whether user can edit this agent */
+  canEdit = computed(() => {
+    const agent = this.agent();
+    if (!agent) return false;
+    // Agents can edit their own profile, or admin can edit
+    return this.isOwnProfile() || this.accessService.canManageEntity('agent', agent.agentId, 'edit');
+  });
 
-  // Computed
+  /** Agent full name */
   fullName = computed(() => {
-    const p = this.profile();
-    if (!p) return '';
-    return [p.firstName, p.middleName, p.lastName].filter(Boolean).join(' ');
+    const agent = this.agent();
+    if (!agent) return '';
+    return [agent.firstName, agent.middleName, agent.lastName].filter(Boolean).join(' ');
   });
 
-  initials = computed(() => {
-    const p = this.profile();
-    if (!p) return '';
-    return (p.firstName.charAt(0) + p.lastName.charAt(0)).toUpperCase();
+  /** Cash balance from custody */
+  cashBalance = computed(() => {
+    return this.custody()?.currentBalance ?? 0;
   });
 
-  fullAddress = computed(() => {
-    const p = this.profile();
-    if (!p) return '';
-    const parts = [p.addressLine1, p.addressLine2, p.city, p.state, p.postalCode, p.country].filter(Boolean);
-    return parts.join(', ');
-  });
+  /** Breadcrumbs */
+  breadcrumbs = computed<BreadcrumbItem[]>(() => {
+    const agent = this.agent();
+    const items: BreadcrumbItem[] = [
+      { label: 'Home', route: '/' }
+    ];
 
-  statusClass = computed(() => {
-    const status = this.profile()?.agentStatus;
-    switch (status) {
-      case 'Active': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
-      case 'Inactive': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
-      case 'Suspended': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
-      case 'Terminated': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
+    if (this.isOwnProfile()) {
+      items.push({ label: 'My Profile', route: '/agent/profile' });
+    } else {
+      items.push({ label: 'Agents', route: '/agents' });
+      if (agent) {
+        items.push({ label: this.fullName(), route: `/agents/${agent.agentId}` });
+      }
     }
+
+    return items;
   });
 
-  // Pagination computed
-  totalPages = computed(() => {
-    const m = this.members();
-    if (!m) return 1;
-    return Math.ceil(m.total / m.limit);
+  /** Tab configuration */
+  tabs = computed<TabItem[]>(() => {
+    const s = this.stats();
+    const baseTabs: TabItem[] = [
+      { id: 'overview', label: 'Overview' },
+      { id: 'members', label: 'Members', badge: s?.totalMembers },
+      { id: 'pending-contributions', label: 'Pending Contributions' },
+      { id: 'low-balance', label: 'Low Balance' },
+      { id: 'cash-custody', label: 'Cash Custody' }
+    ];
+
+    // Add Activity tab for admin viewing other agents
+    if (!this.isOwnProfile()) {
+      baseTabs.push({ id: 'activity', label: 'Activity' });
+    }
+
+    return baseTabs;
   });
+
+  /** Hierarchy for header component */
+  hierarchy = computed(() => {
+    const agent = this.agent();
+    if (!agent) return undefined;
+
+    return {
+      forum: agent.forum ? { id: agent.forum.forumId, name: agent.forum.forumName } : undefined,
+      area: agent.area ? { id: agent.area.areaId, name: agent.area.areaName } : undefined,
+      unit: agent.unit ? { id: agent.unit.unitId, name: agent.unit.unitName } : undefined
+    };
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // LIFECYCLE
+  // ═══════════════════════════════════════════════════════════════════════════
 
   ngOnInit(): void {
-    // Check if viewing a specific agent or own profile
-    const agentId = this.route.snapshot.paramMap.get('agentId');
-    if (agentId) {
-      this.agentIdFromRoute.set(agentId);
-      this.isMyProfile.set(false);
-      this.loadAgentProfile(agentId);
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      const agentId = params['agentId'];
+      if (agentId) {
+        // Viewing specific agent (admin view)
+        this.agentId.set(agentId);
+        this.loadAgentData(agentId);
+      } else {
+        // Viewing own profile
+        this.loadOwnProfile();
+      }
+    });
+
+    this.detectActiveTab();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DATA LOADING
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  private loadOwnProfile(): void {
+    this.loading.set(true);
+
+    this.agentService.getMyProfile()
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.loading.set(false))
+      )
+      .subscribe({
+        next: (agent) => {
+          this.agent.set(agent);
+          this.agentId.set(agent.agentId);
+          this.loadStats(agent.agentId);
+          this.loadCustody();
+        },
+        error: (error) => {
+          this.toastService.error('Failed to load profile', error?.error?.message || 'Please try again');
+        }
+      });
+  }
+
+  private loadAgentData(agentId: string): void {
+    this.loading.set(true);
+
+    this.agentService.getAgentProfile(agentId)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.loading.set(false))
+      )
+      .subscribe({
+        next: (agent) => {
+          this.agent.set(agent);
+          this.loadStats(agentId);
+          // Don't load custody for non-own profiles
+        },
+        error: (error) => {
+          this.toastService.error('Failed to load agent', error?.error?.message || 'Please try again');
+        }
+      });
+  }
+
+  private loadStats(agentId: string): void {
+    this.statsLoading.set(true);
+
+    this.agentService.getAgentStats(agentId)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.statsLoading.set(false))
+      )
+      .subscribe({
+        next: (stats) => this.stats.set(stats),
+        error: () => {
+          // Stats failed but profile can still be shown
+        }
+      });
+  }
+
+  private loadCustody(): void {
+    this.custodyLoading.set(true);
+
+    forkJoin({
+      custody: this.cashService.getMyCustody(),
+      pending: this.cashService.getPendingHandovers()
+    })
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.custodyLoading.set(false))
+      )
+      .subscribe({
+        next: ({ custody, pending }) => {
+          this.custody.set(custody.custody);
+          this.pendingReceiveCount.set(pending.incoming?.length ?? 0);
+        },
+        error: () => {
+          // Custody failed but profile can still be shown
+        }
+      });
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TAB NAVIGATION
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  private detectActiveTab(): void {
+    const url = this.router.url;
+    if (url.includes('/members')) {
+      this.activeTab.set('members');
+    } else if (url.includes('/cash-custody')) {
+      this.activeTab.set('cash-custody');
+    } else if (url.includes('/activity')) {
+      this.activeTab.set('activity');
     } else {
-      this.isMyProfile.set(true);
-      this.loadProfile();
+      this.activeTab.set('overview');
     }
   }
 
-  loadAgentProfile(agentId: string): void {
-    this.loading.set(true);
-    this.agentService.getAgentProfile(agentId).subscribe({
-      next: (profile) => {
-        this.profile.set(profile);
-        this.loading.set(false);
-        // Update breadcrumbs for viewing other agent
-        const fullName = [profile.firstName, profile.middleName, profile.lastName].filter(Boolean).join(' ');
-        this.breadcrumbs.set([
-          { label: 'Home', route: '/' },
-          { label: 'Agents', route: '/agents' },
-          { label: fullName || 'Agent Profile', route: `/agents/${agentId}/profile` }
-        ]);
-        // Load initial tab data
-        this.loadStats();
-      },
-      error: (error) => {
-        this.loading.set(false);
-        this.toastService.error('Failed to load profile', error?.error?.message || 'Please try again');
-      }
-    });
+  onTabChange(tabId: string): void {
+    this.activeTab.set(tabId);
+    this.router.navigate([`./${tabId}`], { relativeTo: this.route });
   }
 
-  loadProfile(): void {
-    this.loading.set(true);
-    this.agentService.getMyProfile().subscribe({
-      next: (profile) => {
-        this.profile.set(profile);
-        this.loading.set(false);
-        // Load initial tab data
-        this.loadStats();
-      },
-      error: (error) => {
-        this.loading.set(false);
-        this.toastService.error('Failed to load profile', error?.error?.message || 'Please try again');
-      }
-    });
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ACTIONS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  onEdit(): void {
+    // TODO: Open edit modal or navigate to edit page
+    this.toastService.info('Edit Profile', 'Edit functionality coming soon');
   }
 
-  loadStats(): void {
-    const agentId = this.profile()?.agentId;
-    if (!agentId) return;
-
-    this.loadingStats.set(true);
-    this.agentService.getAgentStats(agentId).subscribe({
-      next: (stats) => {
-        this.stats.set(stats);
-        this.loadingStats.set(false);
-      },
-      error: () => {
-        this.loadingStats.set(false);
-      }
-    });
+  onReassignAdmin(): void {
+    // Agents don't have this action
   }
 
-  loadPerformance(): void {
-    const agentId = this.profile()?.agentId;
-    if (!agentId) return;
-
-    this.loadingPerformance.set(true);
-    this.agentService.getAgentPerformance(agentId, this.performancePeriod()).subscribe({
-      next: (performance) => {
-        this.performance.set(performance);
-        this.loadingPerformance.set(false);
-      },
-      error: () => {
-        this.loadingPerformance.set(false);
-      }
-    });
+  onReceiveCash(): void {
+    this.router.navigate(['/cash-management/pending-receipts']);
   }
 
-  loadMembers(): void {
-    const agentId = this.profile()?.agentId;
-    if (!agentId) return;
+  onTransferToBank(): void {
+    this.router.navigate(['/cash-management/handover/new']);
+  }
 
-    this.loadingMembers.set(true);
-    const params: AgentMembersQueryParams = {
-      page: this.membersPage(),
-      limit: this.membersLimit()
-    };
+  onViewApprovals(): void {
+    this.router.navigate(['/approvals/my-approvals']);
+  }
 
-    if (this.membersSearch()) {
-      params.search = this.membersSearch();
+  onNavigateToHierarchy(event: { type: 'forum' | 'area' | 'unit'; id: string }): void {
+    switch (event.type) {
+      case 'forum':
+        this.router.navigate(['/forums', event.id]);
+        break;
+      case 'area':
+        this.router.navigate(['/areas', event.id]);
+        break;
+      case 'unit':
+        this.router.navigate(['/units', event.id]);
+        break;
     }
-    if (this.membersStatusFilter()) {
-      params.status = this.membersStatusFilter() as any;
-    }
-    if (this.membersTierFilter()) {
-      params.tier = this.membersTierFilter();
-    }
-
-    this.agentService.getAgentMembers(agentId, params).subscribe({
-      next: (response) => {
-        this.members.set(response);
-        this.loadingMembers.set(false);
-      },
-      error: () => {
-        this.loadingMembers.set(false);
-      }
-    });
-  }
-
-  setActiveTab(tab: TabType): void {
-    this.activeTab.set(tab);
-
-    // Load data for the tab if not already loaded
-    if (tab === 'members' && !this.members()) {
-      this.loadMembers();
-    } else if (tab === 'performance' && !this.performance()) {
-      this.loadPerformance();
-    }
-  }
-
-  openEditModal(): void {
-    this.showEditModal.set(true);
-  }
-
-  closeEditModal(): void {
-    this.showEditModal.set(false);
-  }
-
-  onProfileUpdated(): void {
-    this.showEditModal.set(false);
-    this.loadProfile();
-    this.toastService.success('Profile Updated', 'Your profile has been updated successfully');
-  }
-
-  // Members tab methods
-  onMembersSearchChange(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    this.membersSearch.set(value);
-  }
-
-  onMembersSearch(): void {
-    this.membersPage.set(1);
-    this.loadMembers();
-  }
-
-  onMembersStatusChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.membersStatusFilter.set(value);
-    this.membersPage.set(1);
-    this.loadMembers();
-  }
-
-  onMembersTierChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.membersTierFilter.set(value);
-    this.membersPage.set(1);
-    this.loadMembers();
-  }
-
-  goToMembersPage(page: number): void {
-    if (page < 1 || page > this.totalPages()) return;
-    this.membersPage.set(page);
-    this.loadMembers();
-  }
-
-  registerNewMember(): void {
-    const agentId = this.profile()?.agentId;
-    if (agentId) {
-      this.router.navigate(['/members/add'], { queryParams: { agentId } });
-    }
-  }
-
-  viewMember(memberId: string): void {
-    this.router.navigate(['/members', memberId, 'edit']);
-  }
-
-  // Performance tab methods
-  onPerformancePeriodChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value as 'thisMonth' | 'lastMonth' | 'thisYear';
-    this.performancePeriod.set(value);
-    this.loadPerformance();
-  }
-
-  // Utility
-  formatDate(dateString: string | null | undefined): string {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  }
-
-  getMemberStatusClass(status: string | null | undefined): string {
-    switch (status) {
-      case 'Active': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
-      case 'Suspended': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
-      case 'Frozen': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
-      case 'Closed': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
-      case 'Deceased': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
-    }
-  }
-
-  getRegistrationStatusClass(status: string): string {
-    switch (status) {
-      case 'Approved': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
-      case 'PendingApproval': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
-      case 'Draft': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
-      case 'Rejected': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
-    }
-  }
-
-  // Helper method to get bar height percentage
-  getAcquisitionBarHeight(count: number): number {
-    const trend = this.performance()?.memberAcquisition?.monthlyTrend;
-    if (!trend || trend.length === 0) return 10;
-    const maxCount = Math.max(...trend.map(t => t.count), 1);
-    return Math.max((count / maxCount) * 100, 10);
-  }
-
-  getRetentionBarHeight(rate: number): number {
-    return Math.max(rate, 10);
   }
 }

@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claim Details — Wireframe</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --border: #e2e5ea;
+    --border-light: #eef0f3;
+    --text-primary: #1a1d23;
+    --text-secondary: #5f6673;
+    --text-tertiary: #8a91a0;
+    --accent: #2563eb;
+    --accent-light: #eff4ff;
+    --accent-hover: #1d4ed8;
+    --success: #059669;
+    --success-bg: #ecfdf5;
+    --success-border: #a7f3d0;
+    --warning: #d97706;
+    --warning-bg: #fffbeb;
+    --warning-border: #fde68a;
+    --danger: #dc2626;
+    --danger-bg: #fef2f2;
+    --danger-border: #fecaca;
+    --info: #7c3aed;
+    --info-bg: #f5f3ff;
+    --info-border: #ddd6fe;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* === STATUS SWITCHER (for demo) === */
+  .demo-controls {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text-primary);
+    border-radius: 12px;
+    padding: 6px;
+    display: flex;
+    gap: 2px;
+    z-index: 100;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.24);
+  }
+  .demo-controls button {
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: transparent;
+    color: #9ca3af;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .demo-controls button:hover { color: #e5e7eb; }
+  .demo-controls button.active {
+    background: var(--accent);
+    color: white;
+  }
+
+  /* === PAGE LAYOUT === */
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 24px 100px;
+  }
+
+  /* === BREADCRUMB === */
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-tertiary);
+    margin-bottom: 20px;
+  }
+  .breadcrumb a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .breadcrumb a:hover { color: var(--accent); }
+  .breadcrumb .sep { font-size: 10px; }
+
+  /* === HEADER CARD (always visible) === */
+  .header-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 0;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .claim-identity h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .claim-identity .claim-code {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    font-weight: 400;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .status-badge .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+  .status-badge.reported { background: #f0f4ff; color: #4361b8; }
+  .status-badge.reported .dot { background: #4361b8; }
+  .status-badge.verification { background: var(--warning-bg); color: var(--warning); }
+  .status-badge.verification .dot { background: var(--warning); }
+  .status-badge.pending-approval { background: var(--info-bg); color: var(--info); }
+  .status-badge.pending-approval .dot { background: var(--info); }
+  .status-badge.approved { background: var(--success-bg); color: var(--success); }
+  .status-badge.approved .dot { background: var(--success); }
+  .status-badge.settled { background: #f0fdf4; color: #166534; }
+  .status-badge.settled .dot { background: #166534; }
+  .status-badge.rejected { background: var(--danger-bg); color: var(--danger); }
+  .status-badge.rejected .dot { background: var(--danger); }
+
+  .header-facts {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--border-light);
+    padding-top: 16px;
+  }
+  .fact {
+    padding: 0 16px;
+    border-right: 1px solid var(--border-light);
+  }
+  .fact:first-child { padding-left: 0; }
+  .fact:last-child { border-right: none; }
+  .fact-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .fact-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .fact-value.money { color: var(--accent); }
+  .fact-sub {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    font-weight: 400;
+    margin-top: 1px;
+  }
+
+  /* === ACTION BANNER === */
+  .action-banner {
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+  }
+  .action-banner.hidden {
+    display: none;
+  }
+
+  .banner-verification {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border-color: var(--warning-border);
+  }
+  .banner-approval {
+    background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+    border-color: var(--info-border);
+  }
+  .banner-settlement {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-color: var(--success-border);
+  }
+  .banner-rejected {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-color: var(--danger-border);
+  }
+  .banner-settled-done {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-color: #86efac;
+  }
+
+  .banner-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+  }
+  .banner-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .banner-verification .banner-icon { background: rgba(217, 119, 6, 0.12); }
+  .banner-approval .banner-icon { background: rgba(124, 58, 237, 0.12); }
+  .banner-settlement .banner-icon { background: rgba(5, 150, 105, 0.12); }
+  .banner-rejected .banner-icon { background: rgba(220, 38, 38, 0.1); }
+  .banner-settled-done .banner-icon { background: rgba(22, 101, 52, 0.12); }
+
+  .banner-text h3 {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 1px;
+  }
+  .banner-text p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  .banner-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  /* === BUTTONS === */
+  .btn {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--text-primary);
+    border-color: var(--border);
+  }
+  .btn-secondary:hover { background: var(--bg); }
+  .btn-success {
+    background: var(--success);
+    color: white;
+  }
+  .btn-success:hover { background: #047857; }
+  .btn-danger-outline {
+    background: transparent;
+    color: var(--danger);
+    border-color: var(--danger);
+  }
+  .btn-danger-outline:hover { background: var(--danger-bg); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  /* === TABS === */
+  .tabs-container {
+    margin-bottom: 20px;
+  }
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    padding: 12px 20px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+  }
+  .tab:hover { color: var(--text-secondary); }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+  .tab .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--danger);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    padding: 0 5px;
+    margin-left: 6px;
+  }
+
+  /* === TAB CONTENT === */
+  .tab-content {
+    display: none;
+  }
+  .tab-content.active {
+    display: block;
+  }
+
+  /* === CARDS === */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 16px;
+  }
+  .card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .card-body {
+    padding: 20px;
+  }
+
+  /* === INFO GRID === */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 32px;
+  }
+  .info-item {}
+  .info-label {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-bottom: 3px;
+  }
+  .info-value {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .info-value a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .info-value a:hover { text-decoration: underline; }
+
+  /* === DOCUMENTS === */
+  .doc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .doc-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+    transition: border-color 0.15s;
+  }
+  .doc-item:hover { border-color: var(--border); }
+  .doc-icon {
+    width: 36px;
+    height: 36px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .doc-info { flex: 1; min-width: 0; }
+  .doc-name {
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .doc-meta {
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+  .doc-status {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .doc-status.verified { background: var(--success-bg); color: var(--success); }
+  .doc-status.pending { background: var(--warning-bg); color: var(--warning); }
+  .doc-actions {
+    display: flex;
+    gap: 4px;
+  }
+  .doc-action-btn {
+    font-family: inherit;
+    font-size: 11px;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.15s;
+  }
+  .doc-action-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* === CONTRIBUTION PROGRESS === */
+  .progress-section {
+    margin-bottom: 20px;
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+  .progress-amount {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .progress-amount span { 
+    color: var(--text-tertiary);
+    font-size: 14px;
+    font-weight: 400;
+  }
+  .progress-pct {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--success);
+  }
+  .progress-bar-track {
+    width: 100%;
+    height: 8px;
+    background: var(--bg);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #60a5fa);
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+  .progress-stats {
+    display: flex;
+    gap: 24px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+  }
+  .progress-stats strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  /* === CONTRIBUTION TABLE === */
+  .contrib-filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .filter-chip {
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 20px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.15s;
+  }
+  .filter-chip:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-chip.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead th {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+  tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-primary);
+  }
+  tbody tr:hover { background: #fafbfc; }
+  .member-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .avatar-sm {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--accent-light);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .member-name { font-weight: 500; }
+  .member-code { font-size: 11px; color: var(--text-tertiary); }
+  
+  .contrib-status {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .contrib-status.collected { background: var(--success-bg); color: var(--success); }
+  .contrib-status.pending { background: var(--warning-bg); color: var(--warning); }
+  .contrib-status.missed { background: var(--danger-bg); color: var(--danger); }
+
+  /* === TIMELINE === */
+  .timeline {
+    position: relative;
+    padding-left: 28px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 9px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: var(--border);
+  }
+  .timeline-item {
+    position: relative;
+    padding-bottom: 24px;
+  }
+  .timeline-item:last-child { padding-bottom: 0; }
+  .timeline-dot {
+    position: absolute;
+    left: -28px;
+    top: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    background: white;
+    border: 2px solid var(--border);
+  }
+  .timeline-dot.success { border-color: var(--success); background: var(--success-bg); }
+  .timeline-dot.warning { border-color: var(--warning); background: var(--warning-bg); }
+  .timeline-dot.info { border-color: var(--accent); background: var(--accent-light); }
+  .timeline-dot.danger { border-color: var(--danger); background: var(--danger-bg); }
+
+  .timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 3px;
+  }
+  .timeline-title {
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .timeline-date {
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+  .timeline-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .timeline-actor {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+  }
+
+  /* === EMPTY STATE === */
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-tertiary);
+  }
+  .empty-state .icon { font-size: 32px; margin-bottom: 12px; }
+  .empty-state h3 { font-size: 15px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+  .empty-state p { font-size: 13px; }
+
+  /* === SETTLED OVERLAY === */
+  .settled-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 16px;
+    background: #f0fdf4;
+    border-radius: var(--radius-sm);
+    border: 1px solid #86efac;
+  }
+
+  /* === TRANSITIONS === */
+  .fade-in {
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === RESPONSIVE NOTE === */
+  .mobile-note {
+    display: none;
+    text-align: center;
+    padding: 12px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    background: var(--warning-bg);
+    border-radius: var(--radius-sm);
+    margin-bottom: 16px;
+  }
+  @media (max-width: 640px) {
+    .mobile-note { display: block; }
+    .header-facts { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .fact { border-right: none; padding: 0; }
+    .info-grid { grid-template-columns: 1fr; }
+    .demo-controls { 
+      bottom: 12px; 
+      left: 12px; right: 12px; 
+      transform: none;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="mobile-note">📱 Wireframe optimized for desktop — scroll horizontally on mobile</div>
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a href="#">Death Claims</a>
+    <span class="sep">›</span>
+    <span id="breadcrumb-code">DC-2025-00012</span>
+  </nav>
+
+  <!-- ==================== HEADER CARD (Always visible) ==================== -->
+  <div class="header-card">
+    <div class="header-top">
+      <div class="claim-identity">
+        <h1>John Smith <span style="font-weight:400; color: var(--text-tertiary); font-size: 15px;">— Death Claim</span></h1>
+        <div class="claim-code">DC-2025-00012 · MEM-2025-00456</div>
+      </div>
+      <div id="status-badge">
+        <span class="status-badge verification"><span class="dot"></span>Under Verification</span>
+      </div>
+    </div>
+    <div class="header-facts">
+      <div class="fact">
+        <div class="fact-label">Death Date</div>
+        <div class="fact-value">Jan 12, 2025</div>
+        <div class="fact-sub">Muscat, Oman</div>
+      </div>
+      <div class="fact">
+        <div class="fact-label">Benefit Amount</div>
+        <div class="fact-value money" id="benefit-amount">OMR 5,000</div>
+        <div class="fact-sub">Tier A</div>
+      </div>
+      <div class="fact">
+        <div class="fact-label">Filed By</div>
+        <div class="fact-value">Agent Mary Johnson</div>
+        <div class="fact-sub">Jan 15, 2025</div>
+      </div>
+      <div class="fact">
+        <div class="fact-label">Nominee</div>
+        <div class="fact-value">Sarah Smith</div>
+        <div class="fact-sub">Spouse</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== ACTION BANNER (contextual) ==================== -->
+
+  <!-- Verification Banner -->
+  <div id="banner-verification" class="action-banner banner-verification">
+    <div class="banner-content">
+      <div class="banner-icon">⏳</div>
+      <div class="banner-text">
+        <h3>Documents require verification</h3>
+        <p>Review uploaded documents and verify their authenticity before submitting for approval.</p>
+      </div>
+    </div>
+    <div class="banner-actions">
+      <button class="btn btn-secondary btn-sm">Request More Docs</button>
+      <button class="btn btn-primary btn-sm">Verify & Send for Approval</button>
+    </div>
+  </div>
+
+  <!-- Pending Approval Banner -->
+  <div id="banner-approval" class="action-banner banner-approval hidden">
+    <div class="banner-content">
+      <div class="banner-icon">📋</div>
+      <div class="banner-text">
+        <h3>Awaiting your approval decision</h3>
+        <p>All documents verified. Review the claim and approve or reject.</p>
+      </div>
+    </div>
+    <div class="banner-actions">
+      <button class="btn btn-danger-outline btn-sm">Reject</button>
+      <button class="btn btn-success btn-sm">Approve Claim</button>
+    </div>
+  </div>
+
+  <!-- Approved / Ready for Settlement Banner -->
+  <div id="banner-settlement" class="action-banner banner-settlement hidden">
+    <div class="banner-content">
+      <div class="banner-icon">💰</div>
+      <div class="banner-text">
+        <h3>Approved — Ready for benefit payout</h3>
+        <p>Contribution cycle complete. Record the settlement payment to the nominee.</p>
+      </div>
+    </div>
+    <div class="banner-actions">
+      <button class="btn btn-success btn-sm">Record Settlement</button>
+    </div>
+  </div>
+
+  <!-- Rejected Banner -->
+  <div id="banner-rejected" class="action-banner banner-rejected hidden">
+    <div class="banner-content">
+      <div class="banner-icon">✕</div>
+      <div class="banner-text">
+        <h3>Claim Rejected</h3>
+        <p>Rejected by Admin User on Jan 18, 2025 — "Death certificate could not be verified."</p>
+      </div>
+    </div>
+    <div class="banner-actions">
+      <button class="btn btn-secondary btn-sm">Reopen Claim</button>
+    </div>
+  </div>
+
+  <!-- Settled Banner -->
+  <div id="banner-settled" class="action-banner banner-settled-done hidden">
+    <div class="banner-content">
+      <div class="banner-icon">✓</div>
+      <div class="banner-text">
+        <h3>Claim Settled</h3>
+        <p>Benefit of OMR 5,000 paid to Sarah Smith via Bank Transfer on Jan 30, 2025.</p>
+      </div>
+    </div>
+    <div class="banner-actions">
+      <button class="btn btn-secondary btn-sm">View Receipt</button>
+    </div>
+  </div>
+
+  <!-- No Banner for Reported status (just the header card with status) -->
+  <div id="banner-reported" class="action-banner hidden" style="background: #f0f4ff; border-color: #c7d2fe; border-top: none; border-radius: 0 0 var(--radius) var(--radius);">
+    <div class="banner-content">
+      <div class="banner-icon" style="background: rgba(67,97,184,0.12);">📝</div>
+      <div class="banner-text">
+        <h3>Claim reported — awaiting document upload</h3>
+        <p>Agent needs to upload required documents (death certificate, medical report, nominee ID) to proceed.</p>
+      </div>
+    </div>
+    <div class="banner-actions">
+      <button class="btn btn-primary btn-sm">Upload Documents</button>
+    </div>
+  </div>
+
+
+  <!-- ==================== TABS ==================== -->
+  <div class="tabs-container">
+    <div class="tabs">
+      <button class="tab active" data-tab="details" onclick="switchTab('details')">Details & Documents</button>
+      <button class="tab" data-tab="contributions" onclick="switchTab('contributions')">
+        Contributions
+        <span class="badge" id="contrib-badge" style="display:none;">1</span>
+      </button>
+      <button class="tab" data-tab="activity" onclick="switchTab('activity')">Activity Log</button>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 1: Details & Documents ==================== -->
+  <div class="tab-content active" id="tab-details">
+
+    <!-- Two-column: Claim Info + Deceased Info -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+      
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Death Details</span>
+        </div>
+        <div class="card-body">
+          <div class="info-grid" style="grid-template-columns: 1fr;">
+            <div class="info-item">
+              <div class="info-label">Cause of Death</div>
+              <div class="info-value">Cardiac Arrest</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Place of Death</div>
+              <div class="info-value">Royal Hospital, Muscat</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Attending Doctor</div>
+              <div class="info-value">Dr. Ahmed Al-Rashidi</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Additional Notes</div>
+              <div class="info-value" style="color: var(--text-secondary); font-weight: 400;">Member had been hospitalized for 3 days prior.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Nominee Details</span>
+        </div>
+        <div class="card-body">
+          <div class="info-grid" style="grid-template-columns: 1fr;">
+            <div class="info-item">
+              <div class="info-label">Name</div>
+              <div class="info-value">Sarah Smith</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Relationship</div>
+              <div class="info-value">Spouse</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Contact</div>
+              <div class="info-value">+968 9234 5678</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Bank Account</div>
+              <div class="info-value">Bank Muscat · ****4521</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documents -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Documents</span>
+        <button class="btn btn-secondary btn-sm">+ Upload</button>
+      </div>
+      <div class="card-body">
+        <div class="doc-list">
+          <div class="doc-item">
+            <div class="doc-icon">📄</div>
+            <div class="doc-info">
+              <div class="doc-name">Death Certificate</div>
+              <div class="doc-meta">PDF · 1.2 MB · Uploaded Jan 15, 2025</div>
+            </div>
+            <span class="doc-status verified">Verified</span>
+            <div class="doc-actions">
+              <button class="doc-action-btn">View</button>
+            </div>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon">📄</div>
+            <div class="doc-info">
+              <div class="doc-name">Medical Report</div>
+              <div class="doc-meta">PDF · 2.5 MB · Uploaded Jan 15, 2025</div>
+            </div>
+            <span class="doc-status verified">Verified</span>
+            <div class="doc-actions">
+              <button class="doc-action-btn">View</button>
+            </div>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon">📄</div>
+            <div class="doc-info">
+              <div class="doc-name">Nominee ID (National ID)</div>
+              <div class="doc-meta">JPG · 800 KB · Uploaded Jan 15, 2025</div>
+            </div>
+            <span class="doc-status pending">Pending</span>
+            <div class="doc-actions">
+              <button class="doc-action-btn">View</button>
+              <button class="doc-action-btn" style="color: var(--success);">✓</button>
+              <button class="doc-action-btn" style="color: var(--danger);">✕</button>
+            </div>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon">📄</div>
+            <div class="doc-info">
+              <div class="doc-name">Bank Account Proof</div>
+              <div class="doc-meta">PDF · 900 KB · Uploaded Jan 15, 2025</div>
+            </div>
+            <span class="doc-status pending">Pending</span>
+            <div class="doc-actions">
+              <button class="doc-action-btn">View</button>
+              <button class="doc-action-btn" style="color: var(--success);">✓</button>
+              <button class="doc-action-btn" style="color: var(--danger);">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Member Summary (collapsed card) -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Deceased Member Summary</span>
+        <a href="#" style="font-size: 12px; color: var(--accent); text-decoration: none;">View Full Profile →</a>
+      </div>
+      <div class="card-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Member Code</div>
+            <div class="info-value"><a href="#">MEM-2025-00456</a></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Tier</div>
+            <div class="info-value">Tier A — OMR 5,000 benefit</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Agent</div>
+            <div class="info-value"><a href="#">Mary Johnson</a> (AGT-00123)</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Unit / Area / Forum</div>
+            <div class="info-value">Ruwi Central · Muscat Area · Oman Forum</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Joined</div>
+            <div class="info-value">Mar 5, 2023</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Status at Death</div>
+            <div class="info-value" style="color: var(--success);">Active (good standing)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 2: Contributions ==================== -->
+  <div class="tab-content" id="tab-contributions">
+
+    <!-- Before cycle exists -->
+    <div id="contrib-empty">
+      <div class="empty-state">
+        <div class="icon">📊</div>
+        <h3>No contribution cycle yet</h3>
+        <p>A contribution cycle will be created automatically when this claim is approved.</p>
+      </div>
+    </div>
+
+    <!-- After cycle exists -->
+    <div id="contrib-active" style="display: none;">
+      
+      <!-- Progress Card -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Cycle CC-2025-00015</span>
+          <span style="font-size: 12px; color: var(--text-tertiary);">Deadline: Feb 15, 2025 <span id="days-left" style="color: var(--warning); font-weight: 600;">(5 days left)</span></span>
+        </div>
+        <div class="card-body">
+          <div class="progress-section">
+            <div class="progress-header">
+              <div class="progress-amount">OMR 3,500 <span>/ OMR 5,000</span></div>
+              <div class="progress-pct">70%</div>
+            </div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" style="width: 70%;"></div>
+            </div>
+            <div class="progress-stats">
+              <span><strong>350</strong> of 500 members collected</span>
+              <span><strong>140</strong> pending</span>
+              <span><strong>10</strong> missed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Members Table -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Member Contributions</span>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" placeholder="Search member..." style="font-family: inherit; font-size: 12px; padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); outline: none; width: 160px;">
+          </div>
+        </div>
+        <div class="card-body" style="padding: 0;">
+          <div style="padding: 12px 20px; border-bottom: 1px solid var(--border-light);">
+            <div class="contrib-filters">
+              <button class="filter-chip active">All (500)</button>
+              <button class="filter-chip">Collected (350)</button>
+              <button class="filter-chip">Pending (140)</button>
+              <button class="filter-chip">Missed (10)</button>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Member</th>
+                <th>Agent</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="member-cell">
+                    <div class="avatar-sm">AS</div>
+                    <div>
+                      <div class="member-name">Ahmed Said</div>
+                      <div class="member-code">MEM-00234</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="font-size: 12px;">Mary Johnson</td>
+                <td style="font-weight: 600;">OMR 10</td>
+                <td style="font-size: 12px; color: var(--text-secondary);">Wallet</td>
+                <td><span class="contrib-status collected">Collected</span></td>
+                <td style="font-size: 12px; color: var(--text-tertiary);">Jan 20</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="member-cell">
+                    <div class="avatar-sm">FK</div>
+                    <div>
+                      <div class="member-name">Fatima Khalid</div>
+                      <div class="member-code">MEM-00189</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="font-size: 12px;">Mary Johnson</td>
+                <td style="font-weight: 600;">OMR 10</td>
+                <td style="font-size: 12px; color: var(--text-secondary);">Direct Cash</td>
+                <td><span class="contrib-status collected">Collected</span></td>
+                <td style="font-size: 12px; color: var(--text-tertiary);">Jan 19</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="member-cell">
+                    <div class="avatar-sm">RN</div>
+                    <div>
+                      <div class="member-name">Rashid Nasser</div>
+                      <div class="member-code">MEM-00312</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="font-size: 12px;">Ali Farouk</td>
+                <td style="font-weight: 600;">OMR 10</td>
+                <td style="font-size: 12px; color: var(--text-secondary);">—</td>
+                <td><span class="contrib-status pending">Pending</span></td>
+                <td style="font-size: 12px; color: var(--text-tertiary);">—</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="member-cell">
+                    <div class="avatar-sm">HM</div>
+                    <div>
+                      <div class="member-name">Hassan Mahmoud</div>
+                      <div class="member-code">MEM-00098</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="font-size: 12px;">Ali Farouk</td>
+                <td style="font-weight: 600;">OMR 10</td>
+                <td style="font-size: 12px; color: var(--text-secondary);">—</td>
+                <td><span class="contrib-status missed">Missed</span></td>
+                <td style="font-size: 12px; color: var(--text-tertiary);">—</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="padding: 12px 20px; font-size: 12px; color: var(--text-tertiary); border-top: 1px solid var(--border-light);">
+            Showing 4 of 500 members · Page 1 of 50
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 3: Activity Log ==================== -->
+  <div class="tab-content" id="tab-activity">
+    <div class="card">
+      <div class="card-body">
+        <div class="timeline">
+          <div class="timeline-item" id="tl-settled" style="display: none;">
+            <div class="timeline-dot success">✓</div>
+            <div class="timeline-header">
+              <span class="timeline-title">Benefit Settled</span>
+              <span class="timeline-date">Jan 30, 2025 · 10:00 AM</span>
+            </div>
+            <div class="timeline-desc">OMR 5,000 paid to Sarah Smith via Bank Transfer. Ref: BM-TRF-2025-8821.</div>
+            <div class="timeline-actor">by Finance Admin</div>
+          </div>
+
+          <div class="timeline-item" id="tl-cycle-closed" style="display: none;">
+            <div class="timeline-dot info">📊</div>
+            <div class="timeline-header">
+              <span class="timeline-title">Contribution Cycle Closed</span>
+              <span class="timeline-date">Jan 28, 2025 · 6:00 PM</span>
+            </div>
+            <div class="timeline-desc">Cycle CC-2025-00015 closed. 490 of 500 members contributed (98%). Total collected: OMR 4,900.</div>
+            <div class="timeline-actor">System</div>
+          </div>
+
+          <div class="timeline-item" id="tl-cycle-started" style="display: none;">
+            <div class="timeline-dot info">📊</div>
+            <div class="timeline-header">
+              <span class="timeline-title">Contribution Cycle Started</span>
+              <span class="timeline-date">Jan 18, 2025 · 2:35 PM</span>
+            </div>
+            <div class="timeline-desc">Cycle CC-2025-00015 created. 500 members notified. Deadline: Feb 15, 2025.</div>
+            <div class="timeline-actor">System (triggered by approval)</div>
+          </div>
+
+          <div class="timeline-item" id="tl-approved" style="display: none;">
+            <div class="timeline-dot success">✓</div>
+            <div class="timeline-header">
+              <span class="timeline-title">Claim Approved</span>
+              <span class="timeline-date">Jan 18, 2025 · 2:30 PM</span>
+            </div>
+            <div class="timeline-desc">Benefit amount locked at OMR 5,000. Contribution cycle initiated.</div>
+            <div class="timeline-actor">by Admin User (Forum Admin)</div>
+          </div>
+
+          <div class="timeline-item" id="tl-rejected" style="display: none;">
+            <div class="timeline-dot danger">✕</div>
+            <div class="timeline-header">
+              <span class="timeline-title">Claim Rejected</span>
+              <span class="timeline-date">Jan 18, 2025 · 2:30 PM</span>
+            </div>
+            <div class="timeline-desc">Reason: Death certificate could not be verified. Hospital records do not match.</div>
+            <div class="timeline-actor">by Admin User (Forum Admin)</div>
+          </div>
+
+          <div class="timeline-item" id="tl-sent-approval">
+            <div class="timeline-dot info">📋</div>
+            <div class="timeline-header">
+              <span class="timeline-title">Sent for Approval</span>
+              <span class="timeline-date">Jan 17, 2025 · 11:00 AM</span>
+            </div>
+            <div class="timeline-desc">Claim submitted to approval workflow. All documents marked as verified.</div>
+            <div class="timeline-actor">by Unit Admin (Ruwi Central)</div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot warning">📄</div>
+            <div class="timeline-header">
+              <span class="timeline-title">Documents Uploaded</span>
+              <span class="timeline-date">Jan 15, 2025 · 3:45 PM</span>
+            </div>
+            <div class="timeline-desc">4 documents uploaded: Death Certificate, Medical Report, Nominee ID, Bank Proof.</div>
+            <div class="timeline-actor">by Agent Mary Johnson</div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot info">📝</div>
+            <div class="timeline-header">
+              <span class="timeline-title">Claim Submitted</span>
+              <span class="timeline-date">Jan 15, 2025 · 2:30 PM</span>
+            </div>
+            <div class="timeline-desc">Death claim filed for member John Smith (MEM-2025-00456). Cause: Cardiac Arrest.</div>
+            <div class="timeline-actor">by Agent Mary Johnson</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== DEMO STATUS SWITCHER ==================== -->
+<div class="demo-controls">
+  <button class="active" onclick="setStatus('reported')">Reported</button>
+  <button onclick="setStatus('verification')">Verification</button>
+  <button onclick="setStatus('pending-approval')">Pending Approval</button>
+  <button onclick="setStatus('approved')">Approved</button>
+  <button onclick="setStatus('settled')">Settled</button>
+  <button onclick="setStatus('rejected')">Rejected</button>
+</div>
+
+<script>
+  const statusConfig = {
+    'reported': {
+      badge: '<span class="status-badge reported"><span class="dot"></span>Reported</span>',
+      banner: 'banner-reported',
+      showContrib: false,
+      timeline: { 'tl-settled': false, 'tl-cycle-closed': false, 'tl-cycle-started': false, 'tl-approved': false, 'tl-rejected': false, 'tl-sent-approval': false }
+    },
+    'verification': {
+      badge: '<span class="status-badge verification"><span class="dot"></span>Under Verification</span>',
+      banner: 'banner-verification',
+      showContrib: false,
+      timeline: { 'tl-settled': false, 'tl-cycle-closed': false, 'tl-cycle-started': false, 'tl-approved': false, 'tl-rejected': false, 'tl-sent-approval': false }
+    },
+    'pending-approval': {
+      badge: '<span class="status-badge pending-approval"><span class="dot"></span>Pending Approval</span>',
+      banner: 'banner-approval',
+      showContrib: false,
+      timeline: { 'tl-settled': false, 'tl-cycle-closed': false, 'tl-cycle-started': false, 'tl-approved': false, 'tl-rejected': false, 'tl-sent-approval': true }
+    },
+    'approved': {
+      badge: '<span class="status-badge approved"><span class="dot"></span>Approved</span>',
+      banner: 'banner-settlement',
+      showContrib: true,
+      timeline: { 'tl-settled': false, 'tl-cycle-closed': false, 'tl-cycle-started': true, 'tl-approved': true, 'tl-rejected': false, 'tl-sent-approval': true }
+    },
+    'settled': {
+      badge: '<span class="status-badge settled"><span class="dot"></span>Settled</span>',
+      banner: 'banner-settled',
+      showContrib: true,
+      timeline: { 'tl-settled': true, 'tl-cycle-closed': true, 'tl-cycle-started': true, 'tl-approved': true, 'tl-rejected': false, 'tl-sent-approval': true }
+    },
+    'rejected': {
+      badge: '<span class="status-badge rejected"><span class="dot"></span>Rejected</span>',
+      banner: 'banner-rejected',
+      showContrib: false,
+      timeline: { 'tl-settled': false, 'tl-cycle-closed': false, 'tl-cycle-started': false, 'tl-approved': false, 'tl-rejected': true, 'tl-sent-approval': true }
+    }
+  };
+
+  function setStatus(status) {
+    const config = statusConfig[status];
+    
+    // Update status badge
+    document.getElementById('status-badge').innerHTML = config.badge;
+    
+    // Hide all banners
+    document.querySelectorAll('.action-banner').forEach(b => b.classList.add('hidden'));
+    
+    // Show active banner
+    if (config.banner) {
+      document.getElementById(config.banner).classList.remove('hidden');
+    }
+    
+    // Toggle contributions tab content
+    document.getElementById('contrib-empty').style.display = config.showContrib ? 'none' : 'block';
+    document.getElementById('contrib-active').style.display = config.showContrib ? 'block' : 'none';
+    
+    // Show/hide contrib badge on tab
+    document.getElementById('contrib-badge').style.display = config.showContrib ? 'inline-flex' : 'none';
+    
+    // Update days left for settled
+    if (status === 'settled') {
+      document.getElementById('days-left').textContent = '(Closed)';
+      document.getElementById('days-left').style.color = 'var(--success)';
+    } else {
+      document.getElementById('days-left').textContent = '(5 days left)';
+      document.getElementById('days-left').style.color = 'var(--warning)';
+    }
+    
+    // Update timeline items
+    Object.entries(config.timeline).forEach(([id, show]) => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = show ? 'block' : 'none';
+    });
+    
+    // Update demo button states
+    document.querySelectorAll('.demo-controls button').forEach(btn => {
+      btn.classList.toggle('active', btn.textContent.toLowerCase().replace(' ', '-') === status || 
+        (btn.textContent === 'Reported' && status === 'reported') ||
+        (btn.textContent === 'Verification' && status === 'verification') ||
+        (btn.textContent === 'Pending Approval' && status === 'pending-approval') ||
+        (btn.textContent === 'Approved' && status === 'approved') ||
+        (btn.textContent === 'Settled' && status === 'settled') ||
+        (btn.textContent === 'Rejected' && status === 'rejected')
+      );
+    });
+  }
+
+  function switchTab(tabName) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+    
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+  }
+
+  // Initialize
+  setStatus('verification');
+</script>
+
+</body>
+</html>

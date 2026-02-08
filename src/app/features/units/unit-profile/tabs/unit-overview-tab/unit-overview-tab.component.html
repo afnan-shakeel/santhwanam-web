@@ -26,45 +26,17 @@
       }
     </div>
 
-    <!-- Entity Info Cards -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Unit Details Card -->
-      <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900">Unit Details</h3>
-        </div>
-        <div class="p-6 space-y-4">
-          <div>
-            <p class="text-sm text-gray-500">Total Agents</p>
-            <p class="text-sm font-medium text-gray-900">{{ stats()!.totalAgents }} ({{ stats()!.activeAgents }} active)</p>
-          </div>
-          <div>
-            <p class="text-sm text-gray-500">Total Members</p>
-            <p class="text-sm font-medium text-gray-900">{{ stats()!.totalMembers }} ({{ stats()!.activeMembers }} active)</p>
-          </div>
-          <div>
-            <p class="text-sm text-gray-500">Suspended Members</p>
-            <p class="text-sm font-medium text-gray-900">{{ stats()!.suspendedMembers }}</p>
-          </div>
-          <div>
-            <p class="text-sm text-gray-500">Pending Approvals</p>
-            <p class="text-sm font-medium text-gray-900">{{ stats()!.pendingApprovals }}</p>
-          </div>
-        </div>
+    <!-- Recent Activity Placeholder -->
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900">Recent Activity</h3>
       </div>
-
-      <!-- Recent Activity Placeholder -->
-      <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900">Recent Activity</h3>
-        </div>
-        <div class="p-6">
-          <div class="text-center py-8">
-            <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p class="mt-2 text-sm text-gray-500">Activity timeline coming soon</p>
-          </div>
+      <div class="p-6">
+        <div class="text-center py-8">
+          <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="mt-2 text-sm text-gray-500">Activity timeline coming soon</p>
         </div>
       </div>
     </div>

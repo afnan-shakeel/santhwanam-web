@@ -4,13 +4,14 @@ import {
   Component,
   input
 } from '@angular/core';
+import { IconComponent } from '../icon/icon.component';
 
 export type StatsCardColor = 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'neutral';
 
 @Component({
   selector: 'app-stats-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   templateUrl: './stats-card.component.html',
   styleUrl: './stats-card.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

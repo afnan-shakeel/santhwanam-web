@@ -192,7 +192,7 @@ export class ForumProfileComponent implements OnInit, OnDestroy {
       .subscribe({
         next: ({ custody, pending }) => {
           this.custody.set(custody.custody);
-          this.pendingReceiveCount.set(pending.data?.length ?? 0);
+          this.pendingReceiveCount.set(pending.incoming?.length ?? 0);
         },
         error: () => {
           // Custody failed but profile can still be shown
@@ -235,11 +235,11 @@ export class ForumProfileComponent implements OnInit, OnDestroy {
   }
 
   onReceiveCash(): void {
-    this.router.navigate(['/cash-management/pending-receipts']);
+    this.router.navigate(['/cash/pending-receipts']);
   }
 
   onTransferToBank(): void {
-    this.router.navigate(['/cash-management/handover/new'], {
+    this.router.navigate(['/cash/handover/new'], {
       queryParams: { recipient: 'bank' }
     });
   }
@@ -248,7 +248,7 @@ export class ForumProfileComponent implements OnInit, OnDestroy {
     this.router.navigate(['/approvals/my-approvals']);
   }
 
-  onNavigateToHierarchy(event: { type: 'forum' | 'area'; id: string }): void {
+  onNavigateToHierarchy(event: { type: 'forum' | 'area' | 'unit'; id: string }): void {
     // Forum is top level, so this shouldn't be called
   }
 }

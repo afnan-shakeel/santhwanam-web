@@ -82,17 +82,17 @@
 
         <!-- Footer -->
         <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-4">
-          <button 
-            (click)="onCancel()"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          <app-button 
+            variant="ghost"
+            (click)="onCancel()">
             Cancel
-          </button>
-          <button 
-            (click)="onConfirm()"
+          </app-button>
+          <app-button 
+            variant="danger"
             [disabled]="!isValid"
-            class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            (click)="onConfirm()">
             Reject Handover
-          </button>
+          </app-button>
         </div>
       </div>
     </div>

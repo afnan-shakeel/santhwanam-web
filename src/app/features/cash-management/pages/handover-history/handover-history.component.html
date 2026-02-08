@@ -40,15 +40,13 @@
 
         <!-- Status Filter -->
         <div class="flex items-center gap-2">
-          <label class="text-sm font-medium text-gray-500">Status:</label>
-          <select 
-            [value]="statusFilter()"
-            (change)="onStatusFilterChange($any($event.target).value)"
-            class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
-            @for (option of statusOptions; track option.value) {
-              <option [value]="option.value">{{ option.label }}</option>
-            }
-          </select>
+          <app-select
+            label="Status"
+            placeholder="All Statuses"
+            size="sm"
+            [options]="statusOptions"
+            [ngModel]="statusFilter()"
+            (valueChange)="onStatusFilterChange($event)" />
         </div>
       </div>
     </div>

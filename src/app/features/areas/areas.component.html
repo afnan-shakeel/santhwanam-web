@@ -28,3 +28,13 @@
   (saved)="onAreaSaved()"
   (cancelled)="onAreaFormCancelled()">
 </app-area-form>
+
+<!-- Admin Assignment Modal -->
+@if (selectedEntityForAdmin()) {
+  <app-admin-assignment-modal
+    [(open)]="showAssignAdminModal"
+    [entity]="selectedEntityForAdmin()!"
+    [currentAdminUserId]="selectedAdminUserId()"
+    (onAssigned)="onAdminAssigned($event)"
+  />
+}

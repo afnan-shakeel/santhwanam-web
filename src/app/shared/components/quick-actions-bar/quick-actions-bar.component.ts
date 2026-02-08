@@ -10,7 +10,7 @@ import {
 import { ButtonComponent } from '../button/button.component';
 import { BadgeComponent } from '../badge/badge.component';
 
-export type QuickActionEntityType = 'forum' | 'area' | 'unit';
+export type QuickActionEntityType = 'forum' | 'area' | 'unit' | 'agent';
 
 @Component({
   selector: 'app-quick-actions-bar',

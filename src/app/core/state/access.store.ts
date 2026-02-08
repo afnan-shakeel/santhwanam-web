@@ -183,7 +183,8 @@ export class AccessStore {
     const scopeTypeMap: Record<ProfileEntityType, ScopeType> = {
       'forum': 'Forum',
       'area': 'Area',
-      'unit': 'Unit'
+      'unit': 'Unit',
+      'agent': 'Unit' // Agents are scoped at Unit level
     };
 
     const expectedScopeType = scopeTypeMap[entityType];

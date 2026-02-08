@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 import { CashManagementService } from '../../../../core/services/cash-management.service';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { ToastService } from '../../../../core/services/toast.service';
 import { OverdueReportItem } from '../../../../shared/models/cash-management.model';
 
@@ -17,7 +18,7 @@ import { OverdueReportItem } from '../../../../shared/models/cash-management.mod
 @Component({
   selector: 'app-overdue-report',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ButtonComponent],
   templateUrl: './overdue-report.component.html',
   styleUrl: './overdue-report.component.css'
 })

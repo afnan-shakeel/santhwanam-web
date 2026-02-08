@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CashHandoverWithRelations, REJECTION_REASONS, RejectionReasonCode } from '../../../../shared/models/cash-management.model';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
 
 export interface RejectionData {
   handover: CashHandoverWithRelations;
@@ -17,7 +18,7 @@ export interface RejectionData {
 @Component({
   selector: 'app-rejection-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ButtonComponent],
   templateUrl: './rejection-modal.component.html',
   styleUrl: './rejection-modal.component.css'
 })

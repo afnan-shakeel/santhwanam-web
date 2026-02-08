@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { CashHandoverWithRelations } from '../../../../shared/models/cash-management.model';
 import { CashManagementService } from '../../../../core/services/cash-management.service';
 import { HandoverStatusBadgeComponent } from '../handover-status-badge/handover-status-badge.component';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
 
 export type PendingHandoverDirection = 'outgoing' | 'incoming' | 'both';
 
@@ -18,7 +19,7 @@ export type PendingHandoverDirection = 'outgoing' | 'incoming' | 'both';
 @Component({
   selector: 'app-pending-handover-list',
   standalone: true,
-  imports: [CommonModule, HandoverStatusBadgeComponent],
+  imports: [CommonModule, HandoverStatusBadgeComponent, ButtonComponent],
   templateUrl: './pending-handover-list.component.html',
   styleUrl: './pending-handover-list.component.css'
 })

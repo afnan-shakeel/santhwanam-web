@@ -97,8 +97,10 @@ export interface CashHandoverWithRelations extends CashHandover {
   fromUser: {
     userId: string;
     email: string;
+    fullName?: string;
     firstName: string;
     lastName: string;
+    role: string;
   };
   handoverNumber: string;
   counterpartyName: string;
@@ -108,8 +110,10 @@ export interface CashHandoverWithRelations extends CashHandover {
   toUser: {
     userId: string;
     email: string;
+    fullName?: string;
     firstName: string;
     lastName: string;
+    role: string;
   };
   forum: {
     forumId: string;

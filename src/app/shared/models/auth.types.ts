@@ -27,7 +27,7 @@ export type AdminLevel = 'forum' | 'area' | 'unit' | null;
 /**
  * Entity types that can have profiles
  */
-export type ProfileEntityType = 'forum' | 'area' | 'unit';
+export type ProfileEntityType = 'forum' | 'area' | 'unit' | 'agent';
 
 /**
  * Hierarchy level numeric values for comparison
@@ -36,7 +36,8 @@ export type ProfileEntityType = 'forum' | 'area' | 'unit';
 export const ADMIN_LEVEL_HIERARCHY: Record<string, number> = {
   'forum': 3,
   'area': 2,
-  'unit': 1
+  'unit': 1,
+  'agent': 0
 };
 
 /**

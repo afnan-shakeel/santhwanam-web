@@ -90,7 +90,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   onNavigate(route: string): void {
-    this.router.navigate([route]);
+    this.router.navigate([route]).then(() => {
+    }, error => {
+      console.error('Navigation error:', error);
+    });
     // Close mobile sidebar on navigation
     this.mobileClose.emit();
   }

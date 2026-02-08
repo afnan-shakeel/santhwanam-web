@@ -10,9 +10,13 @@ import {
 import { ButtonComponent } from '../button/button.component';
 import { AdminDetails } from '../../models/forum.model';
 
-export type EntityType = 'forum' | 'area' | 'unit';
+export type EntityType = 'forum' | 'area' | 'unit' | 'agent';
 
 export interface EntityHierarchy {
+  forum?: { id: string; name: string } | null;
+  area?: { id: string; name: string } | null;
+  unit?: { id: string; name: string } | null;
+  // Legacy support
   areaId?: string;
   areaName?: string;
   forumId?: string;
@@ -44,8 +48,8 @@ export class EntityProfileHeaderComponent {
   /** Parent hierarchy for breadcrumb display */
   readonly hierarchy = input<EntityHierarchy>();
 
-  /** Admin user details */
-  readonly admin = input.required<AdminDetails>();
+  /** Admin user details - optional for agents */
+  readonly admin = input<AdminDetails | null>();
 
   /** Whether this is the logged-in user's own entity profile */
   readonly isOwnProfile = input<boolean>(false);
@@ -62,7 +66,7 @@ export class EntityProfileHeaderComponent {
 
   readonly onEdit = output<void>();
   readonly onReassignAdmin = output<void>();
-  readonly onNavigateToHierarchy = output<{ type: 'forum' | 'area'; id: string }>();
+  readonly onNavigateToHierarchy = output<{ type: 'forum' | 'area' | 'unit'; id: string }>();
 
   // ═══════════════════════════════════════════════════════════════════════════
   // COMPUTED
@@ -73,7 +77,8 @@ export class EntityProfileHeaderComponent {
     const icons: Record<EntityType, string> = {
       forum: '🌐',
       area: '📍',
-      unit: '🏢'
+      unit: '🏢',
+      agent: '👤'
     };
     return icons[this.entityType()];
   });
@@ -83,10 +88,14 @@ export class EntityProfileHeaderComponent {
     const labels: Record<EntityType, string> = {
       forum: 'Forum',
       area: 'Area',
-      unit: 'Unit'
+      unit: 'Unit',
+      agent: 'Agent'
     };
     return labels[this.entityType()];
   });
+
+  /** Whether this is an agent profile (hides admin section) */
+  readonly isAgent = computed(() => this.entityType() === 'agent');
 
   /** Hierarchy breadcrumb display */
   readonly hierarchyDisplay = computed(() => {
@@ -94,15 +103,26 @@ export class EntityProfileHeaderComponent {
     if (!h) return null;
 
     const type = this.entityType();
-    if (type === 'unit' && h.areaName && h.forumName) {
+    const items: { type: 'forum' | 'area' | 'unit'; id: string; name: string }[] = [];
+
+    // For agent: show unit → area → forum
+    if (type === 'agent') {
+      if (h.unit) items.push({ type: 'unit', id: h.unit.id, name: h.unit.name });
+      if (h.area) items.push({ type: 'area', id: h.area.id, name: h.area.name });
+      if (h.forum) items.push({ type: 'forum', id: h.forum.id, name: h.forum.name });
+      return items.length > 0 ? items : null;
+    }
+
+    // Legacy support for unit/area
+    if (type === 'unit' && (h.areaName || h.area) && (h.forumName || h.forum)) {
       return [
-        { type: 'area' as const, id: h.areaId!, name: h.areaName },
-        { type: 'forum' as const, id: h.forumId!, name: h.forumName }
+        { type: 'area' as const, id: h.areaId || h.area?.id || '', name: h.areaName || h.area?.name || '' },
+        { type: 'forum' as const, id: h.forumId || h.forum?.id || '', name: h.forumName || h.forum?.name || '' }
       ];
     }
-    if (type === 'area' && h.forumName) {
+    if (type === 'area' && (h.forumName || h.forum)) {
       return [
-        { type: 'forum' as const, id: h.forumId!, name: h.forumName }
+        { type: 'forum' as const, id: h.forumId || h.forum?.id || '', name: h.forumName || h.forum?.name || '' }
       ];
     }
     return null;
@@ -131,7 +151,7 @@ export class EntityProfileHeaderComponent {
     this.onReassignAdmin.emit();
   }
 
-  handleHierarchyClick(item: { type: 'forum' | 'area'; id: string }): void {
+  handleHierarchyClick(item: { type: 'forum' | 'area' | 'unit'; id: string }): void {
     this.onNavigateToHierarchy.emit(item);
   }
 }

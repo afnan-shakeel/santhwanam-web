@@ -22,7 +22,7 @@ export class MyUnitProfileComponent implements OnInit {
   ngOnInit(): void {
     const hierarchy = this.accessStore.hierarchy();
     const unitId = hierarchy?.unitId;
-
+    console.log(hierarchy)
     if (unitId) {
       // Redirect to the actual unit profile
       this.router.navigate(['/units', unitId], { replaceUrl: true });
