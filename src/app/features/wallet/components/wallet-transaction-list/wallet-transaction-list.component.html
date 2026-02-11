@@ -1,11 +1,11 @@
-<!-- Wallet Transaction List -->
-<div class="wallet-transaction-list">
+<!-- Wallet Transaction List - V3 Clean Design -->
+<div>
   <!-- Loading State -->
   @if (loading) {
     <div class="flex items-center justify-center py-12">
       <div class="flex flex-col items-center gap-3">
-        <div class="animate-spin rounded-full h-8 w-8 border-3 border-primary border-t-transparent"></div>
-        <p class="text-sm text-gray-500 dark:text-gray-400">Loading transactions...</p>
+        <div class="animate-spin rounded-full h-8 w-8 border-[3px] border-primary-600 border-t-transparent"></div>
+        <p class="text-sm text-gray-400">Loading transactions...</p>
       </div>
     </div>
   }
@@ -13,55 +13,57 @@
   <!-- Empty State -->
   @if (!loading && transactions.length === 0) {
     <div class="py-12 text-center">
-      <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+      <svg class="w-14 h-14 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round"
           d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
       </svg>
-      <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No transactions yet</h3>
-      <p class="text-gray-500 dark:text-gray-400">Your wallet transactions will appear here.</p>
+      <h3 class="text-base font-medium text-gray-900 mb-1">No transactions yet</h3>
+      <p class="text-gray-400 text-sm">Your wallet transactions will appear here.</p>
     </div>
   }
 
-  <!-- Transaction List - Compact Mode (List View) -->
+  <!-- Transaction List - Compact Mode (Overview list) -->
   @if (!loading && transactions.length > 0 && compact) {
-    <div class="divide-y divide-gray-100 dark:divide-gray-700">
+    <div class="flex flex-col">
       @for (txn of transactions; track txn.transactionId) {
-        <div class="px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-          <div class="flex items-center justify-between gap-4">
-            <!-- Icon & Info -->
-            <div class="flex items-center gap-4">
-              <!-- Transaction Icon -->
-              <div class="shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-lg"
-                [class]="txn.status === 'Pending' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
-                         isCredit(txn.transactionType) ? 'bg-green-100 dark:bg-green-900/30' :
-                         'bg-red-100 dark:bg-red-900/30'">
-                {{ getTransactionIcon(txn.transactionType, txn.status) }}
-              </div>
+        <div class="flex items-center gap-3.5 py-3.5 border-b border-gray-100 last:border-b-0 hover:bg-gray-50/50 transition-colors cursor-default"
+          style="margin: 0 -2px; padding-left: 2px; padding-right: 2px;">
+          <!-- SVG Icon -->
+          <div class="w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0"
+            [class]="isCredit(txn.transactionType) ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'">
+            @if (isCredit(txn.transactionType)) {
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+              </svg>
+            } @else {
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
+              </svg>
+            }
+          </div>
 
-              <!-- Details -->
-              <div class="min-w-0">
-                <p class="font-medium text-gray-900 dark:text-white">
-                  {{ getTransactionLabel(txn.transactionType) }}
-                </p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                  {{ formatDate(txn.createdAt) }}
-                  @if (txn.description) {
-                    <span class="mx-1">•</span>
-                    <span class="truncate">{{ txn.description }}</span>
-                  }
-                </p>
-              </div>
+          <!-- Details -->
+          <div class="flex-1 min-w-0">
+            <div class="text-[13.5px] font-medium text-gray-900 mb-0.5">
+              {{ txn.description || getTransactionLabel(txn.transactionType) }}
             </div>
+            <div class="text-xs text-gray-400 flex items-center gap-1.5">
+              <span>{{ formatDate(txn.createdAt) }}</span>
+              @if (txn.sourceEntityId) {
+                <span class="w-[3px] h-[3px] rounded-full bg-gray-300"></span>
+                <span>Ref: {{ txn.sourceEntityId.slice(0, 8) }}</span>
+              }
+            </div>
+          </div>
 
-            <!-- Amount -->
-            <div class="shrink-0 text-right">
-              <p class="text-lg font-semibold"
-                [class]="isCredit(txn.transactionType) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-                {{ isCredit(txn.transactionType) ? '+' : '-' }} {{ formatCurrency(txn.amount) }}
-              </p>
-              <p class="text-xs text-gray-500 dark:text-gray-400">
-                Bal: {{ formatCurrency(txn.balanceAfter) }}
-              </p>
+          <!-- Amount -->
+          <div class="shrink-0 text-right">
+            <div class="text-sm font-semibold tracking-tight"
+              [class]="isCredit(txn.transactionType) ? 'text-green-600' : 'text-red-600'">
+              {{ isCredit(txn.transactionType) ? '+' : '-' }} {{ formatCurrency(txn.amount) }}
+            </div>
+            <div class="text-[11.5px] text-gray-400 font-mono mt-px">
+              Bal: {{ formatCurrency(txn.balanceAfter) }}
             </div>
           </div>
         </div>
@@ -72,82 +74,85 @@
   <!-- Transaction List - Full Mode (Table View) -->
   @if (!loading && transactions.length > 0 && !compact) {
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead class="bg-gray-50 dark:bg-gray-800">
-          <tr>
-            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead>
+          <tr class="bg-[#FAFAF8]">
+            <th scope="col" class="px-4 py-2.5 text-left text-[11.5px] font-semibold text-gray-400 uppercase tracking-wider">
               Type
             </th>
-            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            <th scope="col" class="px-4 py-2.5 text-left text-[11.5px] font-semibold text-gray-400 uppercase tracking-wider">
               Description
             </th>
-            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            <th scope="col" class="px-4 py-2.5 text-left text-[11.5px] font-semibold text-gray-400 uppercase tracking-wider">
               Date & Time
             </th>
-            <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            <th scope="col" class="px-4 py-2.5 text-right text-[11.5px] font-semibold text-gray-400 uppercase tracking-wider">
               Amount
             </th>
-            <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            <th scope="col" class="px-4 py-2.5 text-right text-[11.5px] font-semibold text-gray-400 uppercase tracking-wider">
               Balance
             </th>
-            <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            <th scope="col" class="px-4 py-2.5 text-center text-[11.5px] font-semibold text-gray-400 uppercase tracking-wider">
               Status
             </th>
           </tr>
         </thead>
-        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+        <tbody class="bg-white divide-y divide-gray-100">
           @for (txn of transactions; track txn.transactionId) {
-            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+            <tr class="hover:bg-gray-50/50 transition-colors">
               <!-- Type -->
-              <td class="px-4 py-4 whitespace-nowrap">
-                <div class="flex items-center gap-2">
-                  <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm"
-                    [class]="txn.status === 'Pending' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
-                             isCredit(txn.transactionType) ? 'bg-green-100 dark:bg-green-900/30' :
-                             'bg-red-100 dark:bg-red-900/30'">
-                    {{ getTransactionIcon(txn.transactionType, txn.status) }}
+              <td class="px-4 py-3.5 whitespace-nowrap">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-7 h-7 rounded-[7px] flex items-center justify-center"
+                    [class]="isCredit(txn.transactionType) ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'">
+                    @if (isCredit(txn.transactionType)) {
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+                      </svg>
+                    } @else {
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
+                      </svg>
+                    }
                   </span>
-                  <span class="text-sm font-medium text-gray-900 dark:text-white">
-                    {{ getTransactionLabel(txn.transactionType) }}
-                  </span>
+                  <span class="text-[13.5px] font-medium text-gray-900">{{ getTransactionLabel(txn.transactionType) }}</span>
                 </div>
               </td>
 
               <!-- Description -->
-              <td class="px-4 py-4">
-                <p class="text-sm text-gray-900 dark:text-white truncate max-w-xs">
+              <td class="px-4 py-3.5">
+                <p class="text-[13.5px] text-gray-900 truncate max-w-xs font-medium">
                   {{ txn.description || '-' }}
                 </p>
                 @if (txn.sourceModule) {
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
-                    Source: {{ txn.sourceModule }}
-                  </p>
+                  <p class="text-[11.5px] text-gray-400 font-mono mt-0.5">Source: {{ txn.sourceModule }}</p>
                 }
               </td>
 
               <!-- Date & Time -->
-              <td class="px-4 py-4 whitespace-nowrap">
-                <p class="text-sm text-gray-900 dark:text-white">{{ formatDate(txn.createdAt) }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatTime(txn.createdAt) }}</p>
+              <td class="px-4 py-3.5 whitespace-nowrap">
+                <p class="text-[13px] text-gray-600">{{ formatDate(txn.createdAt) }}</p>
+                <p class="text-[11.5px] text-gray-400 mt-0.5">{{ formatTime(txn.createdAt) }}</p>
               </td>
 
               <!-- Amount -->
-              <td class="px-4 py-4 whitespace-nowrap text-right">
-                <span class="text-sm font-semibold"
-                  [class]="isCredit(txn.transactionType) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-                  {{ isCredit(txn.transactionType) ? '+' : '-' }} {{ formatCurrency(txn.amount) }}
+              <td class="px-4 py-3.5 whitespace-nowrap text-right">
+                <span class="text-[13.5px] font-semibold tracking-tight"
+                  [class]="isCredit(txn.transactionType) ? 'text-green-600' : 'text-red-600'">
+                  {{ isCredit(txn.transactionType) ? '+' : '-' }}{{ formatCurrency(txn.amount) }}
                 </span>
               </td>
 
               <!-- Balance After -->
-              <td class="px-4 py-4 whitespace-nowrap text-right">
-                <span class="text-sm text-gray-900 dark:text-white">{{ formatCurrency(txn.balanceAfter) }}</span>
+              <td class="px-4 py-3.5 whitespace-nowrap text-right">
+                <span class="text-[13px] text-gray-600 font-mono font-medium">{{ formatCurrency(txn.balanceAfter) }}</span>
               </td>
 
               <!-- Status -->
-              <td class="px-4 py-4 whitespace-nowrap text-center">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+              <td class="px-4 py-3.5 whitespace-nowrap text-center">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-xs font-medium"
                   [class]="getStatusBadgeClass(txn.status)">
+                  <span class="w-[5px] h-[5px] rounded-full bg-current"></span>
                   {{ txn.status }}
                 </span>
               </td>

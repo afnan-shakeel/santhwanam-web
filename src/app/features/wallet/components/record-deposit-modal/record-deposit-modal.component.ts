@@ -29,6 +29,7 @@ export class RecordDepositModalComponent implements OnInit {
   @Input() memberName?: string | null;
   @Input() agentInfo?: WalletAgentInfo | null;
   @Input() recommendedAmount?: number;
+  @Input() currentBalance?: number | null;
   @Output() closeModal = new EventEmitter<void>();
   @Output() depositRecorded = new EventEmitter<void>();
 

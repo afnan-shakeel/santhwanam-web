@@ -1,56 +1,35 @@
-<!-- Wallet Overview Tab Content -->
+<!-- Wallet Overview Tab Content - V3 Clean Design -->
 <div class="space-y-6">
-  <!-- Quick Stats - Using Shared Component -->
-  <app-wallet-stats [stats]="stats()"></app-wallet-stats>
-
   <!-- Recent Transactions -->
-  <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-    <!-- Header -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Transactions</h2>
-      <button (click)="viewAllTransactions()"
-        class="text-sm font-medium text-primary hover:text-primary-dark transition-colors flex items-center gap-1">
-        View All
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+  <div>
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-[14.5px] font-semibold text-gray-900">Recent Transactions</h3>
+      <a (click)="viewAllTransactions()"
+        class="text-[13px] font-medium text-primary-600 flex items-center gap-1 cursor-pointer hover:text-primary-700 transition-colors">
+        View all
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <polyline points="9 18 15 12 9 6" />
         </svg>
-      </button>
+      </a>
     </div>
 
     <!-- Transaction List - Using Shared Component in Compact Mode -->
-    <app-wallet-transaction-list 
+    <app-wallet-transaction-list
       [transactions]="recentTransactions().slice(0, 5)"
       [compact]="true">
     </app-wallet-transaction-list>
   </div>
 
-  <!-- How Wallet Works Info -->
-  <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-5">
-    <div class="flex items-start gap-4">
-      <div class="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg shrink-0">
-        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd"
-            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-            clip-rule="evenodd" />
-        </svg>
-      </div>
-      <div>
-        <h3 class="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-2">How Wallet Works</h3>
-        <ul class="space-y-1.5 text-sm text-blue-700 dark:text-blue-300">
-          <li class="flex items-start gap-2">
-            <span class="text-blue-500 mt-0.5">•</span>
-            <span>Your wallet is used to automatically pay contributions when a member passes away</span>
-          </li>
-          <li class="flex items-start gap-2">
-            <span class="text-blue-500 mt-0.5">•</span>
-            <span>If you have sufficient balance, contributions are deducted automatically</span>
-          </li>
-          <li class="flex items-start gap-2">
-            <span class="text-blue-500 mt-0.5">•</span>
-            <span>Contact your agent to add money to your wallet</span>
-          </li>
-        </ul>
-      </div>
+  <!-- How Wallet Works Info Banner -->
+  <div class="flex items-start gap-3 px-5 py-4 bg-[#F0FDFA] border border-[#99F6E4] rounded-lg">
+    <svg class="w-[18px] h-[18px] text-primary-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12.01" y2="8" />
+    </svg>
+    <div class="text-[13px] text-[#115E59] leading-relaxed">
+      <strong class="block mb-0.5 font-semibold">How the wallet works</strong>
+      Contributions are automatically deducted when a death claim cycle starts. Keep the wallet funded to stay covered.
     </div>
   </div>
 </div>

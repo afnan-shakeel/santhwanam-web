@@ -4,13 +4,12 @@ import { Router } from '@angular/router';
 
 import { WalletStore } from '../../../../core/state/wallet.store';
 import { WalletTransactionType } from '../../../../shared/models/wallet.model';
-import { WalletStatsComponent } from '../../components/wallet-stats/wallet-stats.component';
 import { WalletTransactionListComponent } from '../../components/wallet-transaction-list/wallet-transaction-list.component';
 
 @Component({
   selector: 'app-wallet-overview',
   standalone: true,
-  imports: [CommonModule, WalletStatsComponent, WalletTransactionListComponent],
+  imports: [CommonModule, WalletTransactionListComponent],
   templateUrl: './wallet-overview.component.html',
   styleUrls: ['./wallet-overview.component.css']
 })
@@ -20,7 +19,6 @@ export class WalletOverviewComponent implements OnInit {
 
   // Get data from store
   wallet = this.walletStore.wallet;
-  stats = this.walletStore.stats;
   recentTransactions = this.walletStore.recentTransactions;
 
   ngOnInit(): void {

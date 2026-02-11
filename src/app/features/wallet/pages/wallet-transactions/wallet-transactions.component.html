@@ -1,281 +1,219 @@
-<!-- Wallet Transactions - Works as child route or standalone -->
+<!-- Wallet Transactions V3 - Clean Design -->
 
 @if (isChildRoute()) {
-  <!-- Child Route Mode - No header, just content -->
-  <div class="space-y-6">
-    <!-- Download buttons for child route mode -->
-    <div class="flex items-center justify-end gap-2">
-      <button
-        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        PDF
-      </button>
-      <button
-        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-        </svg>
-        Excel
-      </button>
-    </div>
-
-    <!-- Filters Card -->
-    <ng-container *ngTemplateOutlet="filtersCard"></ng-container>
+  <!-- Child Route Mode - Tab content -->
+  <div class="space-y-5">
+    <!-- Flat Filter Bar -->
+    <ng-container *ngTemplateOutlet="filtersBar"></ng-container>
 
     <!-- Transactions Table -->
     <ng-container *ngTemplateOutlet="transactionsTable"></ng-container>
   </div>
 } @else {
-  <!-- Standalone Mode - Full page with header -->
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <!-- Standalone Mode -->
+  <div class="min-h-screen bg-[#F6F5F2]">
     <!-- Header -->
-    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="bg-white border-b border-gray-200">
+      <div class="max-w-[1080px] mx-auto px-4 sm:px-7 py-5">
         <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
 
-        <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div class="flex items-center gap-3">
+        <div class="mt-4 flex items-center justify-between">
+          <div class="flex items-center gap-3.5">
             <button (click)="goBack()"
-              class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              class="w-9 h-9 border border-gray-200 bg-white rounded-md flex items-center justify-center text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <polyline points="15 18 9 12 15 6" />
               </svg>
             </button>
-            <div class="p-3 bg-linear-to-br from-primary-600 to-primary-800 rounded-xl shadow-lg">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </div>
-            <div>
-              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Transaction History</h1>
-            </div>
-          </div>
-
-          <!-- Download Buttons -->
-          <div class="flex items-center gap-2">
-            <button
-              class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              PDF
-            </button>
-            <button
-              class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-              </svg>
-              Excel
-            </button>
+            <h1 class="text-xl font-bold tracking-tight text-gray-900">Transaction History</h1>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      <!-- Filters Card -->
-      <ng-container *ngTemplateOutlet="filtersCard"></ng-container>
-
-      <!-- Transactions Table -->
+    <div class="max-w-[1080px] mx-auto px-4 sm:px-7 py-6 space-y-5">
+      <ng-container *ngTemplateOutlet="filtersBar"></ng-container>
       <ng-container *ngTemplateOutlet="transactionsTable"></ng-container>
     </div>
   </div>
 }
 
-<!-- Shared Template: Filters Card -->
-<ng-template #filtersCard>
-  <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-      <div class="flex items-center justify-between">
-        <h2 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-          </svg>
-          Filters
-        </h2>
-        <button (click)="clearFilters()" class="text-sm text-primary hover:text-primary-dark font-medium">
-          Clear all
-        </button>
-      </div>
+<!-- Shared Template: Flat Filter Bar -->
+<ng-template #filtersBar>
+  <form [formGroup]="filterForm" (ngSubmit)="applyFilters()"
+    class="flex items-end gap-3 flex-wrap">
+    <!-- Type -->
+    <div class="flex flex-col gap-1.5">
+      <span class="text-[11.5px] font-semibold uppercase tracking-wider text-gray-400">Type</span>
+      <app-select formControlName="type" [options]="typeOptions" placeholder="All Types"></app-select>
     </div>
 
-    <div class="p-6">
-      <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <!-- Type Filter -->
-        <div>
-          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Type</label>
-          <app-select formControlName="type" [options]="typeOptions" placeholder="All Types"></app-select>
-        </div>
-
-        <!-- Status Filter -->
-        <div>
-          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Status</label>
-          <app-select formControlName="status" [options]="statusOptions" placeholder="All Status"></app-select>
-        </div>
-
-        <!-- Start Date -->
-        <div>
-          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">From Date</label>
-          <input type="date" formControlName="startDate"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
-                   bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm
-                   focus:ring-2 focus:ring-primary focus:border-primary">
-        </div>
-
-        <!-- End Date -->
-        <div>
-          <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">To Date</label>
-          <input type="date" formControlName="endDate"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
-                   bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm
-                   focus:ring-2 focus:ring-primary focus:border-primary">
-        </div>
-
-        <!-- Apply Button -->
-        <div class="flex items-end">
-          <button type="submit"
-            class="w-full px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg transition-colors">
-            Apply Filters
-          </button>
-        </div>
-      </form>
+    <!-- Status -->
+    <div class="flex flex-col gap-1.5">
+      <span class="text-[11.5px] font-semibold uppercase tracking-wider text-gray-400">Status</span>
+      <app-select formControlName="status" [options]="statusOptions" placeholder="All Status"></app-select>
     </div>
-  </div>
+
+    <!-- Start Date -->
+    <div class="flex flex-col gap-1.5">
+      <span class="text-[11.5px] font-semibold uppercase tracking-wider text-gray-400">From</span>
+      <input type="date" formControlName="startDate"
+        class="px-3 py-[7px] border border-gray-200 rounded-md bg-white text-gray-900 text-[13px]
+               focus:ring-1 focus:ring-primary-600 focus:border-primary-600 outline-none min-w-[150px]">
+    </div>
+
+    <!-- End Date -->
+    <div class="flex flex-col gap-1.5">
+      <span class="text-[11.5px] font-semibold uppercase tracking-wider text-gray-400">To</span>
+      <input type="date" formControlName="endDate"
+        class="px-3 py-[7px] border border-gray-200 rounded-md bg-white text-gray-900 text-[13px]
+               focus:ring-1 focus:ring-primary-600 focus:border-primary-600 outline-none min-w-[150px]">
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-end gap-2 ml-auto">
+      <button type="button" (click)="clearFilters()"
+        class="px-3 py-2 text-[12.5px] font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
+        Clear all
+      </button>
+      <button type="submit"
+        class="inline-flex items-center gap-1.5 px-3 py-2 text-[12.5px] font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:border-gray-300 hover:bg-gray-50 transition-all">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" />
+        </svg>
+        PDF
+      </button>
+      <button type="button"
+        class="inline-flex items-center gap-1.5 px-3 py-2 text-[12.5px] font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:border-gray-300 hover:bg-gray-50 transition-all">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="3" x2="9" y2="21" />
+        </svg>
+        Excel
+      </button>
+    </div>
+  </form>
 </ng-template>
 
 <!-- Shared Template: Transactions Table -->
 <ng-template #transactionsTable>
-  <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-    <!-- Loading State -->
-    @if (loading()) {
-      <div class="flex items-center justify-center py-20">
-        <div class="flex flex-col items-center gap-4">
-          <div class="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent"></div>
-          <p class="text-gray-500 dark:text-gray-400 text-sm">Loading transactions...</p>
-        </div>
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex items-center justify-center py-20">
+      <div class="flex flex-col items-center gap-4">
+        <div class="animate-spin rounded-full h-10 w-10 border-4 border-primary-600 border-t-transparent"></div>
+        <p class="text-gray-400 text-sm">Loading transactions...</p>
       </div>
-    } @else {
-      <!-- Table -->
-      @if (transactions().length > 0) {
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead>
-              <tr class="bg-gray-50 dark:bg-gray-700/50">
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Date
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Description
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Type
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Status
-                </th>
-                <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Balance
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-              @for (txn of transactions(); track txn.transactionId) {
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <!-- Date -->
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900 dark:text-white">{{ formatDate(txn.createdAt) }}</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ formatTime(txn.createdAt) }}</div>
-                  </td>
+    </div>
+  } @else {
+    @if (transactions().length > 0) {
+      <!-- Data Table -->
+      <div class="border border-gray-200 rounded-lg overflow-hidden">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr>
+              <th class="bg-[#FAFAF8] px-4 py-2.5 text-left text-[11.5px] font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-200" style="width:120px">Date</th>
+              <th class="bg-[#FAFAF8] px-4 py-2.5 text-left text-[11.5px] font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-200">Description</th>
+              <th class="bg-[#FAFAF8] px-4 py-2.5 text-left text-[11.5px] font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-200" style="width:140px">Type</th>
+              <th class="bg-[#FAFAF8] px-4 py-2.5 text-left text-[11.5px] font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-200" style="width:110px">Status</th>
+              <th class="bg-[#FAFAF8] px-4 py-2.5 text-right text-[11.5px] font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-200" style="width:110px">Amount</th>
+              <th class="bg-[#FAFAF8] px-4 py-2.5 text-right text-[11.5px] font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-200" style="width:90px">Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (txn of transactions(); track txn.transactionId) {
+              <tr class="hover:bg-gray-50/50 transition-colors">
+                <!-- Date -->
+                <td class="px-4 py-3.5 border-b border-gray-100 whitespace-nowrap">
+                  <div class="text-[13px] text-gray-600">{{ formatDate(txn.createdAt) }}</div>
+                  <div class="text-[11.5px] text-gray-400 mt-0.5">{{ formatTime(txn.createdAt) }}</div>
+                </td>
 
-                  <!-- Description -->
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <span class="text-lg">{{ getTransactionIcon(txn.transactionType, txn.status) }}</span>
-                      <div class="min-w-0">
-                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
-                          {{ txn.description || getTransactionLabel(txn.transactionType) }}
-                        </p>
-                        @if (txn.sourceEntityId) {
-                          <p class="text-xs text-gray-500 dark:text-gray-400">Ref: {{ txn.sourceEntityId.slice(0, 8) }}...</p>
-                        }
-                      </div>
+                <!-- Description -->
+                <td class="px-4 py-3.5 border-b border-gray-100">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-7 h-7 rounded-[7px] flex items-center justify-center shrink-0"
+                      [class]="isCredit(txn.transactionType) ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'">
+                      @if (isCredit(txn.transactionType)) {
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                          <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+                        </svg>
+                      } @else {
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                          <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
+                        </svg>
+                      }
                     </div>
-                  </td>
+                    <div>
+                      <div class="text-[13.5px] font-medium text-gray-900">
+                        {{ txn.description || getTransactionLabel(txn.transactionType) }}
+                      </div>
+                      @if (txn.sourceEntityId) {
+                        <div class="text-[11.5px] text-gray-400 font-mono mt-0.5">Ref: {{ txn.sourceEntityId.slice(0, 8) }}</div>
+                      }
+                    </div>
+                  </div>
+                </td>
 
-                  <!-- Type -->
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ getTransactionLabel(txn.transactionType) }}</span>
-                  </td>
+                <!-- Type -->
+                <td class="px-4 py-3.5 border-b border-gray-100 text-[13.5px] text-gray-700">
+                  {{ getTransactionLabel(txn.transactionType) }}
+                </td>
 
-                  <!-- Status -->
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="px-2.5 py-1 text-xs font-medium rounded-full" [class]="getStatusBadgeClass(txn.status)">
-                      {{ txn.status }}
-                    </span>
-                  </td>
+                <!-- Status -->
+                <td class="px-4 py-3.5 border-b border-gray-100">
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-xs font-medium" [class]="getStatusBadgeClass(txn.status)">
+                    <span class="w-[5px] h-[5px] rounded-full bg-current"></span>
+                    {{ txn.status }}
+                  </span>
+                </td>
 
-                  <!-- Amount -->
-                  <td class="px-6 py-4 whitespace-nowrap text-right">
-                    <span class="text-sm font-semibold"
-                      [class]="isCredit(txn.transactionType) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-                      {{ isCredit(txn.transactionType) ? '+' : '-' }}{{ formatCurrency(txn.amount) }}
-                    </span>
-                  </td>
+                <!-- Amount -->
+                <td class="px-4 py-3.5 border-b border-gray-100 text-right">
+                  <span class="text-[13.5px] font-semibold tracking-tight"
+                    [class]="isCredit(txn.transactionType) ? 'text-green-600' : 'text-red-600'">
+                    {{ isCredit(txn.transactionType) ? '+' : '-' }}{{ formatCurrency(txn.amount) }}
+                  </span>
+                </td>
 
-                  <!-- Balance After -->
-                  <td class="px-6 py-4 whitespace-nowrap text-right">
-                    <span class="text-sm text-gray-900 dark:text-white">{{ formatCurrency(txn.balanceAfter) }}</span>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Pagination -->
-        @if (totalPages() > 1) {
-          <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between">
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ getMaxShowing() }} of {{ total() }} transactions
-              </p>
-              <app-pagination
-                [currentPage]="currentPage()"
-                [totalPages]="totalPages()"
-                (pageChange)="onPageChange($event)">
-              </app-pagination>
-            </div>
-          </div>
-        }
-      } @else {
-        <!-- Empty State -->
-        <div class="px-6 py-16 text-center">
-          <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-          </svg>
-          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No transactions found</h3>
-          <p class="text-gray-500 dark:text-gray-400">
-            @if (hasActiveFilters()) {
-              Try adjusting your filters to find transactions.
-            } @else {
-              Your transaction history will appear here.
+                <!-- Balance -->
+                <td class="px-4 py-3.5 border-b border-gray-100 text-right">
+                  <span class="text-[13px] text-gray-600 font-mono font-medium">{{ formatCurrency(txn.balanceAfter) }}</span>
+                </td>
+              </tr>
             }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="flex items-center justify-between pt-3.5">
+          <p class="text-[13px] text-gray-500">
+            Showing {{ (currentPage() - 1) * pageSize() + 1 }}–{{ getMaxShowing() }} of {{ total() }} transactions
           </p>
+          <app-pagination
+            [currentPage]="currentPage()"
+            [totalPages]="totalPages()"
+            (pageChange)="onPageChange($event)">
+          </app-pagination>
         </div>
       }
+    } @else {
+      <!-- Empty State -->
+      <div class="py-16 text-center">
+        <svg class="w-14 h-14 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <h3 class="text-base font-medium text-gray-900 mb-1">No transactions found</h3>
+        <p class="text-gray-400 text-sm">
+          @if (hasActiveFilters()) {
+            Try adjusting your filters to find transactions.
+          } @else {
+            Your transaction history will appear here.
+          }
+        </p>
+      </div>
     }
-  </div>
+  }
 </ng-template>

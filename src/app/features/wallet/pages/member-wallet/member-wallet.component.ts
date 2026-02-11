@@ -12,7 +12,7 @@ import { RecordDepositModalComponent } from '../../components/record-deposit-mod
 import { AdjustmentModalComponent } from '../../components/adjustment-modal/adjustment-modal.component';
 import { Wallet, WalletSummary } from '../../../../shared/models/wallet.model';
 import { AccessService } from '../../../../core/services/access.service';
-import { ViewModeBadgeComponent } from '../../../../shared/components/view-mode-badge/view-mode-badge.component';
+import { WalletStatsData } from '../../components/wallet-stats/wallet-stats.component';
 
 
 @Component({
@@ -27,8 +27,7 @@ import { ViewModeBadgeComponent } from '../../../../shared/components/view-mode-
     WalletBalanceCardComponent,
     MemberInfoCardComponent,
     RecordDepositModalComponent,
-    AdjustmentModalComponent,
-    ViewModeBadgeComponent
+    AdjustmentModalComponent
   ],
   templateUrl: './member-wallet.component.html',
   styleUrls: ['./member-wallet.component.css']
@@ -72,6 +71,19 @@ export class MemberWalletComponent implements OnInit, OnDestroy {
   // Computed: Determine if current view is agent or admin
   isAgentView = computed(() => this.viewMode() === 'agent');
   isAdminView = computed(() => this.accessService.getSimplifiedViewMode() === 'admin');
+
+  // Computed: View mode label for badge pill
+  viewModeLabel = computed(() => {
+    const mode = this.viewMode();
+    switch (mode) {
+      case 'agent': return 'Agent View';
+      case 'superadmin': return 'Super Admin View';
+      default: return 'Admin View';
+    }
+  });
+
+  // Computed: Stats for balance card
+  walletStats = computed<WalletStatsData | null>(() => this.walletStore.stats());
 
   // Computed: Base route for tabs
   baseRoute = computed(() => {

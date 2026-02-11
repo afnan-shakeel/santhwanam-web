@@ -1,14 +1,12 @@
 import { Component, EventEmitter, Input, Output, booleanAttribute } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { WalletStatsData } from '../wallet-stats/wallet-stats.component';
 
 /**
  * WalletBalanceCardComponent
  * 
  * Shared presentational component displaying wallet balance with contextual actions.
- * Used by:
- * - Member view: Shows "Request Deposit" button
- * - Agent view: Shows "Record Deposit" button
- * - Admin view: Shows "Manual Adjustment" button
+ * Redesigned: white card with gradient top border, inline stats row.
  */
 @Component({
   selector: 'app-wallet-balance-card',
@@ -22,6 +20,7 @@ export class WalletBalanceCardComponent {
   @Input() balance: number = 0;
   @Input({ transform: booleanAttribute }) isLowBalance: boolean = false;
   @Input() recommendedTopUp: number = 0;
+  @Input() stats: WalletStatsData | null = null;
 
   // Action button visibility
   @Input({ transform: booleanAttribute }) showRequestDeposit: boolean = false;
