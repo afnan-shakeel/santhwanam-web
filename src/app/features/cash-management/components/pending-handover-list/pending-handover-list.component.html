@@ -1,98 +1,85 @@
 <!-- Pending Handover List -->
-<div class="bg-white rounded-xl shadow-sm border border-gray-200">
-  <div class="px-6 py-4 border-b border-gray-200">
-    <h3 class="text-lg font-semibold text-gray-900">{{ title }}</h3>
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+  <!-- Card Header -->
+  <div class="flex items-center justify-between px-6 py-[18px] border-b border-gray-100">
+    <h3 class="text-[14.5px] font-semibold text-gray-900">{{ title }}</h3>
+    @if (getFilteredHandovers().length > 0) {
+      <span class="inline-flex items-center gap-1 px-2.5 py-[3px] rounded-xl text-xs font-[550] bg-amber-50 text-amber-600">
+        <span class="w-[5px] h-[5px] rounded-full bg-current"></span>
+        {{ getFilteredHandovers().length }} pending
+      </span>
+    }
   </div>
 
   @if (getFilteredHandovers().length === 0) {
-    <div class="px-6 py-8 text-center text-gray-500">
-      <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="px-6 py-8 text-center text-gray-400">
+      <svg class="w-12 h-12 mx-auto text-gray-200 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
       </svg>
-      <p>{{ emptyMessage }}</p>
+      <p class="text-sm">{{ emptyMessage }}</p>
     </div>
   } @else {
-    <div class="divide-y divide-gray-100">
+    <div class="px-5 py-3">
       @for (handover of getFilteredHandovers(); track handover.handoverId) {
-        <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
-          <div class="flex items-start justify-between gap-4">
-            <!-- Left: Direction icon and details -->
-            <div class="flex items-start gap-3">
-              <!-- Direction Icon -->
+        <div class="flex items-center gap-3.5 py-4 border-b border-gray-100 last:border-b-0 transition-colors">
+          <!-- Icon Box -->
+          <div class="shrink-0 w-10 h-10 rounded-lg flex items-center justify-center"
+               [class]="isOutgoing(handover) ? 'bg-amber-100 text-amber-600' : 'bg-green-50 text-green-600'">
+            @if (isOutgoing(handover)) {
+              <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="17 1 21 5 17 9"/><line x1="3" y1="5" x2="21" y2="5"/>
+              </svg>
+            } @else {
+              <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+              </svg>
+            }
+          </div>
+
+          <!-- Info -->
+          <div class="flex-1 min-w-0">
+            <p class="text-[13.5px] font-[550] text-gray-900 mb-0.5">
               @if (isOutgoing(handover)) {
-                <div class="shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                </div>
+                To: {{ getUserFullName(handover.toUser) }}
+                <span class="font-normal text-gray-400 text-xs">({{ getRoleDisplayName(handover.toUserRole) }})</span>
               } @else {
-                <div class="shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                  <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                  </svg>
-                </div>
+                From: {{ getUserFullName(handover.fromUser) }}
+                <span class="font-normal text-gray-400 text-xs">({{ getRoleDisplayName(handover.fromUserRole) }})</span>
               }
+            </p>
+            <div class="flex items-center gap-1.5 text-xs text-gray-400">
+              <span>{{ handover.handoverNumber }}</span>
+              <span class="w-[3px] h-[3px] rounded-full bg-gray-400"></span>
+              <span>{{ getRelativeTime(handover.initiatedAt) }}</span>
+            </div>
+          </div>
 
-              <!-- Details -->
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-medium px-2 py-0.5 rounded-full" 
-                        [class]="isOutgoing(handover) ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'">
-                    {{ isOutgoing(handover) ? 'Outgoing' : 'Incoming' }}
-                  </span>
-                  <span class="text-sm text-gray-500">{{ handover.handoverNumber }}</span>
-                </div>
-                
-                <p class="mt-1 text-sm font-medium text-gray-900">
-                  @if (isOutgoing(handover)) {
-                    To: {{ getUserFullName(handover.toUser) }} ({{ getRoleDisplayName(handover.toUserRole) }})
-                  } @else {
-                    From: {{ getUserFullName(handover.fromUser) }} ({{ getRoleDisplayName(handover.fromUserRole) }})
-                  }
-                </p>
-
-                <div class="mt-1 flex items-center gap-3 text-sm text-gray-500">
-                  <span class="font-semibold text-gray-900">{{ formatCurrency(handover.amount) }}</span>
-                  <span>•</span>
-                  <span>{{ getRelativeTime(handover.initiatedAt) }}</span>
-                </div>
-
-                @if (handover.initiatorNotes) {
-                  <p class="mt-1 text-sm text-gray-500 italic">"{{ handover.initiatorNotes }}"</p>
-                }
-              </div>
+          <!-- Right: Amount + Chip + Action -->
+          <div class="shrink-0 flex items-center gap-3">
+            <div class="text-right">
+              <p class="text-[15px] font-bold tracking-tight text-amber-600">{{ formatCurrency(handover.amount) }}</p>
+              <span class="inline-flex items-center gap-1 px-2.5 py-[3px] rounded-xl text-[11px] font-[550] bg-amber-50 text-amber-600">
+                <span class="w-[5px] h-[5px] rounded-full bg-current"></span>
+                Pending
+              </span>
             </div>
 
-            <!-- Right: Actions -->
-            <div class="flex items-center gap-2">
-              <app-handover-status-badge [status]="handover.status" />
-              
-              @if (showCancelAction && isOutgoing(handover) && handover.status === 'Initiated') {
-                <app-button 
-                  variant="ghost" 
-                  size="sm"
-                  (click)="cancel.emit(handover)">
-                  Cancel
-                </app-button>
-              }
-
-              @if (showAcknowledgeAction && !isOutgoing(handover) && handover.status === 'Initiated') {
-                <app-button 
-                  variant="primary" 
-                  size="sm"
-                  (click)="acknowledge.emit(handover)">
-                  Acknowledge
-                </app-button>
-              }
-
+            @if (showCancelAction && isOutgoing(handover) && handover.status === 'Initiated') {
               <button 
-                (click)="viewDetails.emit(handover)"
-                class="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
+                (click)="cancel.emit(handover)"
+                class="px-3 py-2 text-xs font-[550] text-red-600 hover:bg-gray-50 rounded-md transition-colors">
+                Cancel
               </button>
-            </div>
+            }
+
+            @if (showAcknowledgeAction && !isOutgoing(handover) && handover.status === 'Initiated') {
+              <app-button 
+                variant="primary" 
+                size="sm"
+                (click)="acknowledge.emit(handover)">
+                Acknowledge
+              </app-button>
+            }
           </div>
         </div>
       }

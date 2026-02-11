@@ -1,197 +1,194 @@
 <!-- Initiate Handover Page -->
 <div class="min-h-screen bg-gray-50">
-  <!-- Header -->
-  <div class="bg-white border-b border-gray-200">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div class="flex items-center gap-4">
-        <app-back-button />
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">Initiate Cash Handover</h1>
-          <p class="mt-1 text-sm text-gray-500">Transfer cash to your supervisor</p>
-        </div>
+  <!-- Content -->
+  <div class="max-w-[640px] mx-auto px-7 py-6">
+    <!-- Page Header (inline with back button) -->
+    <div class="flex items-center gap-3.5 mb-6">
+      <button (click)="onCancel()"
+        class="w-9 h-9 border border-gray-200 bg-white rounded-md flex items-center justify-center text-gray-500 hover:border-gray-400 hover:text-gray-900 transition-all">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <div>
+        <h1 class="text-xl font-bold tracking-tight text-gray-900">Initiate Cash Handover</h1>
+        <p class="mt-0.5 text-[13.5px] text-gray-500">Transfer cash to your supervisor</p>
       </div>
     </div>
-  </div>
 
-  <!-- Content -->
-  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     @if (isLoading()) {
       <!-- Loading State -->
-      <div class="space-y-6">
-        <div class="h-32 bg-gray-200 rounded-xl animate-pulse"></div>
-        <div class="h-64 bg-gray-200 rounded-xl animate-pulse"></div>
+      <div class="space-y-5">
+        <div class="h-16 bg-white border border-gray-200 rounded-lg animate-pulse"></div>
+        <div class="h-80 bg-white border border-gray-200 rounded-xl animate-pulse"></div>
       </div>
     } @else {
-      <div class="space-y-6">
-        <!-- Available Balance Card -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Available Balance</p>
-              <p class="text-3xl font-bold text-gray-900 mt-1">{{ formatCurrency(availableBalance()) }}</p>
-            </div>
-            <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-              <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
+      <!-- Balance Badge -->
+      <div class="inline-flex w-full items-center gap-2.5 px-5 py-3 bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
+        <svg class="w-5 h-5 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+        </svg>
+        <div>
+          <span class="block text-xs font-medium uppercase tracking-[0.04em] text-gray-400">Available Balance</span>
+          <span class="block text-[22px] font-bold tracking-tight text-gray-900 leading-tight">₹{{ availableBalance() | number:'1.2-2' }}</span>
         </div>
+      </div>
 
-        <!-- Form -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-900">Handover Details</h2>
-          </div>
-          
-          <div class="p-6 space-y-6">
-            <!-- Receiver Selection -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Transfer To <span class="text-red-500">*</span>
-              </label>
-              
-              @if (receivers().length === 0) {
-                <div class="text-sm text-gray-500 bg-gray-50 rounded-lg p-4">
-                  No valid receivers available for your role.
-                </div>
-              } @else {
-                <div class="space-y-2">
-                  @for (receiver of receivers(); track receiver.userId) {
-                    <label 
-                      class="flex items-center gap-4 p-4 rounded-lg border cursor-pointer transition-colors"
-                      [class]="selectedReceiverId() === receiver.userId ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:bg-gray-50'">
-                      <input 
-                        type="radio" 
-                        name="receiver"
-                        [value]="receiver.userId"
-                        [checked]="selectedReceiverId() === receiver.userId"
-                        (change)="onReceiverChange(receiver.userId)"
-                        class="h-4 w-4 text-primary-600 focus:ring-primary-500">
-                      <div class="flex-1">
-                        <div class="flex items-center gap-2">
-                          <span class="font-medium text-gray-900">{{ receiver.fullName }}</span>
-                          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
-                            {{ receiver.roleDisplayName }}
-                          </span>
-                        </div>
-                        @if (receiver.scopeEntityName) {
-                          <p class="text-sm text-gray-500 mt-0.5">{{ receiver.scopeEntityName }}</p>
-                        }
+      <!-- Form Card -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="px-7 py-5 border-b border-gray-100">
+          <h3 class="text-[15px] font-semibold text-gray-900">Handover Details</h3>
+        </div>
+        
+        <div class="px-7 py-6 space-y-[22px]">
+          <!-- Receiver Selection -->
+          <div>
+            <label class="block text-[13px] font-semibold text-gray-900 mb-2">
+              Transfer To<span class="text-red-500 ml-0.5">*</span>
+            </label>
+            
+            @if (receivers().length === 0) {
+              <div class="text-sm text-gray-500 bg-gray-50 rounded-md p-4">
+                No valid receivers available for your role.
+              </div>
+            } @else {
+              <div class="flex flex-col gap-2">
+                @for (receiver of receivers(); track receiver.userId) {
+                  <div 
+                    (click)="onReceiverChange(receiver.userId)"
+                    class="flex items-center gap-3.5 px-4 py-3.5 border-2 rounded-lg cursor-pointer transition-all relative"
+                    [class]="selectedReceiverId() === receiver.userId 
+                      ? 'border-primary-600 bg-primary-50/60' 
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'">
+                    <!-- Radio indicator -->
+                    <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all"
+                         [class]="selectedReceiverId() === receiver.userId 
+                           ? 'border-primary-600 bg-primary-600' 
+                           : 'border-gray-200'">
+                      @if (selectedReceiverId() === receiver.userId) {
+                        <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+                      }
+                    </div>
+                    <!-- Avatar -->
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-semibold shrink-0"
+                         [class]="receiver.role === 'UnitAdmin' ? 'bg-blue-100 text-blue-600' 
+                                : receiver.role === 'AreaAdmin' ? 'bg-indigo-100 text-indigo-700'
+                                : receiver.role === 'ForumAdmin' ? 'bg-pink-100 text-pink-700'
+                                : 'bg-amber-100 text-amber-600'">
+                      {{ receiver.fullName.charAt(0) }}{{ (receiver.lastName || '').charAt(0) }}
+                    </div>
+                    <!-- Info -->
+                    <div class="flex-1">
+                      <div class="text-sm font-semibold text-gray-900">{{ receiver.fullName }}</div>
+                      <div class="text-xs text-gray-500 flex items-center gap-1.5">
+                        <span class="px-2 py-px rounded-lg text-[11px] font-medium text-gray-500 border border-gray-100">{{ receiver.roleDisplayName }}</span>
                       </div>
-                    </label>
-                  }
-                </div>
-              }
-            </div>
-
-            <!-- Amount -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Amount <span class="text-red-500">*</span>
-              </label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span class="text-gray-500 sm:text-sm">₹</span>
-                </div>
-                <input 
-                  type="number"
-                  [value]="amount()"
-                  (input)="onAmountChange($any($event.target).value)"
-                  placeholder="0.00"
-                  min="0.01"
-                  step="0.01"
-                  class="block w-full pl-8 pr-24 py-3 rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                  [class.border-red-300]="amountError()"
-                  [class.focus:border-red-500]="amountError()"
-                  [class.focus:ring-red-500]="amountError()">
-                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                  <button 
-                    type="button"
-                    (click)="setMaxAmount()"
-                    class="text-sm font-medium text-primary-600 hover:text-primary-700">
-                    Max
-                  </button>
-                </div>
+                    </div>
+                    <!-- Bank "Requires Approval" tag -->
+                    @if (receiver.role === 'SuperAdmin') {
+                      <span class="absolute top-2 right-3 text-[10.5px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-300">Requires Approval</span>
+                    }
+                  </div>
+                }
               </div>
-              @if (amountError()) {
-                <p class="mt-2 text-sm text-red-600">{{ amountError() }}</p>
-              }
-            </div>
-
-            <!-- Notes -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Notes <span class="text-gray-400">(optional)</span>
-              </label>
-              <textarea 
-                rows="3"
-                [value]="notes()"
-                (input)="onNotesChange($any($event.target).value)"
-                placeholder="Add any notes for the receiver..."
-                class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-              </textarea>
-            </div>
+            }
           </div>
 
-          <!-- Summary -->
-          @if (selectedReceiver() && amount()) {
-            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
-              <div class="flex items-center justify-between text-sm">
-                <span class="text-gray-600">Transferring to</span>
-                <span class="font-medium text-gray-900">{{ selectedReceiver()?.fullName }}</span>
-              </div>
-              <div class="flex items-center justify-between text-sm mt-2">
-                <span class="text-gray-600">Amount</span>
-                <span class="font-bold text-lg text-primary-600">{{ formatCurrency(amount()!) }}</span>
-              </div>
-              <div class="flex items-center justify-between text-sm mt-2">
-                <span class="text-gray-600">Remaining Balance</span>
-                <span class="font-medium text-gray-900">{{ formatCurrency(availableBalance() - amount()!) }}</span>
-              </div>
+          <!-- Amount -->
+          <div>
+            <label class="block text-[13px] font-semibold text-gray-900 mb-2">
+              Amount<span class="text-red-500 ml-0.5">*</span>
+            </label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-400">₹</span>
+              <input 
+                type="number"
+                [value]="amount()"
+                (input)="onAmountChange($any($event.target).value)"
+                placeholder="0.00"
+                min="0.01"
+                step="0.01"
+                class="w-full pl-[30px] pr-16 py-2.5 text-lg font-semibold text-gray-900 bg-white border border-gray-200 rounded-md outline-none transition-all focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20"
+                [class.border-red-300]="amountError()"
+                [class.focus:border-red-500]="amountError()">
+              <button 
+                type="button"
+                (click)="setMaxAmount()"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-[12.5px] font-semibold text-primary-600 hover:text-primary-700 bg-transparent border-none cursor-pointer">
+                Max
+              </button>
             </div>
-          }
+            @if (amountError()) {
+              <p class="mt-2 text-sm text-red-600">{{ amountError() }}</p>
+            }
+          </div>
 
-          <!-- Actions -->
-          <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
-            <app-button 
-              variant="ghost"
-              (click)="onCancel()">
-              Cancel
-            </app-button>
-            <app-button 
-              variant="primary"
-              [disabled]="!isFormValid() || isSubmitting()"
-              (click)="onSubmit()">
-              @if (isSubmitting()) {
-                <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Submitting...
-              } @else {
-                Initiate Handover
-              }
-            </app-button>
+          <!-- Notes -->
+          <div>
+            <label class="block text-[13px] font-semibold text-gray-900 mb-2">
+              Notes<span class="text-gray-400 font-normal text-xs ml-1">(optional)</span>
+            </label>
+            <textarea 
+              [value]="notes()"
+              (input)="onNotesChange($any($event.target).value)"
+              placeholder="Add any notes for the receiver..."
+              class="w-full px-3.5 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-md resize-y min-h-20 outline-none transition-all focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20">
+            </textarea>
           </div>
         </div>
+      </div>
 
-        <!-- Info Note -->
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div class="flex">
-            <svg class="h-5 w-5 text-blue-500 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+      <!-- Summary Card -->
+      @if (selectedReceiver() && amount()) {
+        <div class="mt-6  border border-gray-100 rounded-lg p-5">
+          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-[0.04em] mb-3.5">Transfer Summary</h4>
+          <div class="flex justify-between py-1.5 text-sm">
+            <span class="text-gray-500">Transferring to</span>
+            <span class="font-semibold text-gray-900">{{ selectedReceiver()?.fullName }}</span>
+          </div>
+          <div class="flex justify-between py-1.5 text-sm">
+            <span class="text-gray-500">Amount</span>
+            <span class="font-semibold text-primary-600">{{ formatCurrency(amount()!) }}</span>
+          </div>
+          <div class="flex justify-between pt-3 mt-2 border-t border-gray-200 text-sm">
+            <span class="text-gray-500">Remaining Balance</span>
+            <span class="text-[15px] font-semibold text-primary-600">{{ formatCurrency(availableBalance() - amount()!) }}</span>
+          </div>
+        </div>
+      }
+
+      <!-- Info Notice -->
+      <div class="mt-5 flex items-start gap-2.5 px-4 py-3.5 bg-[#F0FDFA] text-teal-800 border border-teal-200 rounded-md text-[13px] leading-relaxed">
+        <svg class="w-4 h-4 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        <span><strong class="font-semibold">How it works:</strong> The receiver will be notified. They must acknowledge receipt to complete the transfer. You can cancel until acknowledged.</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-end gap-2.5 mt-7 pt-5 border-t border-gray-100">
+        <button 
+          (click)="onCancel()"
+          class="px-3 py-2 text-[13.5px] font-[550] text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-md transition-all">
+          Cancel
+        </button>
+        <button 
+          [disabled]="!isFormValid() || isSubmitting()"
+          (click)="onSubmit()"
+          class="inline-flex items-center gap-[7px] px-6 py-3 text-[14.5px] font-[550] text-white bg-primary-600 rounded-md shadow-sm hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+          @if (isSubmitting()) {
+            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <div class="text-sm text-blue-700">
-              <p class="font-medium">How it works:</p>
-              <ul class="mt-1 list-disc list-inside space-y-1">
-                <li>The receiver will be notified of this handover request</li>
-                <li>They must acknowledge receipt of the cash to complete the transfer</li>
-                <li>You can cancel this request until it's acknowledged</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+            Submitting...
+          } @else {
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="17 1 21 5 17 9"/><line x1="3" y1="5" x2="21" y2="5"/>
+            </svg>
+            Initiate Handover
+          }
+        </button>
       </div>
     }
   </div>

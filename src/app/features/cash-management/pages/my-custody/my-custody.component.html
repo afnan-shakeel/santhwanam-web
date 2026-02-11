@@ -1,95 +1,89 @@
 <!-- My Cash Custody Page -->
 <div class="min-h-screen bg-gray-50">
-  <!-- Header -->
-  <div class="bg-white border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">My Cash Custody</h1>
-          <p class="mt-1 text-sm text-gray-500">View your cash balance, pending transfers, and recent activity</p>
-        </div>
-        <app-button 
-          variant="primary"
-          (click)="onInitiateTransfer()">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9l4 3m0 0l-4 3m4-3H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          Initiate Handover
-        </app-button>
-      </div>
-    </div>
-  </div>
-
   <!-- Content -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="max-w-[1080px] mx-auto px-7 py-6">
+    <!-- Page Header (inline) -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-xl font-bold tracking-tight text-gray-900">My Cash Custody</h1>
+        <p class="mt-0.5 text-[13.5px] text-gray-500">View your cash balance, pending transfers, and recent activity</p>
+      </div>
+      <button 
+        (click)="onInitiateTransfer()"
+        class="inline-flex items-center gap-[7px] px-[18px] py-[9px] text-[13.5px] font-[550] text-white bg-primary-600 rounded-md shadow-sm hover:bg-primary-700 transition-all">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="17 1 21 5 17 9"/><line x1="3" y1="5" x2="21" y2="5"/>
+        </svg>
+        Initiate Handover
+      </button>
+    </div>
+
     @if (isLoading()) {
       <!-- Loading State -->
-      <div class="space-y-6">
-        <div class="h-48 bg-gray-200 rounded-2xl animate-pulse"></div>
-        <div class="h-64 bg-gray-200 rounded-xl animate-pulse"></div>
-        <div class="h-64 bg-gray-200 rounded-xl animate-pulse"></div>
+      <div class="space-y-5">
+        <div class="h-44 bg-white border border-gray-200 rounded-xl animate-pulse"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
+          <div class="h-56 bg-white border border-gray-200 rounded-xl animate-pulse"></div>
+          <div class="h-56 bg-white border border-gray-200 rounded-xl animate-pulse"></div>
+        </div>
       </div>
     } @else if (error()) {
       <!-- Error State -->
-      <div class="rounded-xl bg-red-50 border border-red-200 p-6 text-center">
-        <svg class="w-12 h-12 mx-auto text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="bg-white border border-gray-200 rounded-xl p-6 text-center">
+        <svg class="w-12 h-12 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <h3 class="text-lg font-medium text-red-800">{{ error() }}</h3>
+        <h3 class="text-lg font-medium text-gray-900">{{ error() }}</h3>
         <button 
           (click)="loadData()"
-          class="mt-4 px-4 py-2 bg-red-100 text-red-700 font-medium rounded-lg hover:bg-red-200 transition-colors">
+          class="mt-4 inline-flex items-center gap-[7px] px-[18px] py-[9px] text-[13.5px] font-[550] text-gray-900 bg-white border border-gray-200 rounded-md hover:border-gray-400 hover:bg-gray-50 transition-all">
           Try Again
         </button>
       </div>
     } @else {
-      <div class="space-y-6">
-        <!-- Balance Card -->
-        @if (custody()) {
-          <div>
-            <app-custody-balance-card
-              [balance]="custody()!.currentBalance"
-              [totalReceived]="0"
-              [totalTransferred]="0"
-              [lastActivityDate]="custody()!.updatedAt"
-              [showTransferButton]="true"
-              (initiateTransfer)="onInitiateTransfer()"
-            />
-          </div>
-        } @else {
-          <!-- No Custody Yet -->
-          <div class="bg-linear-to-br from-gray-100 to-gray-200 rounded-2xl p-8 text-center">
-            <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <h3 class="text-lg font-medium text-gray-700">No Cash Custody</h3>
-            <p class="mt-1 text-sm text-gray-500">You don't have any cash in custody yet.</p>
-          </div>
-        }
-
-        <!-- Two Column Layout -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Pending Handovers -->
-          <app-pending-handover-list
-            title="Pending Outgoing Handovers"
-            [handovers]="pendingHandovers()"
-            direction="outgoing"
-            [currentUserId]="currentUserId"
-            [showCancelAction]="true"
-            emptyMessage="No pending outgoing handovers"
-            (cancel)="onCancelHandover($event)"
-            (viewDetails)="onViewHandoverDetails($event)"
-          />
-
-          <!-- Recent Activity -->
-          <app-custody-activity-list
-            title="Recent Activity"
-            [activities]="activities()"
-            [showViewAll]="true"
-            emptyMessage="No recent activity"
-            (viewAll)="onViewFullHistory()"
-          />
+      <!-- Balance Card -->
+      @if (custody()) {
+        <app-custody-balance-card
+          [balance]="custody()!.currentBalance"
+          [totalReceived]="0"
+          [totalTransferred]="0"
+          [lastActivityDate]="custody()!.updatedAt"
+          [showTransferButton]="false"
+          (initiateTransfer)="onInitiateTransfer()"
+        />
+      } @else {
+        <!-- No Custody Yet -->
+        <div class="bg-white border border-gray-200 rounded-xl p-8 text-center">
+          <svg class="w-16 h-16 mx-auto text-gray-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h3 class="text-lg font-medium text-gray-900">No Cash Custody</h3>
+          <p class="mt-1 text-sm text-gray-500">You don't have any cash in custody yet.</p>
         </div>
+      }
+
+      <!-- Two Column Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5 mt-6">
+        <!-- Pending Handovers -->
+        <app-pending-handover-list
+          title="Pending Outgoing Handovers"
+          [handovers]="pendingHandovers()"
+          direction="outgoing"
+          [currentUserId]="currentUserId"
+          [showCancelAction]="true"
+          emptyMessage="No pending outgoing handovers"
+          (cancel)="onCancelHandover($event)"
+          (viewDetails)="onViewHandoverDetails($event)"
+        />
+
+        <!-- Recent Activity -->
+        <app-custody-activity-list
+          title="Recent Activity"
+          [activities]="activities()"
+          [showViewAll]="true"
+          emptyMessage="No recent activity"
+          (viewAll)="onViewFullHistory()"
+        />
       </div>
     }
   </div>

@@ -5,8 +5,6 @@ import { Router } from '@angular/router';
 import { CashManagementService } from '../../../../core/services/cash-management.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { CashHandoverWithRelations } from '../../../../shared/models/cash-management.model';
-import { HandoverStatusBadgeComponent } from '../../components/handover-status-badge/handover-status-badge.component';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
 
 /**
  * PendingReceiptsComponent
@@ -19,7 +17,7 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 @Component({
   selector: 'app-pending-receipts',
   standalone: true,
-  imports: [CommonModule, HandoverStatusBadgeComponent, ButtonComponent],
+  imports: [CommonModule],
   templateUrl: './pending-receipts.component.html',
   styleUrl: './pending-receipts.component.css'
 })

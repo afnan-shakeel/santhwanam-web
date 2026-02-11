@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CashManagementService } from '../../../../core/services/cash-management.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { CashHandoverWithRelations } from '../../../../shared/models/cash-management.model';
-import { HandoverStatusBadgeComponent } from '../../components/handover-status-badge/handover-status-badge.component';
+
 import { RejectionModalComponent, RejectionData } from '../../components/rejection-modal/rejection-modal.component';
 
 /**
@@ -19,7 +19,7 @@ import { RejectionModalComponent, RejectionData } from '../../components/rejecti
 @Component({
   selector: 'app-acknowledge-handover',
   standalone: true,
-  imports: [CommonModule, HandoverStatusBadgeComponent, RejectionModalComponent],
+  imports: [CommonModule, RejectionModalComponent],
   templateUrl: './acknowledge-handover.component.html',
   styleUrl: './acknowledge-handover.component.css'
 })
@@ -76,6 +76,19 @@ export class AcknowledgeHandoverComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  getTimeElapsed(dateString: string): string {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) return `${diffMins} min${diffMins !== 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
   }
 
   onAcknowledge(): void {
