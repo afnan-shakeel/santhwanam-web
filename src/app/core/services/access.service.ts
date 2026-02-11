@@ -259,6 +259,7 @@ export class AccessService {
    * Check if user is viewing their own assigned entity
    */
   isOwnEntity(entityType: ProfileEntityType, entityId: string): boolean {
+    console.log(`Checking if ${entityType} ${entityId} is own entity`);
     return this.accessStore.isOwnEntity(entityType, entityId);
   }
 

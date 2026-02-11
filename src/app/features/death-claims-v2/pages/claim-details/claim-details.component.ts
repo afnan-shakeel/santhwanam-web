@@ -14,10 +14,13 @@ import { ContributionProgressCardComponent } from '../../components/contribution
 import { ContributionTableComponent } from '../../components/contribution-table/contribution-table.component';
 import { RecordCashModalV2Component } from '../../components/record-cash-modal/record-cash-modal.component';
 import { MarkMissedDialogComponent } from '../../components/mark-missed-dialog/mark-missed-dialog.component';
+import { DocumentUploadModalComponent } from '../../components/document-upload-modal/document-upload-modal.component';
 
 import { DeathClaimsService } from '../../../../core/services/death-claims.service';
 import { ContributionsService } from '../../../../core/services/contributions.service';
+import { ApprovalWorkflowService } from '../../../../core/services/approval-workflow.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { ApprovalExecution } from '../../../../shared/models/approval-workflow.model';
 import {
   DeathClaim,
   DeathClaimDocument,
@@ -44,7 +47,8 @@ type ActiveTab = 'details' | 'contributions' | 'activity';
     ContributionProgressCardComponent,
     ContributionTableComponent,
     RecordCashModalV2Component,
-    MarkMissedDialogComponent
+    MarkMissedDialogComponent,
+    DocumentUploadModalComponent
   ],
   templateUrl: './claim-details.component.html',
   styleUrls: ['./claim-details.component.css']
@@ -54,13 +58,31 @@ export class ClaimDetailsV2Component implements OnInit {
   private router = inject(Router);
   private claimsService = inject(DeathClaimsService);
   private contributionsService = inject(ContributionsService);
+  private approvalService = inject(ApprovalWorkflowService);
   private toastService = inject(ToastService);
 
   // Core state
   claimId = signal('');
   claim = signal<DeathClaim | null>(null);
+  claimMember = computed(() => this.claim()?.member ?? null);
+  claimNominee = computed(() => {
+    const member = this.claim()?.member;
+    return member?.nominees?.[0] ?? null;
+  });
   documents = signal<DeathClaimDocument[]>([]);
   contributionCycle = signal<ContributionCycle | null>(null);
+
+  // Approval state
+  approvalExecutions = signal<ApprovalExecution[]>([]);
+  currentExecution = computed(() => {
+    const claim = this.claim();
+    const executions = this.approvalExecutions();
+    if (!claim?.approvalRequest?.currentStageOrder || !executions.length) return null;
+    return executions.find(e => e.stageOrder === claim.approvalRequest!.currentStageOrder) ?? null;
+  });
+
+  // Upload modal
+  showUploadModal = signal(false);
 
   // Loading
   claimLoading = signal(true);
@@ -76,6 +98,10 @@ export class ClaimDetailsV2Component implements OnInit {
   showRecordCashModal = signal(false);
   showMarkMissedDialog = signal(false);
   showSettlementModal = signal(false);
+  showRejectionModal = signal(false);
+  showSubmitApprovalModal = signal(false);
+  rejectionComments = signal('');
+  verificationNotes = signal('');
   selectedContribution = signal<MemberContribution | null>(null);
   settlementPaymentRef = signal('');
 
@@ -123,14 +149,17 @@ export class ClaimDetailsV2Component implements OnInit {
     switch (action) {
       case 'upload-documents':
         this.activeTab.set('details');
-        // TODO: trigger upload modal or scroll to documents section
+        this.showUploadModal.set(true);
         break;
       case 'request-docs':
         // TODO: request more docs flow
         this.toastService.info('Request more documents flow — coming soon');
         break;
       case 'verify-and-submit':
-        this.verifyAndSubmit();
+        this.showSubmitApprovalModal.set(true);
+        break;
+      case 'submit-for-approval':
+        this.showSubmitApprovalModal.set(true);
         break;
       case 'approve':
         this.approveClaim();
@@ -184,6 +213,15 @@ export class ClaimDetailsV2Component implements OnInit {
     });
   }
 
+  onUploadDocument(): void {
+    this.showUploadModal.set(true);
+  }
+
+  onDocumentUploaded(doc: DeathClaimDocument): void {
+    this.showUploadModal.set(false);
+    this.loadDocuments();
+  }
+
   // === Contribution Actions ===
   onRecordPayment(contrib: MemberContribution): void {
     this.selectedContribution.set(contrib);
@@ -212,8 +250,9 @@ export class ClaimDetailsV2Component implements OnInit {
     this.actionLoading.set(true);
     this.claimsService.settleClaim(this.claimId(), {
       paymentMethod: 'BankTransfer',
-      paymentReference: this.settlementPaymentRef() || undefined
-    } as any).subscribe({
+      paymentReference: this.settlementPaymentRef() || undefined,
+      paymentDate: new Date().toISOString()
+    }).subscribe({
       next: () => {
         this.toastService.success('Claim settlement recorded successfully');
         this.showSettlementModal.set(false);
@@ -229,21 +268,29 @@ export class ClaimDetailsV2Component implements OnInit {
   }
 
   // === Claim Status Actions ===
+
+  /**
+   * Called when user confirms the "Verify & Send for Approval" modal.
+   * If claim is UnderVerification → verify first, then submit.
+   * If claim is Verified (edge case: verify succeeded previously but submit failed) → submit directly.
+   */
+  onConfirmSubmitForApproval(): void {
+    const status = this.claim()?.claimStatus;
+    if (status === 'Verified') {
+      this.submitForApproval();
+    } else {
+      this.verifyAndSubmit();
+    }
+  }
+
   private verifyAndSubmit(): void {
     this.actionLoading.set(true);
-    this.claimsService.verifyClaim(this.claimId(), {}).subscribe({
+    const notes = this.verificationNotes().trim() || undefined;
+
+    this.claimsService.verifyClaim(this.claimId(), { verificationNotes: notes }).subscribe({
       next: () => {
-        this.claimsService.submitClaim(this.claimId()).subscribe({
-          next: () => {
-            this.toastService.success('Claim verified and submitted for approval');
-            this.actionLoading.set(false);
-            this.loadClaim();
-          },
-          error: () => {
-            this.toastService.error('Failed to submit for approval');
-            this.actionLoading.set(false);
-          }
-        });
+        // Verify succeeded — now submit for approval
+        this.submitForApproval();
       },
       error: () => {
         this.toastService.error('Failed to verify claim');
@@ -252,14 +299,90 @@ export class ClaimDetailsV2Component implements OnInit {
     });
   }
 
+  private submitForApproval(): void {
+    this.actionLoading.set(true);
+    this.claimsService.submitClaim(this.claimId()).subscribe({
+      next: (response) => {
+        this.toastService.success('Claim submitted for approval successfully');
+        this.showSubmitApprovalModal.set(false);
+        this.verificationNotes.set('');
+        this.actionLoading.set(false);
+        // Update claim state directly from response if available, else reload
+        if (response?.data) {
+          this.claim.set(response.data);
+          this.loadDocuments();
+        } else {
+          this.loadClaim();
+        }
+      },
+      error: () => {
+        this.toastService.error('Failed to submit claim for approval');
+        this.actionLoading.set(false);
+        // If we got here after verify succeeded, reload to reflect Verified status
+        this.loadClaim();
+      }
+    });
+  }
+
   private approveClaim(): void {
-    // TODO: integrate with approval workflow API
-    this.toastService.info('Approval workflow integration — coming soon');
+    const execution = this.currentExecution();
+    if (!execution) {
+      this.toastService.error('No approval execution found for the current stage');
+      return;
+    }
+
+    this.actionLoading.set(true);
+    this.approvalService.processApproval({
+      executionId: execution.executionId,
+      decision: 'Approve'
+    }).subscribe({
+      next: () => {
+        this.toastService.success('Claim approved successfully');
+        this.actionLoading.set(false);
+        this.loadClaim();
+      },
+      error: () => {
+        this.toastService.error('Failed to approve claim');
+        this.actionLoading.set(false);
+      }
+    });
   }
 
   private rejectClaim(): void {
-    // TODO: open rejection modal with reason field
-    this.toastService.info('Rejection flow — coming soon');
+    this.showRejectionModal.set(true);
+  }
+
+  onConfirmRejection(): void {
+    const execution = this.currentExecution();
+    if (!execution) {
+      this.toastService.error('No approval execution found for the current stage');
+      return;
+    }
+
+    const comments = this.rejectionComments().trim();
+    if (!comments) {
+      this.toastService.warning('Please provide a reason for rejection');
+      return;
+    }
+
+    this.actionLoading.set(true);
+    this.approvalService.processApproval({
+      executionId: execution.executionId,
+      decision: 'Reject',
+      comments
+    }).subscribe({
+      next: () => {
+        this.toastService.success('Claim rejected');
+        this.showRejectionModal.set(false);
+        this.rejectionComments.set('');
+        this.actionLoading.set(false);
+        this.loadClaim();
+      },
+      error: () => {
+        this.toastService.error('Failed to reject claim');
+        this.actionLoading.set(false);
+      }
+    });
   }
 
   // === Data Loading ===
@@ -270,6 +393,10 @@ export class ClaimDetailsV2Component implements OnInit {
         this.claim.set(claim);
         this.claimLoading.set(false);
         this.loadDocuments();
+        // Load approval details if pending approval
+        if (claim.claimStatus === 'PendingApproval' && claim.approvalRequestId) {
+          this.loadApprovalDetails(claim.approvalRequestId);
+        }
         // Load cycle if claim is approved or settled
         if (claim.claimStatus === 'Approved' || claim.claimStatus === 'Settled') {
           this.loadCycle();
@@ -293,6 +420,21 @@ export class ClaimDetailsV2Component implements OnInit {
     });
   }
 
+  private loadApprovalDetails(requestId: string): void {
+    console.log('Loading approval details for requestId:', requestId);
+    this.approvalService.getApprovalRequestDetails(requestId).subscribe({
+      next: (response) => {
+        console.log('Approval details loaded:', response);
+        this.approvalExecutions.set(response.executions);
+        console.log('Approval details loaded:', this.currentExecution());
+      },
+      error: () => {
+        // Non-critical — approval actions just won't be available
+        this.approvalExecutions.set([]);
+      }
+    });
+  }
+
   private loadCycle(): void {
     this.cycleLoading.set(true);
     const claim = this.claim();
@@ -304,7 +446,7 @@ export class ClaimDetailsV2Component implements OnInit {
 
     this.contributionsService.getCycleById(cycleId).subscribe({
       next: (res) => {
-        this.contributionCycle.set(res.data);
+        this.contributionCycle.set(res);
         this.cycleLoading.set(false);
       },
       error: () => this.cycleLoading.set(false)

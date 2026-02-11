@@ -19,6 +19,58 @@
     <!-- Form Content -->
     <div class="p-6 space-y-8">
       
+      
+      <!-- Organization Details Section (show only for admin) -->
+      @if(formFillingEntity != 'agent') {
+      <section>
+        <div class="flex items-center gap-2 mb-4">
+          <h3 class="text-sm font-medium text-gray-900 dark:text-white">Organization</h3>
+          <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- fix: default membership tier is selected -->
+          <!-- <app-select
+            label="Membership Tier"
+            placeholder="Select tier"
+            formControlName="tierId"
+            [options]="tierOptions()"
+            [required]="true"
+            [error]="getFieldError('tierId')"
+          ></app-select> -->
+
+          <!-- fix: unit is derived from agent -->
+          <!-- <app-search-select
+            size="small"
+            label="Unit"
+            placeholder="Search unit..."
+            mode="single"
+            formControlName="unitId"
+            [options]="unitOptions()"
+            [initialOptions]="initialUnitOptions()"
+            [loading]="loadingUnits()"
+            [required]="true"
+            [error]="getFieldError('unitId')"
+            (search)="onSearchUnits($event)"
+          ></app-search-select> -->
+
+          <app-search-select
+            size="small"
+            label="Agent"
+            placeholder="Search agent..."
+            mode="single"
+            formControlName="agentId"
+            [options]="agentOptions()"
+            [initialOptions]="initialAgentOptions()"
+            [loading]="loadingAgents()"
+            [required]="true"
+            [error]="getFieldError('agentId')"
+            (search)="onSearchAgents($event)"
+          ></app-search-select>
+        </div>
+      </section>
+      }
+
       <!-- Personal Information Section -->
       <section>
         <div class="flex items-center gap-2 mb-4">
@@ -169,57 +221,6 @@
         </div>
       </section>
 
-      <!-- Membership Details Section -->
-      <section>
-        <div class="flex items-center gap-2 mb-4">
-          <h3 class="text-sm font-medium text-gray-900 dark:text-white">Membership Details</h3>
-          <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- <app-select
-            label="Membership Tier"
-            placeholder="Select tier"
-            formControlName="tierId"
-            [options]="tierOptions()"
-            [required]="true"
-            [error]="getFieldError('tierId')"
-          ></app-select> -->
-
-          <app-search-select
-            size="small"
-            label="Unit"
-            placeholder="Search unit..."
-            mode="single"
-            formControlName="unitId"
-            [options]="unitOptions()"
-            [initialOptions]="initialUnitOptions()"
-            [loading]="loadingUnits()"
-            [required]="true"
-            [error]="getFieldError('unitId')"
-            (search)="onSearchUnits($event)"
-          ></app-search-select>
-
-          @if (formFillingEntity == 'agent' && formFillingEntityId) {
-
-          }
-          @else{
-            <app-search-select
-              size="small"
-              label="Agent"
-              placeholder="Search agent..."
-              mode="single"
-              formControlName="agentId"
-              [options]="agentOptions()"
-              [initialOptions]="initialAgentOptions()"
-              [loading]="loadingAgents()"
-              [required]="true"
-              [error]="getFieldError('agentId')"
-              (search)="onSearchAgents($event)"
-            ></app-search-select>
-          }
-        </div>
-      </section>
     </div>
 
     <!-- Action Buttons -->

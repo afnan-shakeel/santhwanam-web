@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { AgentService } from '../../../../../core/services/agent.service';
@@ -9,6 +9,7 @@ import { PaginationComponent } from '../../../../../shared/components/pagination
 import { BadgeComponent } from '../../../../../shared/components/badge/badge.component';
 import { SelectComponent, SelectOption } from '../../../../../shared/components/select/select.component';
 import { InputComponent } from '../../../../../shared/components/input/input.component';
+import { AccessService } from '../../../../../core/services/access.service';
 
 type MemberStatusFilter = 'Active' | 'Suspended' | 'Frozen' | 'Closed' | 'Deceased' | '';
 
@@ -21,7 +22,9 @@ type MemberStatusFilter = 'Active' | 'Suspended' | 'Frozen' | 'Closed' | 'Deceas
 })
 export class AgentMembersTabComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private agentService = inject(AgentService);
+  private accessService = inject(AccessService);
 
   agentId = signal<string>('');
   loading = signal(true);
@@ -149,5 +152,16 @@ export class AgentMembersTabComponent implements OnInit {
       currency: 'INR',
       maximumFractionDigits: 0
     }).format(amount);
+  }
+
+  onViewMember(member: AgentMember): void {
+    // for agent view mode: /agents/members/2b4c5ed3-7766-43b6-aaa4-3f44bb6bc66b
+    if (this.accessService.isAgentView()) {
+      this.router.navigate(['/agents/members', member.memberId]);
+      return;
+    }
+    
+    // for admin view mode: /members/2b4c5ed3-7766-43b6-aaa4-3f44bb6bc66b/profile/overview
+    this.router.navigate(['/members', member.memberId, 'profile', 'overview']);
   }
 }

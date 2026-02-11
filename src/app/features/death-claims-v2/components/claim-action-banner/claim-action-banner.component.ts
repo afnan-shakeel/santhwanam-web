@@ -44,6 +44,7 @@ export class ClaimActionBannerComponent {
       case 'UnderVerification':
         return this.getVerificationConfig(mode);
       case 'Verified':
+        return this.getVerifiedConfig(mode);
       case 'PendingApproval':
         return this.getApprovalConfig(mode);
       case 'Approved':
@@ -111,24 +112,54 @@ export class ClaimActionBannerComponent {
     };
   }
 
-  private getApprovalConfig(mode: string): BannerConfig {
+  private getVerifiedConfig(mode: string): BannerConfig {
     const isAdmin = mode === 'admin';
+    return {
+      variant: 'verification',
+      icon: '✅',
+      title: isAdmin ? 'Documents verified — ready to submit' : 'Documents verified',
+      description: isAdmin
+        ? 'All documents have been verified. Submit the claim for management approval.'
+        : 'Documents have been verified. Awaiting submission for approval.',
+      bgClass: 'bg-gradient-to-br from-emerald-50 to-green-50',
+      borderClass: 'border-emerald-200',
+      iconBgClass: 'bg-emerald-500/10',
+      actions: isAdmin
+        ? [{ label: 'Send for Approval', type: 'primary', action: 'submit-for-approval' }]
+        : []
+    };
+  }
+
+  private getApprovalConfig(mode: string): BannerConfig {
+    if (mode === 'admin') {
+      // Approver view — can take action
+      return {
+        variant: 'approval',
+        icon: '📋',
+        title: 'Awaiting your approval decision',
+        description: 'All documents verified. Review the claim and approve or reject.',
+        bgClass: 'bg-gradient-to-br from-purple-50 to-violet-50',
+        borderClass: 'border-purple-200',
+        iconBgClass: 'bg-purple-500/10',
+        actions: [
+          { label: 'Reject', type: 'danger-outline', action: 'reject' },
+          { label: 'Approve Claim', type: 'success', action: 'approve' }
+        ]
+      };
+    }
+
+    // Agent / viewer — read-only
     return {
       variant: 'approval',
       icon: '📋',
-      title: isAdmin ? 'Awaiting your approval decision' : 'Claim is under management review',
-      description: isAdmin
-        ? 'All documents verified. Review the claim and approve or reject.'
+      title: 'Claim is under management review',
+      description: mode === 'agent'
+        ? 'Your claim has been submitted and is awaiting management approval.'
         : 'Submitted for approval. Awaiting management decision.',
       bgClass: 'bg-gradient-to-br from-purple-50 to-violet-50',
       borderClass: 'border-purple-200',
       iconBgClass: 'bg-purple-500/10',
-      actions: isAdmin
-        ? [
-            { label: 'Reject', type: 'danger-outline', action: 'reject' },
-            { label: 'Approve Claim', type: 'success', action: 'approve' }
-          ]
-        : []
+      actions: []
     };
   }
 

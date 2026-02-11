@@ -65,16 +65,20 @@ export class ClaimsListingComponent implements OnInit {
         sortable: true
       },
       {
-        key: 'reportedBy',
+        key: 'reportedByUser',
         label: 'Filed By',
-        sortable: false
+        sortable: false,
+        format: (value: any, row: DeathClaim) => {
+            const reporter = value;
+            return reporter ? `${row.reportedByRole || ''} ${reporter.firstName} ${reporter.lastName}` : '—';
+        }
       },
-      {
-        key: 'benefitAmount',
-        label: 'Benefit',
-        sortable: true,
-        format: (value: number) => value ? `OMR ${value.toLocaleString('en', { minimumFractionDigits: 3 })}` : '—'
-      },
+    //   {
+    //     key: 'benefitAmount',
+    //     label: 'Benefit',
+    //     sortable: true,
+    //     format: (value: number) => value ? `INR ${value.toLocaleString('en', { minimumFractionDigits: 3 })}` : '—'
+    //   },
       {
         key: 'claimStatus',
         label: 'Status',

@@ -88,25 +88,27 @@
               <div class="px-5 py-3.5 border-b border-gray-100">
                 <span class="text-sm font-semibold text-gray-900">Nominee Details</span>
               </div>
+              
               <div class="p-5">
                 <div class="grid grid-cols-2 gap-x-8 gap-y-4">
                   <div>
                     <div class="text-xs text-gray-400 mb-0.5">Name</div>
-                    <div class="text-sm font-medium text-gray-900">{{ claim()!.nomineeName || '—' }}</div>
+                    <div class="text-sm font-medium text-gray-900">{{ claimNominee()!.name || '—' }}</div>
                   </div>
                   <div>
                     <div class="text-xs text-gray-400 mb-0.5">Relationship</div>
-                    <div class="text-sm font-medium text-gray-900">{{ claim()!.nomineeRelation || '—' }}</div>
+                    <div class="text-sm font-medium text-gray-900">{{ claimNominee()!.relationType || '—' }}</div>
                   </div>
                   <div>
                     <div class="text-xs text-gray-400 mb-0.5">Contact Number</div>
-                    <div class="text-sm font-medium text-gray-900">{{ claim()!.nomineeContactNumber || '—' }}</div>
+                    <div class="text-sm font-medium text-gray-900">{{ claimNominee()!.contactNumber || '—' }}</div>
                   </div>
                   <div>
                     <div class="text-xs text-gray-400 mb-0.5">Address</div>
                     <div class="text-sm font-medium text-gray-900">
-                      @if (claim()!.nomineeAddress) {
-                        {{ claim()!.nomineeAddress!.city || '' }} {{ claim()!.nomineeAddress!.state || '' }}
+                      @if (claimNominee()!.addressLine1) {
+                        {{ claimNominee()!.addressLine1 }} {{ claimNominee()!.addressLine2 || '' }},
+                        {{ claimNominee()!.city || '' }} {{ claimNominee()!.state || '' }}
                       } @else {
                         —
                       }
@@ -122,7 +124,10 @@
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
               <span class="text-sm font-semibold text-gray-900">Documents</span>
               @if (canUpload()) {
-                <button class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                <button
+                  class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer"
+                  (click)="onUploadDocument()"
+                >
                   + Upload
                 </button>
               }
@@ -164,13 +169,13 @@
               <div class="grid grid-cols-2 gap-x-8 gap-y-4">
                 <div>
                   <div class="text-xs text-gray-400 mb-0.5">Tier</div>
-                  <div class="text-sm font-medium text-gray-900">{{ claim()!.tier?.tierName || '—' }}</div>
+                  <div class="text-sm font-medium text-gray-900">{{ claimMember()?.tier?.tierName || '—' }}</div>
                 </div>
                 <div>
                   <div class="text-xs text-gray-400 mb-0.5">Agent</div>
                   <div class="text-sm font-medium text-gray-900">
-                    @if (claim()!.agent) {
-                      {{ claim()!.agent!.firstName }} {{ claim()!.agent!.lastName }}
+                    @if (claimMember()!.agent) {
+                      {{ claimMember()!.agent!.firstName }} {{ claimMember()!.agent!.lastName }}
                     } @else {
                       —
                     }
@@ -179,12 +184,12 @@
                 <div>
                   <div class="text-xs text-gray-400 mb-0.5">Forum / Area / Unit</div>
                   <div class="text-sm font-medium text-gray-900">
-                    {{ claim()!.forum?.forumName || '—' }} / {{ claim()!.area?.areaName || '—' }} / {{ claim()!.unit?.unitName || '—' }}
+                    {{ claimMember()!.unit?.area?.forum?.forumName || '—' }} / {{ claimMember()!.unit?.area?.areaName || '—' }} / {{ claimMember()!.unit?.unitName || '—' }}
                   </div>
                 </div>
                 <div>
                   <div class="text-xs text-gray-400 mb-0.5">Member Code</div>
-                  <div class="text-sm font-medium text-blue-600">{{ claim()!.memberCode }}</div>
+                  <div class="text-sm font-medium text-blue-600">{{ claimMember()!.memberCode }}</div>
                 </div>
                 <div>
                   <div class="text-xs text-gray-400 mb-0.5">Claim Filed</div>
@@ -211,7 +216,9 @@
           } @else {
             <div class="space-y-4">
               <!-- Cycle Progress Card -->
-              <app-contribution-progress-card [cycle]="contributionCycle()!" />
+               <div>
+                   <app-contribution-progress-card [cycle]="contributionCycle()!" />
+               </div>
 
               <!-- Member Contributions Table -->
               <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
@@ -323,6 +330,162 @@
             (click)="onConfirmSettlement()"
           >
             {{ actionLoading() ? 'Recording...' : 'Record Settlement' }}
+          </button>
+        </div>
+      </div>
+    </app-modal>
+  }
+
+  <!-- Document Upload Modal (reused from v1) -->
+  @if (showUploadModal()) {
+    <app-document-upload-modal
+      [claimId]="claimId()"
+      (closeModal)="showUploadModal.set(false)"
+      (documentUploaded)="onDocumentUploaded($event)"
+    />
+  }
+
+  <!-- Rejection Modal -->
+  @if (showRejectionModal()) {
+    <app-modal
+      id="rejection-modal"
+      title="Reject Claim"
+      [open]="showRejectionModal()"
+      size="sm"
+      (closed)="showRejectionModal.set(false)"
+    >
+      <div class="space-y-4">
+        <p class="text-sm text-gray-600">
+          Please provide a reason for rejecting this claim. This will be recorded in the approval history.
+        </p>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Reason for Rejection <span class="text-red-500">*</span></label>
+          <textarea
+            class="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+            rows="3"
+            placeholder="Explain why this claim is being rejected..."
+            [ngModel]="rejectionComments()"
+            (ngModelChange)="rejectionComments.set($event)"
+          ></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer"
+            (click)="showRejectionModal.set(false)"
+          >
+            Cancel
+          </button>
+          <button
+            class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50 cursor-pointer"
+            [disabled]="actionLoading() || !rejectionComments().trim()"
+            (click)="onConfirmRejection()"
+          >
+            {{ actionLoading() ? 'Rejecting...' : 'Confirm Rejection' }}
+          </button>
+        </div>
+      </div>
+    </app-modal>
+  }
+
+  <!-- Submit for Approval Confirmation Modal -->
+  @if (showSubmitApprovalModal()) {
+    <app-modal
+      id="submit-approval-modal"
+      title="Submit Claim for Approval"
+      [open]="showSubmitApprovalModal()"
+      size="sm"
+      (closed)="showSubmitApprovalModal.set(false)"
+    >
+      <div class="space-y-5">
+        <!-- Claim Summary -->
+        <div class="bg-gray-50 border border-gray-100 rounded-lg p-4 space-y-2.5">
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-500">Claim</span>
+            <span class="font-medium text-gray-900">{{ claim()?.claimNumber }}</span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-500">Deceased Member</span>
+            <span class="font-medium text-gray-900">
+              {{ claimMember()?.firstName }} {{ claimMember()?.lastName }}
+            </span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-500">Benefit Amount</span>
+            <span class="font-semibold text-blue-600">OMR {{ claim()?.benefitAmount | number:'1.3-3' }}</span>
+          </div>
+          @if (claimNominee()) {
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Nominee</span>
+              <span class="font-medium text-gray-900">{{ claimNominee()?.name }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- What will happen -->
+        <div>
+          <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">This action will:</p>
+          <ul class="space-y-1.5">
+            <li class="flex items-start gap-2 text-sm text-gray-700">
+              <svg class="w-4 h-4 text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              @if (claim()?.claimStatus === 'Verified') {
+                <span>Submit the claim for management approval</span>
+              } @else {
+                <span>Verify and submit the claim for management approval</span>
+              }
+            </li>
+            <li class="flex items-start gap-2 text-sm text-gray-700">
+              <svg class="w-4 h-4 text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span>Create an approval request and notify approvers</span>
+            </li>
+            <li class="flex items-start gap-2 text-sm text-gray-700">
+              <svg class="w-4 h-4 text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span>Create a contribution cycle upon approval</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Optional verification notes (only when claim is not yet verified) -->
+        @if (claim()?.claimStatus !== 'Verified') {
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Verification Notes <span class="text-gray-400">(optional)</span></label>
+            <textarea
+              class="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              rows="2"
+              placeholder="Any notes about the document verification..."
+              [ngModel]="verificationNotes()"
+              (ngModelChange)="verificationNotes.set($event)"
+            ></textarea>
+          </div>
+        }
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer"
+            (click)="showSubmitApprovalModal.set(false)"
+          >
+            Cancel
+          </button>
+          <button
+            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+            [disabled]="actionLoading()"
+            (click)="onConfirmSubmitForApproval()"
+          >
+            @if (actionLoading()) {
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Submitting...
+            } @else {
+              {{ claim()?.claimStatus === 'Verified' ? 'Send for Approval' : 'Verify & Send for Approval' }}
+            }
           </button>
         </div>
       </div>

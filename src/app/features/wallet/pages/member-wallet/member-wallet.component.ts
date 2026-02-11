@@ -12,6 +12,7 @@ import { RecordDepositModalComponent } from '../../components/record-deposit-mod
 import { AdjustmentModalComponent } from '../../components/adjustment-modal/adjustment-modal.component';
 import { Wallet, WalletSummary } from '../../../../shared/models/wallet.model';
 import { AccessService } from '../../../../core/services/access.service';
+import { ViewModeBadgeComponent } from '../../../../shared/components/view-mode-badge/view-mode-badge.component';
 
 
 @Component({
@@ -26,7 +27,8 @@ import { AccessService } from '../../../../core/services/access.service';
     WalletBalanceCardComponent,
     MemberInfoCardComponent,
     RecordDepositModalComponent,
-    AdjustmentModalComponent
+    AdjustmentModalComponent,
+    ViewModeBadgeComponent
   ],
   templateUrl: './member-wallet.component.html',
   styleUrls: ['./member-wallet.component.css']
@@ -69,7 +71,7 @@ export class MemberWalletComponent implements OnInit, OnDestroy {
 
   // Computed: Determine if current view is agent or admin
   isAgentView = computed(() => this.viewMode() === 'agent');
-  isAdminView = computed(() => this.viewMode() === 'admin');
+  isAdminView = computed(() => this.accessService.getSimplifiedViewMode() === 'admin');
 
   // Computed: Base route for tabs
   baseRoute = computed(() => {

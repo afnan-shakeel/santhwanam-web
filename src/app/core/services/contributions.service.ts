@@ -38,8 +38,8 @@ export class ContributionsService {
   /**
    * Get contribution cycle by ID
    */
-  getCycleById(cycleId: string): Observable<ApiResponse<ContributionCycle>> {
-    return this.http.get<ApiResponse<ContributionCycle>>(`${this.basePath}/cycles/${cycleId}`);
+  getCycleById(cycleId: string): Observable<ContributionCycle> {
+    return this.http.get<ContributionCycle>(`${this.basePath}/cycles/${cycleId}`);
   }
 
   /**

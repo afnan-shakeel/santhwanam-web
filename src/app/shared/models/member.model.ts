@@ -71,17 +71,22 @@ export interface Member {
   postalCode: string;
   country: string;
   tierId: string;
+  tier?: MemberTier;
   unitId: string;
+  unit?: Partial<Unit>;
   agentId: string;
+  agent: Partial<Agent>;
   registrationStatus: RegistrationStatus;
   memberStatus?: MemberStatus;
   registrationStep: RegistrationStep;
-  tier?: MemberTier;
-  agent?: MemberAgent;
-  unit?: MemberUnit;
   createdAt: string;
   updatedAt?: string;
   registeredAt?: string;
+
+  // relations
+  nominees?: Partial<Nominee>[];
+  documents?: Partial<MemberDocument>[];
+  wallet?: Partial<Wallet>;
 }
 
 // Registration Request/Response
@@ -101,7 +106,7 @@ export interface RegisterMemberRequest {
   postalCode: string;
   country: string;
   tierId: string;
-  unitId: string;
+  unitId?: string;
   agentId: string;
 }
 

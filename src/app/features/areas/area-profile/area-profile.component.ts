@@ -247,7 +247,9 @@ export class AreaProfileComponent implements OnInit, OnDestroy {
   }
 
   onTransferCash(): void {
-    this.router.navigate(['/cash/handover/new']);
+    this.router.navigate(['/cash/handover/new'], {
+      queryParams: { returnUrl: this.router.url }
+    });
   }
 
   onNavigateToHierarchy(event: { type: 'forum' | 'area' | 'unit'; id: string }): void {

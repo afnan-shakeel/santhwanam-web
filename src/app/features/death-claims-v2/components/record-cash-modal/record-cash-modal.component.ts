@@ -7,10 +7,10 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { MemberContribution } from '../../../../shared/models/death-claim.model';
 
 @Component({
-  selector: 'app-record-cash-modal',
-  standalone: true,
-  imports: [CommonModule, FormsModule, ModalComponent],
-  template: `
+    selector: 'app-record-cash-modal',
+    standalone: true,
+    imports: [CommonModule, FormsModule, ModalComponent],
+    template: `
     <app-modal
       [id]="'record-cash-modal'"
       [title]="'Record Cash Collection'"
@@ -74,42 +74,48 @@ import { MemberContribution } from '../../../../shared/models/death-claim.model'
   `
 })
 export class RecordCashModalV2Component {
-  private contributionsService = inject(ContributionsService);
-  private toastService = inject(ToastService);
+    private contributionsService = inject(ContributionsService);
+    private toastService = inject(ToastService);
 
-  open = input.required<boolean>();
-  contribution = input.required<MemberContribution | null>();
+    open = input.required<boolean>();
+    contribution = input.required<MemberContribution | null>();
 
-  closed = output<void>();
-  recorded = output<void>();
+    closed = output<void>();
+    recorded = output<void>();
 
-  paymentReference = '';
-  submitting = signal(false);
+    paymentReference = '';
+    submitting = signal(false);
 
-  onClose(): void {
-    this.paymentReference = '';
-    this.closed.emit();
-  }
-
-  onConfirm(): void {
-    const contrib = this.contribution();
-    if (!contrib) return;
-
-    this.submitting.set(true);
-    this.contributionsService.recordCashContribution(
-      contrib.contributionId,
-      { cashReceiptReference: this.paymentReference || undefined }
-    ).subscribe({
-      next: () => {
-        this.toastService.success('Cash collection recorded successfully');
-        this.submitting.set(false);
+    onClose(): void {
         this.paymentReference = '';
-        this.recorded.emit();
-      },
-      error: () => {
-        this.toastService.error('Failed to record cash collection');
-        this.submitting.set(false);
-      }
-    });
-  }
+        this.closed.emit();
+    }
+
+    onConfirm(): void {
+        const contrib = this.contribution();
+        if (!contrib) return;
+
+        this.submitting.set(true);
+        this.contributionsService.recordCashContribution(
+            contrib.contributionId,
+            { cashReceiptReference: this.paymentReference || undefined }
+        ).subscribe({
+            next: () => {
+                this.toastService.success('Cash collection recorded successfully');
+                this.submitting.set(false);
+                this.paymentReference = '';
+                this.recorded.emit();
+            },
+            error: (errorRes) => {
+                console.log('Error recording cash collection:', errorRes.error?.error?.message);
+                if (errorRes.error?.error?.statusCode == 403) {
+                    this.toastService.error(errorRes.error?.error?.message);
+                }
+                else {
+                    this.toastService.error('Failed to record cash collection');
+                }
+                this.submitting.set(false);
+            }
+        });
+    }
 }

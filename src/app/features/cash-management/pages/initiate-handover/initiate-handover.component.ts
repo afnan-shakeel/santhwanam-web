@@ -1,10 +1,11 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { CashManagementService } from '../../../../core/services/cash-management.service';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { BackButtonComponent } from '../../../../shared/components/back-button/back-button.component';
 import { ToastService } from '../../../../core/services/toast.service';
 import { 
   CashCustody, 
@@ -23,7 +24,7 @@ import {
 @Component({
   selector: 'app-initiate-handover',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent],
+  imports: [CommonModule, FormsModule, ButtonComponent, BackButtonComponent],
   templateUrl: './initiate-handover.component.html',
   styleUrl: './initiate-handover.component.css'
 })
@@ -31,6 +32,7 @@ export class InitiateHandoverComponent implements OnInit {
   private cashService = inject(CashManagementService);
   private toastService = inject(ToastService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   // State
   custody = signal<CashCustody | null>(null);
@@ -135,6 +137,20 @@ export class InitiateHandoverComponent implements OnInit {
   }
 
   onCancel(): void {
+    this.navigateBack();
+  }
+
+  /**
+   * Navigate back using returnUrl from query params, or fallback to /cash/my-custody
+   */
+  private navigateBack(): void {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    if (returnUrl && returnUrl.startsWith('/') && !returnUrl.startsWith('//')) {
+      try {
+        this.router.navigateByUrl(this.router.parseUrl(returnUrl));
+        return;
+      } catch { /* fall through */ }
+    }
     this.router.navigate(['/cash/my-custody']);
   }
 
@@ -157,7 +173,7 @@ export class InitiateHandoverComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.toastService.success('Handover initiated successfully');
-          this.router.navigate(['/cash/my-custody']);
+          this.navigateBack();
         }
         this.isSubmitting.set(false);
       },

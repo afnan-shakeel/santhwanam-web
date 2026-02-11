@@ -85,15 +85,15 @@ export class AcknowledgeHandoverComponent implements OnInit {
 
     this.cashService.acknowledgeHandover(this.handoverId).subscribe({
       next: (response) => {
-        if (response.success) {
+        if (response) {
           this.toastService.success('Cash received and acknowledged successfully');
           this.router.navigate(['/cash/my-custody']);
         }
         this.isAcknowledging.set(false);
       },
-      error: (err) => {
-        console.error('Error acknowledging handover:', err);
-        const message = err.error?.message || 'Failed to acknowledge handover';
+      error: (httpError) => {
+        const err = httpError.error?.error || {};
+        const message = err.message || 'Failed to acknowledge handover';
         this.toastService.error(message);
         this.isAcknowledging.set(false);
       }
@@ -113,7 +113,7 @@ export class AcknowledgeHandoverComponent implements OnInit {
       rejectionReason: event.additionalDetails
     }).subscribe({
       next: (response) => {
-        if (response.success) {
+        if (response) {
           this.toastService.success('Handover rejected');
           this.router.navigate(['/cash/pending-receipts']);
         }

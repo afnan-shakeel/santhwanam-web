@@ -240,7 +240,7 @@ export class ForumProfileComponent implements OnInit, OnDestroy {
 
   onTransferToBank(): void {
     this.router.navigate(['/cash/handover/new'], {
-      queryParams: { recipient: 'bank' }
+      queryParams: { recipient: 'bank', returnUrl: this.router.url }
     });
   }
 

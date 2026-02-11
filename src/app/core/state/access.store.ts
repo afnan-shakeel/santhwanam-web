@@ -178,17 +178,15 @@ export class AccessStore {
    */
   isOwnEntity(entityType: ProfileEntityType, entityId: string): boolean {
     const scope = this.state().scope;
-
     // Map entity type to scope type
     const scopeTypeMap: Record<ProfileEntityType, ScopeType> = {
       'forum': 'Forum',
       'area': 'Area',
       'unit': 'Unit',
-      'agent': 'Unit' // Agents are scoped at Unit level
+      'agent': 'Agent' // prev: Agents are scoped at Unit level, now: Agents are scoped at Agent level
     };
 
     const expectedScopeType = scopeTypeMap[entityType];
-
     // Must match both type and ID
     return scope.type === expectedScopeType && scope.entityId === entityId;
   }

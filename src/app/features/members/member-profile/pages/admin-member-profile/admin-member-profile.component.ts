@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 
 import { BreadcrumbsComponent, BreadcrumbItem } from '../../../../../shared/components/breadcrumbs/breadcrumbs.component';
+import { BackButtonComponent } from '../../../../../shared/components/back-button/back-button.component';
 import { MemberQuickInfoCardComponent } from '../../components/member-quick-info-card/member-quick-info-card.component';
 import { MemberService } from '../../../../../core/services/member.service';
 import { ToastService } from '../../../../../core/services/toast.service';
@@ -26,6 +27,7 @@ interface TabItem {
     CommonModule,
     RouterModule,
     BreadcrumbsComponent,
+    BackButtonComponent,
     MemberQuickInfoCardComponent,
     DevInProgressModalComponent,
     ButtonComponent

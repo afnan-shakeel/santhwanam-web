@@ -281,11 +281,19 @@ export class AgentProfileComponent implements OnInit, OnDestroy {
   }
 
   onReceiveCash(): void {
-    this.router.navigate(['/cash-management/pending-receipts']);
+    this.router.navigate(['/cash/pending-receipts']);
+  }
+
+  onTransferCash(): void {
+    this.router.navigate(['/cash/handover/new'], {
+      queryParams: { returnUrl: this.router.url }
+    });
   }
 
   onTransferToBank(): void {
-    this.router.navigate(['/cash-management/handover/new']);
+    this.router.navigate(['/cash/handover/new'], {
+      queryParams: { returnUrl: this.router.url }
+    });
   }
 
   onViewApprovals(): void {

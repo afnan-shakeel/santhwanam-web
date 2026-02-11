@@ -3,12 +3,14 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 
 import { BreadcrumbsComponent, BreadcrumbItem } from '../../../../../shared/components/breadcrumbs/breadcrumbs.component';
+import { BackButtonComponent } from '../../../../../shared/components/back-button/back-button.component';
 import { MemberQuickInfoCardComponent } from '../../components/member-quick-info-card/member-quick-info-card.component';
 import { PendingCollectionAlertComponent, PendingContribution } from '../../components/pending-collection-alert/pending-collection-alert.component';
 import { MemberService } from '../../../../../core/services/member.service';
 import { ContributionsService } from '../../../../../core/services/contributions.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { MemberProfile } from '../../../../../shared/models/member.model';
+import { RecordDepositModalComponent } from '../../../../wallet/components/record-deposit-modal/record-deposit-modal.component';
 
 type TabType = 'overview' | 'contributions' | 'nominees' | 'documents';
 
@@ -26,8 +28,10 @@ interface TabItem {
     CommonModule,
     RouterModule,
     BreadcrumbsComponent,
+    BackButtonComponent,
     MemberQuickInfoCardComponent,
-    PendingCollectionAlertComponent
+    PendingCollectionAlertComponent,
+    RecordDepositModalComponent
   ],
   templateUrl: './agent-member-profile.component.html',
   styleUrls: ['./agent-member-profile.component.css']
@@ -46,6 +50,7 @@ export class AgentMemberProfileComponent implements OnInit {
   activeTab = signal<TabType>('overview');
   pendingContributions = signal<PendingContribution[]>([]);
   loadingPending = signal(false);
+  showRecordDepositModal = signal(false);
 
   // Breadcrumbs
   breadcrumbs = signal<BreadcrumbItem[]>([
@@ -198,7 +203,19 @@ export class AgentMemberProfileComponent implements OnInit {
   }
 
   onRecordDeposit(): void {
-    this.router.navigate(['/agents/members', this.memberId(), 'wallet', 'deposits']);
+    this.showRecordDepositModal.set(true);
+  }
+
+  closeRecordDepositModal(): void {
+    this.showRecordDepositModal.set(false);
+  }
+
+  onDepositRecorded(): void {
+    this.showRecordDepositModal.set(false);
+    this.toastService.success('Deposit recorded', 'The deposit has been recorded and submitted for approval.');
+    // Optionally, refresh pending contributions or profile data here
+    this.loadPendingContributions(this.memberId());
+    this.loadProfile(this.memberId());
   }
 
   onCollectContribution(contribution: PendingContribution): void {

@@ -1,3 +1,12 @@
+import { MembershipTier } from "../constants/permissions";
+import { Agent } from "./agent.model";
+import { ApprovalRequest } from "./approval-workflow.model";
+import { Area } from "./area.model";
+import { Forum } from "./forum.model";
+import { Member, Nominee } from "./member.model";
+import { Unit } from "./unit.model";
+import { User } from "./user.model";
+
 // Death Claim Status
 export type ClaimStatus =
   | 'Reported'
@@ -49,6 +58,7 @@ export interface DeathClaim {
   claimNumber: string; // Format: DC-YYYY-NNNNN
   claimStatus: ClaimStatus;
   approvalRequestId?: string;
+  approvalRequest?: Partial<ApprovalRequest>;
 
   // Member Info
   memberId: string;
@@ -57,8 +67,6 @@ export interface DeathClaim {
   tierId: string;
   agentId: string;
   unitId: string;
-  areaId: string;
-  forumId: string;
 
   // Death Info
   deathDate: string;
@@ -67,6 +75,7 @@ export interface DeathClaim {
 
   // Reporter Info
   reportedBy: string;
+  reportedByUser?: Partial<User>;
   reportedByRole: string;
   reportedDate: string;
   initialNotes?: string;
@@ -84,6 +93,7 @@ export interface DeathClaim {
   // Verification
   verificationStatus: ClaimVerificationStatus;
   verifiedBy?: string;
+  verifiedByUser?: Partial<User>;
   verifiedDate?: string;
   verificationNotes?: string;
 
@@ -108,64 +118,13 @@ export interface DeathClaim {
   rejectionReason?: string;
 
   // Related data (from eagerLoad)
-  member?: {
-    memberId: string;
-    memberCode: string;
-    firstName: string;
-    middleName?: string;
-    lastName: string;
-    dateOfBirth: string;
-    contactNumber: string;
-    email?: string;
-  };
-  agent?: {
-    agentId: string;
-    agentCode: string;
-    firstName: string;
-    lastName: string;
-  };
-  unit?: {
-    unitId: string;
-    unitCode: string;
-    unitName: string;
-  };
-  area?: {
-    areaId: string;
-    areaCode: string;
-    areaName: string;
-  };
-  forum?: {
-    forumId: string;
-    forumCode: string;
-    forumName: string;
-  };
-  tier?: {
-    tierId: string;
-    tierCode: string;
-    tierName: string;
-    deathBenefitAmount: number;
-  };
-  nominee?: {
-    nomineeId: string;
-    name: string;
-    relationType: string;
-    contactNumber: string;
-    dateOfBirth?: string;
-    addressLine1?: string;
-    city?: string;
-    state?: string;
-  };
+  member?: Partial<Member>;
+  agent?: Partial<Agent>;
+  unit?: Partial<Unit>;
+  area?: Partial<Area>;
+  forum?: Partial<Forum>;
   documents?: DeathClaimDocument[];
   contributionCycle?: ContributionCycle;
-  approvalRequest?: {
-    requestId: string;
-    status: 'Pending' | 'Approved' | 'Rejected' | 'Cancelled';
-    requestedBy: string;
-    requestedByUserName?: string;
-    requestedAt: string;
-    currentStageName?: string;
-    completedAt?: string;
-  };
 }
 
 // Death Claim Document
@@ -258,7 +217,8 @@ export interface ContributionCycle {
   updatedAt: string;
 
   // Related data
-  deathClaim?: DeathClaim;
+  deathClaim?: Partial<DeathClaim>;
+  contributions?: Partial<MemberContribution>[];
   tier?: {
     tierId: string;
     tierCode: string;

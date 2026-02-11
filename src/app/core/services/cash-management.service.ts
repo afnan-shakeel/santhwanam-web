@@ -155,8 +155,8 @@ export class CashManagementService {
   /**
    * Acknowledge a cash handover
    */
-  acknowledgeHandover(handoverId: string, request?: AcknowledgeHandoverRequest): Observable<ApiResponse<CashHandover>> {
-    return this.http.post<ApiResponse<CashHandover>>(
+  acknowledgeHandover(handoverId: string, request?: AcknowledgeHandoverRequest): Observable<CashHandover> {
+    return this.http.post<CashHandover>(
       `${this.basePath}/handovers/${handoverId}/acknowledge`,
       request || {}
     );
@@ -165,8 +165,8 @@ export class CashManagementService {
   /**
    * Reject a cash handover
    */
-  rejectHandover(handoverId: string, request: RejectHandoverRequest): Observable<ApiResponse<CashHandover>> {
-    return this.http.post<ApiResponse<CashHandover>>(
+  rejectHandover(handoverId: string, request: RejectHandoverRequest): Observable<CashHandover> {
+    return this.http.post<CashHandover>(
       `${this.basePath}/handovers/${handoverId}/reject`,
       request
     );
@@ -315,7 +315,7 @@ export class CashManagementService {
   /**
    * Get handovers received by current user with filters
    */
-  getReceivedHandovers(params?: { page?: number; size?: number; status?: string }): Observable<SearchApiResponse<CashHandoverWithRelations>> {
+  getReceivedHandovers(params?: { page?: number; size?: number; status?: string, direction?: string }): Observable<SearchApiResponse<CashHandoverWithRelations>> {
     return this.http.get<SearchApiResponse<CashHandoverWithRelations>>(
       `${this.basePath}/handovers/history`,
       { params: this.buildParams(params) }

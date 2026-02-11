@@ -112,7 +112,9 @@ export class MyCustodyComponent implements OnInit {
   }
 
   onInitiateTransfer(): void {
-    this.router.navigate(['/cash/handover/new']);
+    this.router.navigate(['/cash/handover/new'], {
+      queryParams: { returnUrl: this.router.url }
+    });
   }
 
   onCancelHandover(handover: CashHandoverWithRelations): void {

@@ -39,7 +39,7 @@ export class PendingReceiptsComponent implements OnInit {
   loadPendingReceipts(): void {
     this.isLoading.set(true);
 
-    this.cashService.getReceivedHandovers({ status: 'Initiated' }).subscribe({
+    this.cashService.getReceivedHandovers({ status: 'Initiated', direction: 'received' }).subscribe({
       next: (response) => {
         if (response.items) {
           this.pendingHandovers.set(response.items);

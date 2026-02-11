@@ -3,6 +3,7 @@
  * Based on OpenAPI spec: Organization Bodies - Units
  */
 
+import { Area } from './area.model';
 import { AdminDetails, AdminSummary } from './forum.model';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -14,6 +15,7 @@ export interface Unit {
   unitCode: string;
   unitName: string;
   areaId: string;
+  area: Partial<Area>;
   adminUserId: string;
   establishedDate: string;
   isActive: boolean;

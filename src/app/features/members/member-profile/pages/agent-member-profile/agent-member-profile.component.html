@@ -6,15 +6,7 @@
     <!-- Back Button & Page Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
       <div class="flex items-center gap-4">
-        <button
-          type="button"
-          (click)="goBack()"
-          class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-          </svg>
-          My Members
-        </button>
+        <app-back-button fallback="/agent/profile/members" />
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Member Profile</h1>
       </div>
     </div>
@@ -140,3 +132,13 @@
     }
   </div>
 </div>
+
+<!-- Record Deposit Modal -->
+@if (showRecordDepositModal() && memberId()) {
+  <app-record-deposit-modal
+    [memberId]="memberId()"
+    [memberName]="fullName()"
+    (closeModal)="closeRecordDepositModal()"
+    (depositRecorded)="onDepositRecorded()">
+  </app-record-deposit-modal>
+}

@@ -3,12 +3,14 @@
   <app-breadcrumbs [items]="breadcrumbs" />
 
   <!-- Page Header -->
-  <app-listing-page-header
-    title="Death Claims"
-    description="Manage death claims and benefit payouts"
-    actionLabel="+ Submit Claim"
-    (actionClick)="onSubmitClaim()"
-  />
+   <div>
+       <app-listing-page-header
+         title="Death Claims"
+         description="Manage death claims and benefit payouts"
+         actionLabel="+ Submit Claim"
+         (actionClick)="onSubmitClaim()"
+       />
+   </div>
 
   <!-- Stats Strip -->
   <div class="bg-white border border-gray-200 rounded-xl shadow-sm">

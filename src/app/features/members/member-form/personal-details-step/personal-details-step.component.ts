@@ -121,7 +121,7 @@ export class PersonalDetailsStepComponent implements OnInit {
       postalCode: ['', [Validators.required, Validators.maxLength(20)]],
       country: ['India', [Validators.required, Validators.maxLength(100)]],
       tierId: ['', Validators.required],
-      unitId: ['', Validators.required],
+      unitId: [''],
       agentId: ['', Validators.required]
     });
 

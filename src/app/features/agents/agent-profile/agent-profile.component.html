@@ -37,11 +37,9 @@
         entityType="agent"
         [cashBalance]="cashBalance()"
         [pendingReceiveCount]="pendingReceiveCount()"
-        [pendingApprovalsCount]="stats()?.pendingApprovals ?? 0"
         [isLoading]="custodyLoading()"
         (onReceiveCash)="onReceiveCash()"
-        (onTransferToBank)="onTransferToBank()"
-        (onViewApprovals)="onViewApprovals()"
+        (onTransferCash)="onTransferCash()"
       />
     }
 

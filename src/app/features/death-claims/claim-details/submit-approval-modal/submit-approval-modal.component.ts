@@ -52,7 +52,7 @@ export class SubmitApprovalModalComponent {
   }
 
   get benefitAmount(): string {
-    const amount = this.claim.benefitAmount || this.claim.tier?.deathBenefitAmount || 0;
+    const amount = this.claim.benefitAmount || this.claim.member?.tier?.deathBenefitAmount || 0;
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',

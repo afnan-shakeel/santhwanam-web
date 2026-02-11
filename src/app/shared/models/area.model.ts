@@ -3,7 +3,7 @@
  * Based on OpenAPI spec: Organization Bodies - Areas
  */
 
-import { AdminDetails, AdminSummary } from './forum.model';
+import { AdminDetails, AdminSummary, Forum } from './forum.model';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // BASE MODELS
@@ -14,6 +14,7 @@ export interface Area {
   areaCode: string;
   areaName: string;
   forumId: string;
+  forum: Partial<Forum>;
   adminUserId: string;
   establishedDate: string;
   description?: string;

@@ -46,7 +46,7 @@ export class DeathClaimsService {
    * Search death claims with advanced filtering
    */
   searchClaims(request: SearchRequest): Observable<SearchResponse<DeathClaim>> {
-    request.eagerLoad = ['tier', 'agent', 'unit', 'contributionCycles', 'approvalRequest']
+    request.eagerLoad = ['agent', 'unit', 'contributionCycles', 'approvalRequest', 'reportedByUser']
     return this.http.post<SearchResponse<DeathClaim>>(`${this.basePath}/search`, request);
   }
 
