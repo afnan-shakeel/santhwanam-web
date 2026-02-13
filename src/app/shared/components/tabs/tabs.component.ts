@@ -68,7 +68,7 @@ export class TabsComponent {
   }
 
   getTabClasses(tab: TabItem): string {
-    const baseClasses = 'relative px-4 py-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500';
+    const baseClasses = 'relative px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500';
 
     if (tab.disabled) {
       return `${baseClasses} text-slate-400 cursor-not-allowed`;

@@ -1,7 +1,7 @@
 <!-- Initiate Handover Page -->
 <div class="min-h-screen bg-gray-50">
   <!-- Content -->
-  <div class="max-w-[640px] mx-auto px-7 py-6">
+  <div class="max-w-[640px] mx-auto px-4 sm:px-7 py-6">
     <!-- Page Header (inline with back button) -->
     <div class="flex items-center gap-3.5 mb-6">
       <button (click)="onCancel()"
@@ -36,11 +36,11 @@
 
       <!-- Form Card -->
       <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-        <div class="px-7 py-5 border-b border-gray-100">
+        <div class="px-4 sm:px-7 py-5 border-b border-gray-100">
           <h3 class="text-[15px] font-semibold text-gray-900">Handover Details</h3>
         </div>
         
-        <div class="px-7 py-6 space-y-[22px]">
+        <div class="px-4 sm:px-7 py-6 space-y-[22px]">
           <!-- Receiver Selection -->
           <div>
             <label class="block text-[13px] font-semibold text-gray-900 mb-2">
@@ -56,7 +56,7 @@
                 @for (receiver of receivers(); track receiver.userId) {
                   <div 
                     (click)="onReceiverChange(receiver.userId)"
-                    class="flex items-center gap-3.5 px-4 py-3.5 border-2 rounded-lg cursor-pointer transition-all relative"
+                    class="flex items-center gap-3 sm:gap-3.5 px-3 sm:px-4 py-3 sm:py-3.5 border-2 rounded-lg cursor-pointer transition-all"
                     [class]="selectedReceiverId() === receiver.userId 
                       ? 'border-primary-600 bg-primary-50/60' 
                       : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'">
@@ -78,16 +78,17 @@
                       {{ receiver.fullName.charAt(0) }}{{ (receiver.lastName || '').charAt(0) }}
                     </div>
                     <!-- Info -->
-                    <div class="flex-1">
-                      <div class="text-sm font-semibold text-gray-900">{{ receiver.fullName }}</div>
-                      <div class="text-xs text-gray-500 flex items-center gap-1.5">
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center justify-between gap-2">
+                        <span class="text-sm font-semibold text-gray-900 truncate">{{ receiver.fullName }}</span>
+                        @if (receiver.role === 'SuperAdmin') {
+                          <span class="text-[10.5px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-300 shrink-0">Requires Approval</span>
+                        }
+                      </div>
+                      <div class="text-xs text-gray-500 flex items-center gap-1.5 mt-0.5">
                         <span class="px-2 py-px rounded-lg text-[11px] font-medium text-gray-500 border border-gray-100">{{ receiver.roleDisplayName }}</span>
                       </div>
                     </div>
-                    <!-- Bank "Requires Approval" tag -->
-                    @if (receiver.role === 'SuperAdmin') {
-                      <span class="absolute top-2 right-3 text-[10.5px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-300">Requires Approval</span>
-                    }
                   </div>
                 }
               </div>

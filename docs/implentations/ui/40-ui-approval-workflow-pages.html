@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Santhwanam — Approval Workflow UI Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F9F8F6;
+    --surface: #FFFFFF;
+    --surface-alt: #F3F2EF;
+    --border: #E5E2DC;
+    --border-light: #EDEBE7;
+    --text-primary: #1A1A1A;
+    --text-secondary: #6B6560;
+    --text-tertiary: #9B9590;
+    --teal: #0D9488;
+    --teal-light: #CCFBF1;
+    --teal-dark: #0F766E;
+    --red: #DC2626;
+    --red-light: #FEF2F2;
+    --red-surface: #FEE2E2;
+    --green: #16A34A;
+    --green-light: #F0FDF4;
+    --green-surface: #DCFCE7;
+    --amber: #D97706;
+    --amber-light: #FFFBEB;
+    --amber-surface: #FEF3C7;
+    --blue: #2563EB;
+    --blue-light: #EFF6FF;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.08);
+    --radius: 10px;
+    --radius-sm: 6px;
+    --radius-lg: 14px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* === TOP NAVIGATION (Page switcher + viewport toggle) === */
+  .prototype-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #1A1A1A;
+    color: #fff;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+  }
+  .prototype-nav .page-tabs {
+    display: flex;
+    gap: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 3px;
+  }
+  .prototype-nav .page-tab {
+    padding: 6px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    font-family: inherit;
+    font-size: 13px;
+  }
+  .prototype-nav .page-tab.active {
+    background: var(--teal);
+    color: #fff;
+  }
+  .prototype-nav .page-tab:hover:not(.active) {
+    color: #fff;
+    background: rgba(255,255,255,0.08);
+  }
+  .viewport-toggle {
+    display: flex;
+    gap: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 3px;
+  }
+  .viewport-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .viewport-btn.active {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+  }
+  .proto-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.4);
+    font-weight: 600;
+  }
+
+  /* === VIEWPORT FRAME === */
+  .viewport-frame {
+    max-width: 1200px;
+    margin: 24px auto;
+    transition: max-width 0.4s ease;
+    padding: 0 16px;
+  }
+  .viewport-frame.mobile {
+    max-width: 390px;
+  }
+
+  /* === PAGE CONTAINER === */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* === SHARED: Page Header === */
+  .page-header {
+    padding: 24px 0 16px;
+  }
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+  }
+  .page-header .subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  /* === SHARED: Status Tabs === */
+  .status-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+  .status-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 99px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .status-tab:hover { border-color: var(--teal); color: var(--teal); }
+  .status-tab.active {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: #fff;
+  }
+  .status-tab .count {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 99px;
+    background: rgba(0,0,0,0.08);
+  }
+  .status-tab.active .count {
+    background: rgba(255,255,255,0.25);
+  }
+
+  /* === SHARED: Filters === */
+  .filters-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .filter-chip {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .filter-chip:hover { border-color: var(--text-tertiary); }
+  .filter-chip::after { content: ' ▾'; font-size: 10px; opacity: 0.5; }
+
+  /* === TASK CARD (Action Required) === */
+  .task-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s;
+  }
+  .task-card:hover { box-shadow: var(--shadow-md); }
+
+  .task-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--red-light);
+    border-bottom: 1px solid var(--red-surface);
+  }
+  .task-card-header .entity-type {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--red);
+  }
+  .task-card-header .stage-name {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .entity-summary {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .entity-summary .entity-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .entity-summary .entity-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .entity-icon.member { background: #E0E7FF; }
+  .entity-icon.claim { background: #FEE2E2; }
+  .entity-icon.wallet { background: #D1FAE5; }
+  .entity-icon.handover { background: #FEF3C7; }
+
+  .entity-summary .entity-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .entity-summary .entity-code {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    font-weight: 500;
+  }
+  .entity-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 16px;
+    font-size: 13px;
+  }
+  .entity-detail-grid .detail-item {
+    display: flex;
+    flex-direction: column;
+  }
+  .entity-detail-grid .detail-label {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .entity-detail-grid .detail-value {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 13px;
+  }
+  .entity-detail-grid .detail-full {
+    grid-column: 1 / -1;
+  }
+
+  .benefit-highlight {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--amber-light);
+    border: 1px solid var(--amber-surface);
+    border-radius: var(--radius-sm);
+    margin-top: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--amber);
+  }
+  .benefit-highlight .amount { font-size: 16px; }
+
+  .doc-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .doc-status .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge-green { background: var(--green-surface); color: var(--green); }
+  .badge-amber { background: var(--amber-surface); color: var(--amber); }
+
+  .snapshot-notice {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: var(--surface-alt);
+    font-size: 12px;
+    color: var(--text-tertiary);
+    border-bottom: 1px solid var(--border-light);
+  }
+  .snapshot-notice a {
+    color: var(--teal);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  .snapshot-notice a:hover { text-decoration: underline; }
+
+  /* === Stage Pipeline === */
+  .stage-pipeline-section {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .pipeline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .pipeline-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    position: relative;
+  }
+  .pipeline-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    z-index: 2;
+    flex-shrink: 0;
+    border: 2px solid transparent;
+  }
+  .pipeline-dot.done {
+    background: var(--green);
+    color: #fff;
+    border-color: var(--green);
+  }
+  .pipeline-dot.current {
+    background: #fff;
+    color: var(--teal);
+    border: 2.5px solid var(--teal);
+    box-shadow: 0 0 0 3px var(--teal-light);
+  }
+  .pipeline-dot.waiting {
+    background: var(--surface-alt);
+    color: var(--text-tertiary);
+    border-color: var(--border);
+  }
+  .pipeline-dot.rejected {
+    background: var(--red);
+    color: #fff;
+    border-color: var(--red);
+  }
+  .pipeline-label {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+    text-align: center;
+    line-height: 1.2;
+    font-weight: 500;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pipeline-label.current-label {
+    color: var(--teal);
+    font-weight: 600;
+  }
+  .pipeline-label .who {
+    display: block;
+    font-size: 10.5px;
+    color: var(--text-tertiary);
+    font-weight: 400;
+  }
+  .pipeline-connector {
+    flex: 0.6;
+    height: 2px;
+    background: var(--border);
+    margin-bottom: 18px;
+  }
+  .pipeline-connector.done { background: var(--green); }
+
+  /* Vertical pipeline for 4+ stages */
+  .pipeline-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding-left: 14px;
+  }
+  .pipeline-v-node {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    position: relative;
+  }
+  .pipeline-v-node:not(:last-child) {
+    padding-bottom: 16px;
+  }
+  .pipeline-v-node:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 13px;
+    top: 28px;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+  .pipeline-v-node.v-done:not(:last-child)::before { background: var(--green); }
+  .pipeline-v-info {
+    padding-top: 3px;
+  }
+  .pipeline-v-info .v-stage-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+  .pipeline-v-info .v-meta {
+    font-size: 11.5px;
+    color: var(--text-tertiary);
+  }
+
+  /* === Action Area === */
+  .action-area {
+    padding: 14px 16px;
+  }
+  .action-area textarea {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 13px;
+    resize: none;
+    height: 56px;
+    color: var(--text-primary);
+    background: var(--bg);
+    transition: border-color 0.2s;
+  }
+  .action-area textarea::placeholder { color: var(--text-tertiary); }
+  .action-area textarea:focus {
+    outline: none;
+    border-color: var(--teal);
+    background: #fff;
+  }
+  .action-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+  .btn {
+    padding: 9px 20px;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+  }
+  .btn-approve {
+    background: var(--teal);
+    color: #fff;
+  }
+  .btn-approve:hover { background: var(--teal-dark); }
+  .btn-reject {
+    background: var(--surface);
+    color: var(--red);
+    border: 1.5px solid var(--red-surface);
+  }
+  .btn-reject:hover { background: var(--red-light); border-color: var(--red); }
+  .btn-link {
+    background: none;
+    border: none;
+    color: var(--teal);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+  }
+  .btn-link:hover { text-decoration: underline; }
+
+  /* === COMPLETED / HISTORY CARD (Compact) === */
+  .history-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  .history-card:hover { box-shadow: var(--shadow-sm); }
+  .history-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .history-card-header.approved { background: var(--green-light); color: var(--green); }
+  .history-card-header.rejected { background: var(--red-light); color: var(--red); }
+
+  .history-card-body {
+    padding: 12px 14px;
+  }
+  .history-entity {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .history-entity .h-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .history-entity .h-name {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .history-entity .h-code {
+    font-size: 12px;
+    color: var(--text-tertiary);
+  }
+  .history-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+  }
+  .history-meta .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .history-meta .meta-label { color: var(--text-tertiary); }
+
+  .history-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    border-top: 1px solid var(--border-light);
+    font-size: 12.5px;
+  }
+  .request-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  .request-status.rs-approved { color: var(--green); }
+  .request-status.rs-rejected { color: var(--red); }
+  .request-status.rs-pending { color: var(--amber); }
+  .history-comment {
+    padding: 8px 14px 0;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  /* === SUBMISSION CARD === */
+  .submission-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 14px;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  .submission-card:hover { box-shadow: var(--shadow-md); }
+
+  .submission-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .submission-card-header.in-progress { background: var(--amber-light); }
+  .submission-card-header.s-approved { background: var(--green-light); }
+  .submission-card-header.s-rejected { background: var(--red-light); }
+  .submission-status-badge {
+    font-size: 12.5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .submission-status-badge.in-progress { color: var(--amber); }
+  .submission-status-badge.s-approved { color: var(--green); }
+  .submission-status-badge.s-rejected { color: var(--red); }
+  .submission-date {
+    font-size: 12px;
+    color: var(--text-tertiary);
+  }
+
+  .submission-body {
+    padding: 14px 16px;
+  }
+  .submission-entity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .submission-entity .s-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .submission-entity .s-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .submission-entity .s-sub {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+  }
+
+  .waiting-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--surface-alt);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  .waiting-info .waiting-on {
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .waiting-info .waiting-on strong { color: var(--text-primary); }
+  .waiting-time {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+  }
+  .waiting-time.warn { color: var(--amber); }
+  .waiting-time.danger { color: var(--red); }
+
+  .submission-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 16px;
+    border-top: 1px solid var(--border-light);
+  }
+
+  /* Rejection reason block */
+  .rejection-block {
+    padding: 10px 12px;
+    background: var(--red-light);
+    border: 1px solid var(--red-surface);
+    border-radius: var(--radius-sm);
+    margin-top: 10px;
+    font-size: 13px;
+  }
+  .rejection-block .rej-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  .rejection-block .rej-text {
+    color: var(--text-primary);
+  }
+  .rejection-block .rej-meta {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+  }
+
+  /* Approved info */
+  .approved-block {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--green-light);
+    border-radius: var(--radius-sm);
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: var(--green);
+    font-weight: 500;
+  }
+
+  /* === Load More === */
+  .load-more {
+    text-align: center;
+    padding: 16px;
+  }
+  .load-more button {
+    padding: 10px 28px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .load-more button:hover {
+    border-color: var(--teal);
+    color: var(--teal);
+  }
+
+  /* === TAB CONTENT CONTAINERS === */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 600px) {
+    .entity-detail-grid {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+    .action-buttons {
+      flex-direction: column-reverse;
+      gap: 8px;
+    }
+    .action-buttons .btn {
+      width: 100%;
+      text-align: center;
+    }
+    .action-buttons .btn-link {
+      padding: 8px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Prototype Navigation -->
+<div class="prototype-nav">
+  <div style="display:flex;align-items:center;gap:16px;">
+    <span class="proto-label">Prototype</span>
+    <div class="page-tabs">
+      <button class="page-tab active" onclick="switchPage('tasks')">My Tasks</button>
+      <button class="page-tab" onclick="switchPage('submissions')">My Submissions</button>
+    </div>
+  </div>
+  <div class="viewport-toggle">
+    <button class="viewport-btn" onclick="setViewport('mobile')">📱 Mobile</button>
+    <button class="viewport-btn active" onclick="setViewport('desktop')">🖥 Desktop</button>
+  </div>
+</div>
+
+<div class="viewport-frame" id="viewportFrame">
+
+<!-- ============================================================ -->
+<!-- PAGE 1: MY APPROVAL TASKS                                     -->
+<!-- ============================================================ -->
+<div class="page active" id="page-tasks">
+
+  <div class="page-header">
+    <h1>My Approval Tasks</h1>
+    <div class="subtitle">Items requiring your review and action</div>
+  </div>
+
+  <!-- Status Tabs -->
+  <div class="status-tabs">
+    <button class="status-tab active" onclick="switchTaskTab('action', this)">
+      Action Required <span class="count">5</span>
+    </button>
+    <button class="status-tab" onclick="switchTaskTab('completed', this)">
+      Completed <span class="count">38</span>
+    </button>
+    <button class="status-tab" onclick="switchTaskTab('rejected', this)">
+      Rejected <span class="count">2</span>
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <button class="filter-chip">Entity Type</button>
+    <button class="filter-chip">Workflow</button>
+    <button class="filter-chip">Date Range</button>
+  </div>
+
+  <!-- TAB: Action Required -->
+  <div class="tab-content active" id="task-tab-action">
+
+    <!-- Card 1: Member Registration -->
+    <div class="task-card">
+      <div class="task-card-header">
+        <span class="entity-type">Member Registration</span>
+        <span class="stage-name">Stage: Forum Admin Approval</span>
+      </div>
+      <div class="entity-summary">
+        <div class="entity-title">
+          <div class="entity-icon member">👤</div>
+          <div>
+            <div class="entity-name">John Doe</div>
+            <div class="entity-code">MEM-2025-00456</div>
+          </div>
+        </div>
+        <div class="entity-detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Tier</span>
+            <span class="detail-value">Tier A • ₹100/cont</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Benefit</span>
+            <span class="detail-value">₹50,000</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">DOB</span>
+            <span class="detail-value">15 Mar 1985</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Contact</span>
+            <span class="detail-value">+968 9123 4567</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Agent</span>
+            <span class="detail-value">Mary Johnson (AGT-001)</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Unit</span>
+            <span class="detail-value">Ruwi Central</span>
+          </div>
+          <div class="detail-item detail-full">
+            <span class="detail-label">Hierarchy</span>
+            <span class="detail-value">Ruwi Central → Muscat → Oman Forum</span>
+          </div>
+        </div>
+        <div class="doc-status">
+          <span class="badge badge-green">📋 2 Nominees</span>
+          <span class="badge badge-green">📎 3 Documents</span>
+        </div>
+      </div>
+      <div class="snapshot-notice">
+        <span>ℹ️ Snapshot at time of submission</span>
+        <a href="#">View Full Details →</a>
+      </div>
+      <div class="stage-pipeline-section">
+        <div class="pipeline">
+          <div class="pipeline-node">
+            <div class="pipeline-dot done">✓</div>
+            <div class="pipeline-label">Unit Admin<span class="who">Ahmed • Jan 14</span></div>
+          </div>
+          <div class="pipeline-connector done"></div>
+          <div class="pipeline-node">
+            <div class="pipeline-dot current">2</div>
+            <div class="pipeline-label current-label">You<span class="who">(current)</span></div>
+          </div>
+          <div class="pipeline-connector"></div>
+          <div class="pipeline-node">
+            <div class="pipeline-dot waiting">3</div>
+            <div class="pipeline-label">Super Admin<span class="who">Pending</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="action-area">
+        <textarea placeholder="Add comments (optional)..."></textarea>
+        <div class="action-buttons">
+          <button class="btn-link">View Full Details</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-reject">Reject</button>
+            <button class="btn btn-approve">✓ Approve</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Death Claim -->
+    <div class="task-card">
+      <div class="task-card-header">
+        <span class="entity-type">Death Claim</span>
+        <span class="stage-name">Stage: Forum Verification</span>
+      </div>
+      <div class="entity-summary">
+        <div class="entity-title">
+          <div class="entity-icon claim">💀</div>
+          <div>
+            <div class="entity-name">Claim for: Jane Smith</div>
+            <div class="entity-code">DC-2025-00012</div>
+          </div>
+        </div>
+        <div class="entity-detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Deceased</span>
+            <span class="detail-value">Jane Smith (MEM-2025-00089)</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Death Date</span>
+            <span class="detail-value">10 Jan 2025</span>
+          </div>
+          <div class="detail-item detail-full">
+            <span class="detail-label">Cause</span>
+            <span class="detail-value">Natural causes</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Nominee</span>
+            <span class="detail-value">Ali Smith (Son)</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Contact</span>
+            <span class="detail-value">+968 9456 7890</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Agent</span>
+            <span class="detail-value">John Kumar (AGT-005)</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Unit</span>
+            <span class="detail-value">Ruwi Central</span>
+          </div>
+        </div>
+        <div class="benefit-highlight">
+          💰 Benefit Amount: <span class="amount">₹50,000</span> &nbsp;•&nbsp; Tier A
+        </div>
+        <div class="doc-status" style="margin-top:10px;">
+          <span class="badge badge-green">✅ 3/4 Docs verified</span>
+          <span class="badge badge-green">✅ Verification Complete</span>
+        </div>
+        <div style="margin-top:8px;padding:8px 10px;background:var(--surface-alt);border-radius:6px;font-size:12.5px;color:var(--text-secondary);">
+          <span style="font-weight:600;color:var(--text-primary);">Verification Notes:</span> "All documents authentic. Hospital confirmed cause of death."
+        </div>
+      </div>
+      <div class="snapshot-notice">
+        <span>ℹ️ Snapshot at time of submission</span>
+        <a href="#">View Full Claim →</a>
+      </div>
+      <div class="stage-pipeline-section">
+        <div class="pipeline">
+          <div class="pipeline-node">
+            <div class="pipeline-dot current">1</div>
+            <div class="pipeline-label current-label">You<span class="who">(current)</span></div>
+          </div>
+        </div>
+        <div style="font-size:11.5px;color:var(--text-tertiary);text-align:center;margin-top:4px;">Single-stage workflow</div>
+      </div>
+      <div class="action-area">
+        <textarea placeholder="Add comments (optional)..."></textarea>
+        <div class="action-buttons">
+          <button class="btn-link">View Full Claim</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-reject">Reject</button>
+            <button class="btn btn-approve">✓ Approve</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Wallet Deposit -->
+    <div class="task-card">
+      <div class="task-card-header">
+        <span class="entity-type">Wallet Deposit</span>
+        <span class="stage-name">Stage: Unit Admin Approval</span>
+      </div>
+      <div class="entity-summary">
+        <div class="entity-title">
+          <div class="entity-icon wallet">💳</div>
+          <div>
+            <div class="entity-name">Ali Hassan</div>
+            <div class="entity-code">MEM-2025-00123</div>
+          </div>
+        </div>
+        <div class="entity-detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Deposit</span>
+            <span class="detail-value" style="font-size:15px;font-weight:700;">₹1,000 • Cash</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Balance Change</span>
+            <span class="detail-value">₹250 → <strong style="color:var(--green);">₹1,250</strong></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Collected By</span>
+            <span class="detail-value">Agent Mary (AGT-001)</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Collection Date</span>
+            <span class="detail-value">14 Jan 2025</span>
+          </div>
+          <div class="detail-item detail-full">
+            <span class="detail-label">Notes</span>
+            <span class="detail-value">"Monthly top-up"</span>
+          </div>
+        </div>
+      </div>
+      <div class="snapshot-notice">
+        <span>ℹ️ Snapshot at time of submission</span>
+        <a href="#">View Member Wallet →</a>
+      </div>
+      <div class="stage-pipeline-section">
+        <div class="pipeline">
+          <div class="pipeline-node">
+            <div class="pipeline-dot current">1</div>
+            <div class="pipeline-label current-label">You<span class="who">(current)</span></div>
+          </div>
+        </div>
+        <div style="font-size:11.5px;color:var(--text-tertiary);text-align:center;margin-top:4px;">Single-stage workflow</div>
+      </div>
+      <div class="action-area">
+        <textarea placeholder="Add comments (optional)..."></textarea>
+        <div class="action-buttons">
+          <button class="btn-link">View Member Wallet</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-reject">Reject</button>
+            <button class="btn btn-approve">✓ Approve</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Cash Handover -->
+    <div class="task-card">
+      <div class="task-card-header">
+        <span class="entity-type">Cash Handover</span>
+        <span class="stage-name">Stage: Area Admin Approval</span>
+      </div>
+      <div class="entity-summary">
+        <div class="entity-title">
+          <div class="entity-icon handover">💰</div>
+          <div>
+            <div class="entity-name">Cash Handover — ₹15,000</div>
+            <div class="entity-code">CH-2025-00045</div>
+          </div>
+        </div>
+        <div class="entity-detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">From</span>
+            <span class="detail-value">Agent Mary (AGT-001)</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">To</span>
+            <span class="detail-value">Ahmed (Unit Admin)</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Items</span>
+            <span class="detail-value">12 line items</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Initiated</span>
+            <span class="detail-value">14 Jan, 10:30 AM</span>
+          </div>
+          <div class="detail-item detail-full">
+            <span class="detail-label">Breakdown</span>
+            <span class="detail-value">Contributions: ₹8,500 &nbsp;•&nbsp; Deposits: ₹6,500</span>
+          </div>
+        </div>
+      </div>
+      <div class="snapshot-notice">
+        <span>ℹ️ Snapshot at time of submission</span>
+        <a href="#">View Handover Detail →</a>
+      </div>
+      <div class="stage-pipeline-section">
+        <!-- Example: 4-stage vertical pipeline -->
+        <div class="pipeline-vertical">
+          <div class="pipeline-v-node v-done">
+            <div class="pipeline-dot done" style="width:28px;height:28px;font-size:12px;">✓</div>
+            <div class="pipeline-v-info">
+              <div class="v-stage-name">Agent Submission</div>
+              <div class="v-meta">Mary Johnson • 14 Jan, 10:30 AM</div>
+            </div>
+          </div>
+          <div class="pipeline-v-node v-done">
+            <div class="pipeline-dot done" style="width:28px;height:28px;font-size:12px;">✓</div>
+            <div class="pipeline-v-info">
+              <div class="v-stage-name">Unit Admin Review</div>
+              <div class="v-meta">Ahmed • 14 Jan, 2:15 PM</div>
+            </div>
+          </div>
+          <div class="pipeline-v-node">
+            <div class="pipeline-dot current" style="width:28px;height:28px;font-size:12px;">3</div>
+            <div class="pipeline-v-info">
+              <div class="v-stage-name" style="color:var(--teal);font-weight:600;">Area Admin Approval (You)</div>
+              <div class="v-meta">Waiting for your action</div>
+            </div>
+          </div>
+          <div class="pipeline-v-node">
+            <div class="pipeline-dot waiting" style="width:28px;height:28px;font-size:12px;">4</div>
+            <div class="pipeline-v-info">
+              <div class="v-stage-name">Forum Admin Final</div>
+              <div class="v-meta">Not started</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="action-area">
+        <textarea placeholder="Add comments (optional)..."></textarea>
+        <div class="action-buttons">
+          <button class="btn-link">View Handover Detail</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-reject">Reject</button>
+            <button class="btn btn-approve">✓ Approve</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /task-tab-action -->
+
+  <!-- TAB: Completed -->
+  <div class="tab-content" id="task-tab-completed">
+
+    <div class="history-card">
+      <div class="history-card-header approved">✅ You Approved</div>
+      <div class="history-card-body">
+        <div class="history-entity">
+          <div class="h-icon" style="background:#E0E7FF;">👤</div>
+          <div>
+            <div class="h-name">Member Registration</div>
+            <div class="h-code">Sarah Ali (MEM-2025-00455)</div>
+          </div>
+        </div>
+        <div class="history-meta">
+          <div class="meta-item"><span class="meta-label">Your Stage:</span> Forum Approval</div>
+          <div class="meta-item"><span class="meta-label">Acted:</span> 10 Jan 2025</div>
+        </div>
+      </div>
+      <div class="history-footer">
+        <span class="request-status rs-approved">✅ Request Approved</span>
+        <button class="btn-link" style="font-size:12.5px;">View Details →</button>
+      </div>
+    </div>
+
+    <div class="history-card">
+      <div class="history-card-header approved">✅ You Approved</div>
+      <div class="history-card-body">
+        <div class="history-entity">
+          <div class="h-icon" style="background:#D1FAE5;">💳</div>
+          <div>
+            <div class="h-name">Wallet Deposit • ₹1,000</div>
+            <div class="h-code">Ali Hassan (MEM-2025-00120)</div>
+          </div>
+        </div>
+        <div class="history-meta">
+          <div class="meta-item"><span class="meta-label">Your Stage:</span> Unit Admin Approval</div>
+          <div class="meta-item"><span class="meta-label">Acted:</span> 8 Jan 2025</div>
+        </div>
+      </div>
+      <div class="history-footer">
+        <span class="request-status rs-approved">✅ Request Approved</span>
+        <button class="btn-link" style="font-size:12.5px;">View Details →</button>
+      </div>
+    </div>
+
+    <div class="history-card">
+      <div class="history-card-header approved">✅ You Approved</div>
+      <div class="history-card-body">
+        <div class="history-entity">
+          <div class="h-icon" style="background:#E0E7FF;">👤</div>
+          <div>
+            <div class="h-name">Member Registration</div>
+            <div class="h-code">Omar Khan (MEM-2025-00430)</div>
+          </div>
+        </div>
+        <div class="history-meta">
+          <div class="meta-item"><span class="meta-label">Your Stage:</span> Forum Approval</div>
+          <div class="meta-item"><span class="meta-label">Acted:</span> 8 Jan 2025</div>
+        </div>
+      </div>
+      <div class="history-footer">
+        <span class="request-status rs-rejected">🔴 Rejected at next stage</span>
+        <button class="btn-link" style="font-size:12.5px;">View Details →</button>
+      </div>
+    </div>
+
+    <div class="history-card">
+      <div class="history-card-header approved">✅ You Approved</div>
+      <div class="history-card-body">
+        <div class="history-entity">
+          <div class="h-icon" style="background:#FEE2E2;">💀</div>
+          <div>
+            <div class="h-name">Death Claim</div>
+            <div class="h-code">Fatima Al-Rashid (DC-2025-00009)</div>
+          </div>
+        </div>
+        <div class="history-meta">
+          <div class="meta-item"><span class="meta-label">Your Stage:</span> Forum Verification</div>
+          <div class="meta-item"><span class="meta-label">Acted:</span> 5 Jan 2025</div>
+        </div>
+      </div>
+      <div class="history-footer">
+        <span class="request-status rs-approved">✅ Request Approved</span>
+        <button class="btn-link" style="font-size:12.5px;">View Details →</button>
+      </div>
+    </div>
+
+    <div class="load-more"><button>Load More</button></div>
+  </div><!-- /task-tab-completed -->
+
+  <!-- TAB: Rejected -->
+  <div class="tab-content" id="task-tab-rejected">
+
+    <div class="history-card">
+      <div class="history-card-header rejected">🔴 You Rejected</div>
+      <div class="history-card-body">
+        <div class="history-entity">
+          <div class="h-icon" style="background:#FEE2E2;">💀</div>
+          <div>
+            <div class="h-name">Death Claim</div>
+            <div class="h-code">Claim for: Fatima (DC-2025-00008)</div>
+          </div>
+        </div>
+        <div class="history-meta">
+          <div class="meta-item"><span class="meta-label">Your Stage:</span> Forum Verification</div>
+          <div class="meta-item"><span class="meta-label">Acted:</span> 5 Jan 2025</div>
+        </div>
+        <div class="history-comment">"Death certificate could not be verified. Hospital records do not match."</div>
+      </div>
+      <div class="history-footer">
+        <span class="request-status rs-rejected">🔴 Request Rejected</span>
+        <button class="btn-link" style="font-size:12.5px;">View Details →</button>
+      </div>
+    </div>
+
+    <div class="history-card">
+      <div class="history-card-header rejected">🔴 You Rejected</div>
+      <div class="history-card-body">
+        <div class="history-entity">
+          <div class="h-icon" style="background:#E0E7FF;">👤</div>
+          <div>
+            <div class="h-name">Member Registration</div>
+            <div class="h-code">Omar Khan (MEM-2025-00412)</div>
+          </div>
+        </div>
+        <div class="history-meta">
+          <div class="meta-item"><span class="meta-label">Your Stage:</span> Forum Approval</div>
+          <div class="meta-item"><span class="meta-label">Acted:</span> 2 Jan 2025</div>
+        </div>
+        <div class="history-comment">"Incomplete documents. Missing ID proof for nominee."</div>
+      </div>
+      <div class="history-footer">
+        <span class="request-status rs-rejected">🔴 Request Rejected</span>
+        <button class="btn-link" style="font-size:12.5px;">View Details →</button>
+      </div>
+    </div>
+
+  </div><!-- /task-tab-rejected -->
+
+</div><!-- /page-tasks -->
+
+
+<!-- ============================================================ -->
+<!-- PAGE 2: MY SUBMISSIONS                                        -->
+<!-- ============================================================ -->
+<div class="page" id="page-submissions">
+
+  <div class="page-header">
+    <h1>My Submissions</h1>
+    <div class="subtitle">Track approval progress of items you submitted</div>
+  </div>
+
+  <!-- Status Tabs -->
+  <div class="status-tabs">
+    <button class="status-tab active" onclick="switchSubTab('progress', this)">
+      In Progress <span class="count">3</span>
+    </button>
+    <button class="status-tab" onclick="switchSubTab('s-approved', this)">
+      Approved <span class="count">45</span>
+    </button>
+    <button class="status-tab" onclick="switchSubTab('s-rejected', this)">
+      Rejected <span class="count">2</span>
+    </button>
+    <button class="status-tab" onclick="switchSubTab('s-all', this)">
+      All <span class="count">50</span>
+    </button>
+  </div>
+
+  <div class="filters-bar">
+    <button class="filter-chip">Entity Type</button>
+    <button class="filter-chip">Date Range</button>
+  </div>
+
+  <!-- TAB: In Progress -->
+  <div class="tab-content active" id="sub-tab-progress">
+
+    <div class="submission-card">
+      <div class="submission-card-header in-progress">
+        <span class="submission-status-badge in-progress">🟡 In Progress</span>
+        <span class="submission-date">Submitted 2 days ago</span>
+      </div>
+      <div class="submission-body">
+        <div class="submission-entity">
+          <div class="s-icon" style="background:#E0E7FF;">👤</div>
+          <div>
+            <div class="s-name">Member Registration</div>
+            <div class="s-sub">John Doe (MEM-2025-00456)</div>
+          </div>
+        </div>
+        <div class="stage-pipeline-section" style="padding:0;border:none;">
+          <div class="pipeline">
+            <div class="pipeline-node">
+              <div class="pipeline-dot done">✓</div>
+              <div class="pipeline-label">Unit Admin<span class="who">Ahmed • Jan 14</span></div>
+            </div>
+            <div class="pipeline-connector done"></div>
+            <div class="pipeline-node">
+              <div class="pipeline-dot current">2</div>
+              <div class="pipeline-label current-label">Forum Admin<span class="who">(waiting)</span></div>
+            </div>
+            <div class="pipeline-connector"></div>
+            <div class="pipeline-node">
+              <div class="pipeline-dot waiting">3</div>
+              <div class="pipeline-label">Super Admin<span class="who">Pending</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="waiting-info">
+          <span class="waiting-on">Waiting on: <strong>Sarah (Forum Admin)</strong></span>
+          <span class="waiting-time warn">⏱️ 1d 4h</span>
+        </div>
+      </div>
+      <div class="submission-footer">
+        <button class="btn-link" style="font-size:12.5px;">View Details →</button>
+      </div>
+    </div>
+
+    <div class="submission-card">
+      <div class="submission-card-header in-progress">
+        <span class="submission-status-badge in-progress">🟡 In Progress</span>
+        <span class="submission-date">Submitted 5 hours ago</span>
+      </div>
+      <div class="submission-body">
+        <div class="submission-entity">
+          <div class="s-icon" style="background:#D1FAE5;">💳</div>
+          <div>
+            <div class="s-name">Wallet Deposit — ₹1,000</div>
+            <div class="s-sub">For: Ali Hassan (MEM-2025-00123)</div>
+          </div>
+        </div>
+        <div class="stage-pipeline-section" style="padding:0;border:none;">
+          <div class="pipeline">
+            <div class="pipeline-node">
+              <div class="pipeline-dot current">1</div>
+              <div class="pipeline-label current-label">Unit Admin<span class="who">(waiting)</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="waiting-info">
+          <span class="waiting-on">Waiting on: <strong>Omar (Unit Admin)</strong></span>
+          <span class="waiting-time">⏱️ 5h</span>
+        </div>
+      </div>
+      <div class="submission-footer">
+        <button class="btn-link" style="font-size:12.5px;">View Details →</button>
+      </div>
+    </div>
+
+    <div class="submission-card">
+      <div class="submission-card-header in-progress">
+        <span class="submission-status-badge in-progress">🟡 In Progress</span>
+        <span class="submission-date">Submitted 1 day ago</span>
+      </div>
+      <div class="submission-body">
+        <div class="submission-entity">
+          <div class="s-icon" style="background:#FEE2E2;">💀</div>
+          <div>
+            <div class="s-name">Death Claim</div>
+            <div class="s-sub">Claim for: Rashid (DC-2025-00015)</div>
+          </div>
+        </div>
+        <div class="stage-pipeline-section" style="padding:0;border:none;">
+          <div class="pipeline">
+            <div class="pipeline-node">
+              <div class="pipeline-dot current">1</div>
+              <div class="pipeline-label current-label">Forum Admin<span class="who">(waiting)</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="waiting-info">
+          <span class="waiting-on">Waiting on: <strong>Sarah (Forum Admin)</strong></span>
+          <span class="waiting-time danger">⏱️ 1d 1h ⚠️</span>
+        </div>
+      </div>
+      <div class="submission-footer">
+        <button class="btn-link" style="font-size:12.5px;">View Details →</button>
+      </div>
+    </div>
+
+  </div><!-- /sub-tab-progress -->
+
+  <!-- TAB: Approved -->
+  <div class="tab-content" id="sub-tab-s-approved">
+
+    <div class="submission-card">
+      <div class="submission-card-header s-approved">
+        <span class="submission-status-badge s-approved">✅ Approved</span>
+        <span class="submission-date">12 Jan 2025</span>
+      </div>
+      <div class="submission-body">
+        <div class="submission-entity">
+          <div class="s-icon" style="background:#E0E7FF;">👤</div>
+          <div>
+            <div class="s-name">Member Registration</div>
+            <div class="s-sub">Sarah Ali (MEM-2025-00455)</div>
+          </div>
+        </div>
+        <div class="stage-pipeline-section" style="padding:0;border:none;">
+          <div class="pipeline">
+            <div class="pipeline-node">
+              <div class="pipeline-dot done">✓</div>
+              <div class="pipeline-label">Unit Admin<span class="who">Ahmed</span></div>
+            </div>
+            <div class="pipeline-connector done"></div>
+            <div class="pipeline-node">
+              <div class="pipeline-dot done">✓</div>
+              <div class="pipeline-label">Forum Admin<span class="who">Sarah</span></div>
+            </div>
+            <div class="pipeline-connector done"></div>
+            <div class="pipeline-node">
+              <div class="pipeline-dot done">✓</div>
+              <div class="pipeline-label">Super Admin<span class="who">Khalid</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="approved-block">
+          <span>Approved by: Super Admin (Khalid)</span>
+          <span>12 Jan 2025</span>
+        </div>
+      </div>
+      <div class="submission-footer">
+        <button class="btn-link" style="font-size:12.5px;">View Details →</button>
+      </div>
+    </div>
+
+    <div class="submission-card">
+      <div class="submission-card-header s-approved">
+        <span class="submission-status-badge s-approved">✅ Approved</span>
+        <span class="submission-date">8 Jan 2025</span>
+      </div>
+      <div class="submission-body">
+        <div class="submission-entity">
+          <div class="s-icon" style="background:#D1FAE5;">💳</div>
+          <div>
+            <div class="s-name">Wallet Deposit — ₹500</div>
+            <div class="s-sub">For: Fatima H. (MEM-2025-00098)</div>
+          </div>
+        </div>
+        <div class="stage-pipeline-section" style="padding:0;border:none;">
+          <div class="pipeline">
+            <div class="pipeline-node">
+              <div class="pipeline-dot done">✓</div>
+              <div class="pipeline-label">Unit Admin<span class="who">Omar</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="approved-block">
+          <span>Approved by: Unit Admin (Omar)</span>
+          <span>8 Jan 2025</span>
+        </div>
+      </div>
+      <div class="submission-footer">
+        <button class="btn-link" style="font-size:12.5px;">View Details →</button>
+      </div>
+    </div>
+
+    <div class="load-more"><button>Load More</button></div>
+  </div><!-- /sub-tab-s-approved -->
+
+  <!-- TAB: Rejected -->
+  <div class="tab-content" id="sub-tab-s-rejected">
+
+    <div class="submission-card">
+      <div class="submission-card-header s-rejected">
+        <span class="submission-status-badge s-rejected">🔴 Rejected</span>
+        <span class="submission-date">2 Jan 2025</span>
+      </div>
+      <div class="submission-body">
+        <div class="submission-entity">
+          <div class="s-icon" style="background:#E0E7FF;">👤</div>
+          <div>
+            <div class="s-name">Member Registration</div>
+            <div class="s-sub">Omar Khan (MEM-2025-00412)</div>
+          </div>
+        </div>
+        <div class="stage-pipeline-section" style="padding:0;border:none;">
+          <div class="pipeline">
+            <div class="pipeline-node">
+              <div class="pipeline-dot done">✓</div>
+              <div class="pipeline-label">Unit Admin<span class="who">Ahmed • Jan 1</span></div>
+            </div>
+            <div class="pipeline-connector done"></div>
+            <div class="pipeline-node">
+              <div class="pipeline-dot rejected">✗</div>
+              <div class="pipeline-label" style="color:var(--red);font-weight:600;">Forum Admin<span class="who">Rejected</span></div>
+            </div>
+            <div class="pipeline-connector"></div>
+            <div class="pipeline-node">
+              <div class="pipeline-dot waiting">3</div>
+              <div class="pipeline-label">Super Admin<span class="who">Skipped</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="rejection-block">
+          <div class="rej-label">Rejection Reason</div>
+          <div class="rej-text">"Incomplete documents. Missing ID proof for nominee."</div>
+          <div class="rej-meta">Rejected by: Sarah (Forum Admin) • 2 Jan 2025</div>
+        </div>
+      </div>
+      <div class="submission-footer">
+        <button class="btn-link" style="font-size:12.5px;">View Details →</button>
+      </div>
+    </div>
+
+  </div><!-- /sub-tab-s-rejected -->
+
+  <!-- TAB: All -->
+  <div class="tab-content" id="sub-tab-s-all">
+    <div style="text-align:center;padding:40px 20px;color:var(--text-tertiary);font-size:14px;">
+      All submissions view combines all tabs above.<br>
+      Same cards, no status pre-filter applied.
+    </div>
+  </div>
+
+</div><!-- /page-submissions -->
+
+</div><!-- /viewport-frame -->
+
+<script>
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function setViewport(mode) {
+  const frame = document.getElementById('viewportFrame');
+  document.querySelectorAll('.viewport-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (mode === 'mobile') {
+    frame.classList.add('mobile');
+  } else {
+    frame.classList.remove('mobile');
+  }
+}
+
+function switchTaskTab(tab, btn) {
+  document.querySelectorAll('#page-tasks .tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#page-tasks .status-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('task-tab-' + tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+function switchSubTab(tab, btn) {
+  document.querySelectorAll('#page-submissions .tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#page-submissions .status-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sub-tab-' + tab).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>

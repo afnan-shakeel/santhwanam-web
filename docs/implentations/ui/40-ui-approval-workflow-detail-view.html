@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Santhwanam — Approval Request Detail Page</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F9F8F6;
+    --surface: #FFFFFF;
+    --surface-alt: #F3F2EF;
+    --border: #E5E2DC;
+    --border-light: #EDEBE7;
+    --text-primary: #1A1A1A;
+    --text-secondary: #6B6560;
+    --text-tertiary: #9B9590;
+    --teal: #0D9488;
+    --teal-light: #CCFBF1;
+    --teal-dark: #0F766E;
+    --red: #DC2626;
+    --red-light: #FEF2F2;
+    --red-surface: #FEE2E2;
+    --green: #16A34A;
+    --green-light: #F0FDF4;
+    --green-surface: #DCFCE7;
+    --amber: #D97706;
+    --amber-light: #FFFBEB;
+    --amber-surface: #FEF3C7;
+    --blue: #2563EB;
+    --blue-light: #EFF6FF;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+    --radius: 10px;
+    --radius-sm: 6px;
+    --radius-lg: 14px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* === PROTOTYPE NAV === */
+  .proto-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: #1A1A1A; color: #fff;
+    padding: 10px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px;
+  }
+  .proto-nav .left { display: flex; align-items: center; gap: 16px; }
+  .proto-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.4); font-weight: 600; }
+  .scenario-tabs { display: flex; gap: 4px; background: rgba(255,255,255,0.1); border-radius: 8px; padding: 3px; }
+  .scenario-tab {
+    padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 500;
+    border: none; background: transparent; color: rgba(255,255,255,0.6);
+    font-family: inherit; font-size: 12px; transition: all 0.2s; white-space: nowrap;
+  }
+  .scenario-tab.active { background: var(--teal); color: #fff; }
+  .scenario-tab:hover:not(.active) { color: #fff; background: rgba(255,255,255,0.08); }
+  .viewport-toggle { display: flex; gap: 4px; background: rgba(255,255,255,0.1); border-radius: 8px; padding: 3px; }
+  .vp-btn {
+    padding: 6px 12px; border-radius: 6px; cursor: pointer; border: none;
+    background: transparent; color: rgba(255,255,255,0.6); font-family: inherit;
+    font-size: 13px; font-weight: 500; transition: all 0.2s;
+  }
+  .vp-btn.active { background: rgba(255,255,255,0.15); color: #fff; }
+
+  /* === VIEWPORT === */
+  .viewport { max-width: 800px; margin: 0 auto; padding: 0 16px; transition: max-width 0.4s ease; }
+  .viewport.mobile { max-width: 390px; }
+
+  /* === SCENARIOS === */
+  .scenario { display: none; }
+  .scenario.active { display: block; }
+
+  /* === BACK LINK === */
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 20px 0 12px; font-size: 13px; font-weight: 500;
+    color: var(--teal); text-decoration: none; cursor: pointer;
+  }
+  .back-link:hover { text-decoration: underline; }
+
+  /* === PAGE HEADER === */
+  .detail-header {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .detail-header-top {
+    padding: 18px 20px;
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 12px;
+  }
+  .header-left { flex: 1; }
+  .entity-type-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .badge-member { background: #E0E7FF; color: #4338CA; }
+  .badge-claim { background: var(--red-surface); color: var(--red); }
+  .badge-wallet { background: var(--green-surface); color: var(--green); }
+  .badge-handover { background: var(--amber-surface); color: var(--amber); }
+
+  .header-title { font-size: 20px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.3px; }
+  .header-meta { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+  .header-meta strong { color: var(--text-primary); font-weight: 600; }
+
+  .overall-status {
+    padding: 6px 14px; border-radius: 99px; font-size: 13px; font-weight: 600;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .os-pending { background: var(--amber-light); color: var(--amber); border: 1px solid var(--amber-surface); }
+  .os-approved { background: var(--green-light); color: var(--green); border: 1px solid var(--green-surface); }
+  .os-rejected { background: var(--red-light); color: var(--red); border: 1px solid var(--red-surface); }
+
+  .header-ids {
+    padding: 10px 20px;
+    background: var(--surface-alt);
+    border-top: 1px solid var(--border-light);
+    display: flex; flex-wrap: wrap; gap: 8px 20px;
+    font-size: 12px; color: var(--text-tertiary);
+  }
+  .header-ids .id-item { display: flex; align-items: center; gap: 4px; }
+  .header-ids .id-label { font-weight: 600; }
+  .header-ids .id-value { color: var(--text-secondary); font-family: 'DM Sans', monospace; font-size: 11.5px; }
+
+  /* === SECTION CARD === */
+  .section-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .section-title {
+    padding: 14px 20px;
+    font-size: 14px; font-weight: 700; color: var(--text-primary);
+    border-bottom: 1px solid var(--border-light);
+    display: flex; align-items: center; gap: 8px;
+    text-transform: uppercase; letter-spacing: 0.5px; font-size: 12px;
+  }
+  .section-body { padding: 18px 20px; }
+
+  /* === ENTITY CONTEXT === */
+  .ctx-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px;
+  }
+  .ctx-item { display: flex; flex-direction: column; }
+  .ctx-label { font-size: 11px; color: var(--text-tertiary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .ctx-value { font-size: 13.5px; color: var(--text-primary); font-weight: 500; }
+  .ctx-full { grid-column: 1 / -1; }
+  .ctx-highlight {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; background: var(--amber-light);
+    border: 1px solid var(--amber-surface); border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 600; color: var(--amber);
+  }
+  .ctx-highlight .amount { font-size: 18px; }
+  .ctx-docs {
+    grid-column: 1 / -1;
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .ctx-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 600;
+  }
+  .ctx-badge-green { background: var(--green-surface); color: var(--green); }
+  .ctx-notes {
+    grid-column: 1 / -1;
+    padding: 10px 14px; background: var(--surface-alt); border-radius: var(--radius-sm);
+    font-size: 13px; color: var(--text-secondary);
+  }
+  .ctx-notes strong { color: var(--text-primary); }
+
+  .snapshot-bar {
+    padding: 10px 20px;
+    background: var(--surface-alt);
+    border-top: 1px solid var(--border-light);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 12px; color: var(--text-tertiary);
+  }
+  .snapshot-bar a { color: var(--teal); text-decoration: none; font-weight: 600; }
+  .snapshot-bar a:hover { text-decoration: underline; }
+
+  /* === APPROVAL JOURNEY (Vertical Timeline) === */
+  .timeline { position: relative; padding-left: 0; }
+  .tl-stage { display: flex; gap: 16px; position: relative; }
+  .tl-stage:not(:last-child) { padding-bottom: 24px; }
+  .tl-stage:not(:last-child) .tl-track::after {
+    content: ''; position: absolute; left: 50%; top: 36px; bottom: 0;
+    width: 2px; transform: translateX(-50%);
+    background: var(--border);
+  }
+  .tl-stage.tl-done:not(:last-child) .tl-track::after { background: var(--green); }
+  .tl-stage.tl-rejected-stage:not(:last-child) .tl-track::after { background: var(--red); }
+
+  .tl-track {
+    position: relative; flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: center;
+    width: 36px;
+  }
+  .tl-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; z-index: 2; flex-shrink: 0;
+    border: 2px solid transparent;
+  }
+  .tl-dot.done { background: var(--green); color: #fff; border-color: var(--green); }
+  .tl-dot.current { background: #fff; color: var(--teal); border: 2.5px solid var(--teal); box-shadow: 0 0 0 4px var(--teal-light); }
+  .tl-dot.waiting { background: var(--surface-alt); color: var(--text-tertiary); border-color: var(--border); }
+  .tl-dot.rejected { background: var(--red); color: #fff; border-color: var(--red); }
+
+  .tl-content { flex: 1; padding-top: 2px; }
+  .tl-stage-header {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+    margin-bottom: 4px;
+  }
+  .tl-stage-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .tl-stage-name.current-name { color: var(--teal); }
+  .tl-stage-name.rejected-name { color: var(--red); }
+
+  .tl-decision-badge {
+    padding: 2px 10px; border-radius: 99px; font-size: 11.5px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .tl-decision-badge.approved { background: var(--green-surface); color: var(--green); }
+  .tl-decision-badge.rejected { background: var(--red-surface); color: var(--red); }
+  .tl-decision-badge.pending-badge { background: var(--amber-surface); color: var(--amber); }
+  .tl-decision-badge.waiting-badge { background: var(--surface-alt); color: var(--text-tertiary); border: 1px solid var(--border); }
+
+  .tl-reviewer { font-size: 13px; color: var(--text-secondary); margin-bottom: 2px; }
+  .tl-reviewer strong { color: var(--text-primary); font-weight: 600; }
+  .tl-date { font-size: 12px; color: var(--text-tertiary); }
+  .tl-comment {
+    margin-top: 8px; padding: 10px 14px;
+    background: var(--surface-alt); border-radius: var(--radius-sm);
+    font-size: 13px; color: var(--text-secondary); font-style: italic;
+    border-left: 3px solid var(--border);
+  }
+  .tl-comment.rej-comment { border-left-color: var(--red); background: var(--red-light); }
+
+  .tl-you-tag {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 1px 8px; border-radius: 99px; font-size: 10.5px; font-weight: 700;
+    background: var(--teal-light); color: var(--teal);
+    margin-left: 6px; vertical-align: middle;
+  }
+
+  .tl-waiting-info {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 6px; font-size: 13px; color: var(--text-secondary);
+  }
+  .tl-waiting-time {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 600;
+  }
+  .wt-normal { background: var(--surface-alt); color: var(--text-tertiary); }
+  .wt-warn { background: var(--amber-surface); color: var(--amber); }
+
+  /* === ACTION AREA === */
+  .action-card {
+    background: var(--surface);
+    border: 2px solid var(--teal);
+    border-radius: var(--radius-lg);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .action-card-header {
+    padding: 12px 20px;
+    background: var(--teal-light);
+    border-bottom: 1px solid rgba(13,148,136,0.15);
+    font-size: 13px; font-weight: 700; color: var(--teal-dark);
+    display: flex; align-items: center; gap: 8px;
+    text-transform: uppercase; letter-spacing: 0.5px; font-size: 12px;
+  }
+  .action-card-body { padding: 18px 20px; }
+  .action-card-body textarea {
+    width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px 14px; font-family: inherit; font-size: 13px; resize: none;
+    height: 80px; color: var(--text-primary); background: var(--bg); transition: border-color 0.2s;
+  }
+  .action-card-body textarea::placeholder { color: var(--text-tertiary); }
+  .action-card-body textarea:focus { outline: none; border-color: var(--teal); background: #fff; }
+  .action-buttons {
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 10px; margin-top: 14px;
+  }
+  .btn {
+    padding: 10px 24px; border-radius: var(--radius-sm); font-family: inherit;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none;
+  }
+  .btn-approve { background: var(--teal); color: #fff; }
+  .btn-approve:hover { background: var(--teal-dark); }
+  .btn-reject { background: var(--surface); color: var(--red); border: 1.5px solid var(--red-surface); }
+  .btn-reject:hover { background: var(--red-light); border-color: var(--red); }
+
+  /* === OUTCOME BANNER === */
+  .outcome-banner {
+    padding: 16px 20px; border-radius: var(--radius-lg);
+    margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px;
+  }
+  .outcome-banner.ob-approved { background: var(--green-light); border: 1.5px solid var(--green-surface); }
+  .outcome-banner.ob-rejected { background: var(--red-light); border: 1.5px solid var(--red-surface); }
+  .outcome-icon { font-size: 24px; flex-shrink: 0; }
+  .outcome-text .outcome-title { font-size: 15px; font-weight: 700; }
+  .outcome-text .outcome-detail { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+  .ob-approved .outcome-title { color: var(--green); }
+  .ob-rejected .outcome-title { color: var(--red); }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 500px) {
+    .ctx-grid { grid-template-columns: 1fr; gap: 8px; }
+    .detail-header-top { flex-direction: column; gap: 10px; }
+    .overall-status { align-self: flex-start; }
+    .header-ids { flex-direction: column; gap: 4px; }
+    .action-buttons { flex-direction: column-reverse; }
+    .action-buttons .btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="proto-nav">
+  <div class="left">
+    <span class="proto-label">Detail Page</span>
+    <div class="scenario-tabs">
+      <button class="scenario-tab active" onclick="switchScenario('pending', this)">Pending (Approver)</button>
+      <button class="scenario-tab" onclick="switchScenario('approved', this)">Approved</button>
+      <button class="scenario-tab" onclick="switchScenario('rejected', this)">Rejected</button>
+      <button class="scenario-tab" onclick="switchScenario('submitter', this)">Submitter View</button>
+    </div>
+  </div>
+  <div class="viewport-toggle">
+    <button class="vp-btn" onclick="setVP('mobile')">📱</button>
+    <button class="vp-btn active" onclick="setVP('desktop')">🖥</button>
+  </div>
+</div>
+
+<div class="viewport" id="vp">
+
+<!-- ============================================================ -->
+<!-- SCENARIO 1: PENDING — APPROVER VIEW (Member Registration)    -->
+<!-- 3-stage workflow, stage 2 is current, user is the approver   -->
+<!-- ============================================================ -->
+<div class="scenario active" id="sc-pending">
+  <a class="back-link">← Back to My Approval Tasks</a>
+
+  <!-- Header -->
+  <div class="detail-header">
+    <div class="detail-header-top">
+      <div class="header-left">
+        <div class="entity-type-badge badge-member">👤 Member Registration</div>
+        <div class="header-title">John Doe</div>
+        <div class="header-meta">
+          Submitted by <strong>Agent Mary Johnson</strong> • 2 days ago
+        </div>
+      </div>
+      <div class="overall-status os-pending">🟡 Pending Approval</div>
+    </div>
+    <div class="header-ids">
+      <div class="id-item"><span class="id-label">Member:</span><span class="id-value">MEM-2025-00456</span></div>
+      <div class="id-item"><span class="id-label">Request:</span><span class="id-value">APR-2025-00321</span></div>
+      <div class="id-item"><span class="id-label">Workflow:</span><span class="id-value">Member Registration Approval</span></div>
+    </div>
+  </div>
+
+  <!-- Entity Context Snapshot -->
+  <div class="section-card">
+    <div class="section-title">📋 Entity Details</div>
+    <div class="section-body">
+      <div class="ctx-grid">
+        <div class="ctx-item"><span class="ctx-label">Full Name</span><span class="ctx-value">John Doe</span></div>
+        <div class="ctx-item"><span class="ctx-label">Date of Birth</span><span class="ctx-value">15 Mar 1985 (39 yrs)</span></div>
+        <div class="ctx-item"><span class="ctx-label">Contact</span><span class="ctx-value">+968 9123 4567</span></div>
+        <div class="ctx-item"><span class="ctx-label">Email</span><span class="ctx-value">john.doe@email.com</span></div>
+        <div class="ctx-item"><span class="ctx-label">Tier</span><span class="ctx-value">Tier A • ₹100/contribution</span></div>
+        <div class="ctx-item"><span class="ctx-label">Benefit</span><span class="ctx-value">₹50,000</span></div>
+        <div class="ctx-item"><span class="ctx-label">Agent</span><span class="ctx-value">Mary Johnson (AGT-001)</span></div>
+        <div class="ctx-item"><span class="ctx-label">Unit</span><span class="ctx-value">Ruwi Central</span></div>
+        <div class="ctx-item ctx-full"><span class="ctx-label">Hierarchy</span><span class="ctx-value">Ruwi Central → Muscat Area → Oman Forum</span></div>
+        <div class="ctx-docs">
+          <span class="ctx-badge ctx-badge-green">📋 2 Nominees</span>
+          <span class="ctx-badge ctx-badge-green">📎 3 Documents uploaded</span>
+        </div>
+      </div>
+    </div>
+    <div class="snapshot-bar">
+      <span>ℹ️ Snapshot from 12 Jan 2025, 8:00 AM</span>
+      <a href="#">View Member Profile →</a>
+    </div>
+  </div>
+
+  <!-- Approval Journey -->
+  <div class="section-card">
+    <div class="section-title">🔄 Approval Journey</div>
+    <div class="section-body">
+      <div class="timeline">
+
+        <!-- Stage 1: Done -->
+        <div class="tl-stage tl-done">
+          <div class="tl-track"><div class="tl-dot done">✓</div></div>
+          <div class="tl-content">
+            <div class="tl-stage-header">
+              <span class="tl-stage-name">Stage 1: Unit Admin Review</span>
+              <span class="tl-decision-badge approved">Approved</span>
+            </div>
+            <div class="tl-reviewer">Reviewed by <strong>Ahmed Al-Rashid</strong> (Unit Admin — Ruwi Central)</div>
+            <div class="tl-date">14 Jan 2025, 2:30 PM</div>
+            <div class="tl-comment">"Documents complete. Member verified in person. Recommend approval."</div>
+          </div>
+        </div>
+
+        <!-- Stage 2: Current (You) -->
+        <div class="tl-stage">
+          <div class="tl-track"><div class="tl-dot current">2</div></div>
+          <div class="tl-content">
+            <div class="tl-stage-header">
+              <span class="tl-stage-name current-name">Stage 2: Forum Admin Approval <span class="tl-you-tag">YOU</span></span>
+              <span class="tl-decision-badge pending-badge">Awaiting Decision</span>
+            </div>
+            <div class="tl-reviewer">Assigned to <strong>You (Sarah Ahmed)</strong> (Forum Admin — Oman Forum)</div>
+            <div class="tl-waiting-info">
+              <span>Waiting since:</span>
+              <span class="tl-waiting-time wt-warn">⏱️ 1d 4h</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 3: Waiting -->
+        <div class="tl-stage">
+          <div class="tl-track"><div class="tl-dot waiting">3</div></div>
+          <div class="tl-content">
+            <div class="tl-stage-header">
+              <span class="tl-stage-name" style="color:var(--text-tertiary)">Stage 3: Super Admin Final Approval</span>
+              <span class="tl-decision-badge waiting-badge">Not Started</span>
+            </div>
+            <div class="tl-reviewer" style="color:var(--text-tertiary)">Will be assigned to <strong style="color:var(--text-secondary)">Khalid (Super Admin)</strong></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Area (Approver Only) -->
+  <div class="action-card">
+    <div class="action-card-header">✍️ Your Decision</div>
+    <div class="action-card-body">
+      <textarea placeholder="Add your review comments (optional)..."></textarea>
+      <div class="action-buttons">
+        <button class="btn btn-reject">Reject</button>
+        <button class="btn btn-approve">✓ Approve</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SCENARIO 2: APPROVED — Death Claim (All stages complete)     -->
+<!-- ============================================================ -->
+<div class="scenario" id="sc-approved">
+  <a class="back-link">← Back to My Approval Tasks</a>
+
+  <div class="detail-header">
+    <div class="detail-header-top">
+      <div class="header-left">
+        <div class="entity-type-badge badge-claim">💀 Death Claim</div>
+        <div class="header-title">Claim for Jane Smith</div>
+        <div class="header-meta">
+          Submitted by <strong>Admin Sarah Ahmed</strong> • 5 days ago
+        </div>
+      </div>
+      <div class="overall-status os-approved">✅ Approved</div>
+    </div>
+    <div class="header-ids">
+      <div class="id-item"><span class="id-label">Claim:</span><span class="id-value">DC-2025-00012</span></div>
+      <div class="id-item"><span class="id-label">Request:</span><span class="id-value">APR-2025-00315</span></div>
+      <div class="id-item"><span class="id-label">Workflow:</span><span class="id-value">Death Claim Approval</span></div>
+    </div>
+  </div>
+
+  <!-- Outcome Banner -->
+  <div class="outcome-banner ob-approved">
+    <span class="outcome-icon">✅</span>
+    <div class="outcome-text">
+      <div class="outcome-title">Claim Approved — Contribution Cycle Created</div>
+      <div class="outcome-detail">Approved by Sarah Ahmed (Forum Admin) on 16 Jan 2025. Contribution cycle CC-2025-00015 has been initiated with a 15-day collection deadline.</div>
+    </div>
+  </div>
+
+  <!-- Entity Context -->
+  <div class="section-card">
+    <div class="section-title">📋 Entity Details</div>
+    <div class="section-body">
+      <div class="ctx-grid">
+        <div class="ctx-item"><span class="ctx-label">Deceased</span><span class="ctx-value">Jane Smith (MEM-2025-00089)</span></div>
+        <div class="ctx-item"><span class="ctx-label">Death Date</span><span class="ctx-value">10 Jan 2025</span></div>
+        <div class="ctx-item ctx-full"><span class="ctx-label">Cause of Death</span><span class="ctx-value">Natural causes</span></div>
+        <div class="ctx-highlight">
+          💰 Benefit Amount: <span class="amount">₹50,000</span> &nbsp;•&nbsp; Tier A
+        </div>
+        <div class="ctx-item"><span class="ctx-label">Nominee</span><span class="ctx-value">Ali Smith (Son)</span></div>
+        <div class="ctx-item"><span class="ctx-label">Nominee Contact</span><span class="ctx-value">+968 9456 7890</span></div>
+        <div class="ctx-item"><span class="ctx-label">Agent</span><span class="ctx-value">John Kumar (AGT-005)</span></div>
+        <div class="ctx-item"><span class="ctx-label">Unit</span><span class="ctx-value">Ruwi Central</span></div>
+        <div class="ctx-docs">
+          <span class="ctx-badge ctx-badge-green">✅ 4/4 Docs verified</span>
+          <span class="ctx-badge ctx-badge-green">✅ Verification Complete</span>
+        </div>
+        <div class="ctx-notes">
+          <strong>Verification Notes:</strong> "All documents authentic. Hospital confirmed cause of death. Nominee identity verified with national ID."
+        </div>
+      </div>
+    </div>
+    <div class="snapshot-bar">
+      <span>ℹ️ Snapshot from 14 Jan 2025, 10:00 AM</span>
+      <a href="#">View Full Claim →</a>
+    </div>
+  </div>
+
+  <!-- Approval Journey -->
+  <div class="section-card">
+    <div class="section-title">🔄 Approval Journey</div>
+    <div class="section-body">
+      <div class="timeline">
+        <div class="tl-stage tl-done">
+          <div class="tl-track"><div class="tl-dot done">✓</div></div>
+          <div class="tl-content">
+            <div class="tl-stage-header">
+              <span class="tl-stage-name">Stage 1: Forum Admin Verification <span class="tl-you-tag">YOU</span></span>
+              <span class="tl-decision-badge approved">Approved</span>
+            </div>
+            <div class="tl-reviewer">Reviewed by <strong>You (Sarah Ahmed)</strong> (Forum Admin — Oman Forum)</div>
+            <div class="tl-date">16 Jan 2025, 2:30 PM</div>
+            <div class="tl-comment">"All documents verified. Member was active and in good standing. Nominee confirmed. Approve claim."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No action area — request is finalized -->
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SCENARIO 3: REJECTED — Member Registration                   -->
+<!-- Approved at stage 1, rejected at stage 2                     -->
+<!-- ============================================================ -->
+<div class="scenario" id="sc-rejected">
+  <a class="back-link">← Back to All Requests</a>
+
+  <div class="detail-header">
+    <div class="detail-header-top">
+      <div class="header-left">
+        <div class="entity-type-badge badge-member">👤 Member Registration</div>
+        <div class="header-title">Omar Khan</div>
+        <div class="header-meta">
+          Submitted by <strong>Agent Ali Rashid</strong> • 12 days ago
+        </div>
+      </div>
+      <div class="overall-status os-rejected">🔴 Rejected</div>
+    </div>
+    <div class="header-ids">
+      <div class="id-item"><span class="id-label">Member:</span><span class="id-value">MEM-2025-00412</span></div>
+      <div class="id-item"><span class="id-label">Request:</span><span class="id-value">APR-2025-00290</span></div>
+      <div class="id-item"><span class="id-label">Workflow:</span><span class="id-value">Member Registration Approval</span></div>
+    </div>
+  </div>
+
+  <!-- Outcome Banner -->
+  <div class="outcome-banner ob-rejected">
+    <span class="outcome-icon">🔴</span>
+    <div class="outcome-text">
+      <div class="outcome-title">Registration Rejected at Stage 2</div>
+      <div class="outcome-detail">Rejected by Sarah Ahmed (Forum Admin) on 2 Jan 2025. Reason: Incomplete documents — missing ID proof for nominee.</div>
+    </div>
+  </div>
+
+  <!-- Entity Context -->
+  <div class="section-card">
+    <div class="section-title">📋 Entity Details</div>
+    <div class="section-body">
+      <div class="ctx-grid">
+        <div class="ctx-item"><span class="ctx-label">Full Name</span><span class="ctx-value">Omar Khan</span></div>
+        <div class="ctx-item"><span class="ctx-label">Date of Birth</span><span class="ctx-value">22 Aug 1990 (34 yrs)</span></div>
+        <div class="ctx-item"><span class="ctx-label">Contact</span><span class="ctx-value">+968 9234 5678</span></div>
+        <div class="ctx-item"><span class="ctx-label">Tier</span><span class="ctx-value">Tier B • ₹200/contribution</span></div>
+        <div class="ctx-item"><span class="ctx-label">Agent</span><span class="ctx-value">Ali Rashid (AGT-008)</span></div>
+        <div class="ctx-item"><span class="ctx-label">Unit</span><span class="ctx-value">Seeb North</span></div>
+        <div class="ctx-docs">
+          <span class="ctx-badge ctx-badge-green">📋 1 Nominee</span>
+          <span class="ctx-badge" style="background:var(--amber-surface);color:var(--amber);">⚠️ 1 Document (incomplete)</span>
+        </div>
+      </div>
+    </div>
+    <div class="snapshot-bar">
+      <span>ℹ️ Snapshot from 28 Dec 2024, 9:00 AM</span>
+      <a href="#">View Member Profile →</a>
+    </div>
+  </div>
+
+  <!-- Approval Journey -->
+  <div class="section-card">
+    <div class="section-title">🔄 Approval Journey</div>
+    <div class="section-body">
+      <div class="timeline">
+        <!-- Stage 1: Approved -->
+        <div class="tl-stage tl-done">
+          <div class="tl-track"><div class="tl-dot done">✓</div></div>
+          <div class="tl-content">
+            <div class="tl-stage-header">
+              <span class="tl-stage-name">Stage 1: Unit Admin Review</span>
+              <span class="tl-decision-badge approved">Approved</span>
+            </div>
+            <div class="tl-reviewer">Reviewed by <strong>Hassan Omar</strong> (Unit Admin — Seeb North)</div>
+            <div class="tl-date">30 Dec 2024, 11:15 AM</div>
+            <div class="tl-comment">"Documents appear in order. Forwarding for forum approval."</div>
+          </div>
+        </div>
+
+        <!-- Stage 2: Rejected -->
+        <div class="tl-stage tl-rejected-stage">
+          <div class="tl-track"><div class="tl-dot rejected">✗</div></div>
+          <div class="tl-content">
+            <div class="tl-stage-header">
+              <span class="tl-stage-name rejected-name">Stage 2: Forum Admin Approval <span class="tl-you-tag">YOU</span></span>
+              <span class="tl-decision-badge rejected">Rejected</span>
+            </div>
+            <div class="tl-reviewer">Reviewed by <strong>You (Sarah Ahmed)</strong> (Forum Admin — Oman Forum)</div>
+            <div class="tl-date">2 Jan 2025, 4:45 PM</div>
+            <div class="tl-comment rej-comment">"Incomplete documents. Nominee does not have valid ID proof uploaded. National ID or passport required. Please resubmit with complete documentation."</div>
+          </div>
+        </div>
+
+        <!-- Stage 3: Skipped -->
+        <div class="tl-stage">
+          <div class="tl-track"><div class="tl-dot waiting" style="font-size:11px;">—</div></div>
+          <div class="tl-content">
+            <div class="tl-stage-header">
+              <span class="tl-stage-name" style="color:var(--text-tertiary)">Stage 3: Super Admin Final Approval</span>
+              <span class="tl-decision-badge waiting-badge">Skipped</span>
+            </div>
+            <div class="tl-reviewer" style="color:var(--text-tertiary)">Not reached — request was rejected at previous stage</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SCENARIO 4: SUBMITTER VIEW — Wallet Deposit in progress      -->
+<!-- User is the agent who submitted, not the approver            -->
+<!-- ============================================================ -->
+<div class="scenario" id="sc-submitter">
+  <a class="back-link">← Back to My Submissions</a>
+
+  <div class="detail-header">
+    <div class="detail-header-top">
+      <div class="header-left">
+        <div class="entity-type-badge badge-wallet">💳 Wallet Deposit</div>
+        <div class="header-title">Deposit ₹1,000 for Ali Hassan</div>
+        <div class="header-meta">
+          Submitted by <strong>You (Agent Mary Johnson)</strong> • 5 hours ago
+        </div>
+      </div>
+      <div class="overall-status os-pending">🟡 Pending Approval</div>
+    </div>
+    <div class="header-ids">
+      <div class="id-item"><span class="id-label">Deposit:</span><span class="id-value">DEP-2025-00089</span></div>
+      <div class="id-item"><span class="id-label">Member:</span><span class="id-value">MEM-2025-00123</span></div>
+      <div class="id-item"><span class="id-label">Request:</span><span class="id-value">APR-2025-00330</span></div>
+      <div class="id-item"><span class="id-label">Workflow:</span><span class="id-value">Wallet Deposit Approval</span></div>
+    </div>
+  </div>
+
+  <!-- Entity Context -->
+  <div class="section-card">
+    <div class="section-title">📋 Entity Details</div>
+    <div class="section-body">
+      <div class="ctx-grid">
+        <div class="ctx-item"><span class="ctx-label">Member</span><span class="ctx-value">Ali Hassan (MEM-2025-00123)</span></div>
+        <div class="ctx-item"><span class="ctx-label">Deposit Amount</span><span class="ctx-value" style="font-size:16px;font-weight:700;">₹1,000</span></div>
+        <div class="ctx-item"><span class="ctx-label">Payment Method</span><span class="ctx-value">Cash</span></div>
+        <div class="ctx-item"><span class="ctx-label">Collection Date</span><span class="ctx-value">14 Jan 2025</span></div>
+        <div class="ctx-item"><span class="ctx-label">Balance Before</span><span class="ctx-value">₹250</span></div>
+        <div class="ctx-item"><span class="ctx-label">Balance After</span><span class="ctx-value" style="color:var(--green);font-weight:700;">₹1,250</span></div>
+        <div class="ctx-item ctx-full"><span class="ctx-label">Notes</span><span class="ctx-value">"Monthly top-up"</span></div>
+      </div>
+    </div>
+    <div class="snapshot-bar">
+      <span>ℹ️ Snapshot from 14 Jan 2025, 10:30 AM</span>
+      <a href="#">View Member Wallet →</a>
+    </div>
+  </div>
+
+  <!-- Approval Journey -->
+  <div class="section-card">
+    <div class="section-title">🔄 Approval Journey</div>
+    <div class="section-body">
+      <div class="timeline">
+        <div class="tl-stage">
+          <div class="tl-track"><div class="tl-dot current">1</div></div>
+          <div class="tl-content">
+            <div class="tl-stage-header">
+              <span class="tl-stage-name current-name">Stage 1: Unit Admin Approval</span>
+              <span class="tl-decision-badge pending-badge">Awaiting Decision</span>
+            </div>
+            <div class="tl-reviewer">Assigned to <strong>Omar Al-Said</strong> (Unit Admin — Ruwi Central)</div>
+            <div class="tl-waiting-info">
+              <span>Waiting since:</span>
+              <span class="tl-waiting-time wt-normal">⏱️ 5h</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No action area — submitter cannot approve/reject -->
+  <div style="
+    padding: 16px 20px; border-radius: 14px; margin-bottom: 16px;
+    background: var(--blue-light); border: 1.5px solid #BFDBFE;
+    display: flex; align-items: flex-start; gap: 12px; font-size: 13px; color: #1E40AF;
+  ">
+    <span style="font-size:18px;">ℹ️</span>
+    <div>
+      <div style="font-weight:600; margin-bottom:2px;">Waiting for approval</div>
+      <div style="color:#3B82F6;">This deposit request is awaiting review by the Unit Admin (Omar Al-Said). You'll be notified once a decision is made.</div>
+    </div>
+  </div>
+
+</div>
+
+</div><!-- /viewport -->
+
+<script>
+function switchScenario(id, btn) {
+  document.querySelectorAll('.scenario').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.scenario-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sc-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+function setVP(mode) {
+  const vp = document.getElementById('vp');
+  document.querySelectorAll('.vp-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (mode === 'mobile') vp.classList.add('mobile');
+  else vp.classList.remove('mobile');
+}
+</script>
+
+</body>
+</html>

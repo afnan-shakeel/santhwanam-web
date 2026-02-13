@@ -85,7 +85,7 @@ export class ContributionTableComponent implements OnInit {
       filters: [
         { field: 'cycleId', value: this.cycleId(), operator: 'equals' }
       ],
-      eagerLoad: ['member', 'agent'],
+      eagerLoad: ['member', 'agent', 'cycle'],
       sortBy: 'memberName',
       sortOrder: 'asc'
     };

@@ -997,7 +997,9 @@
                   "entityId": { "type": "string", "format": "uuid" },
                   "forumId": { "type": "string", "format": "uuid", "nullable": true },
                   "areaId": { "type": "string", "format": "uuid", "nullable": true },
-                  "unitId": { "type": "string", "format": "uuid", "nullable": true }
+                  "unitId": { "type": "string", "format": "uuid", "nullable": true },
+                  "entityLabel": { "type": "string", "maxLength": 255, "description": "Human-readable label for the entity" },
+                  "entityContext": { "type": "object", "description": "Structured snapshot of entity attributes at submission time" }
                 }
               }
             }
@@ -1073,7 +1075,8 @@
     "/api/approval-workflow/requests/{requestId}": {
       "get": {
         "tags": ["Approval Workflow - Requests"],
-        "summary": "Get approval request by ID",
+        "summary": "Get enriched approval request detail by ID",
+        "description": "Returns full detail including entity context, all stage executions with reviewer names, workflow metadata, and requester info.",
         "parameters": [
           {
             "name": "requestId",
@@ -1084,21 +1087,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Approval request details",
+            "description": "Enriched approval request detail",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "requestId": { "type": "string", "format": "uuid" },
-                    "workflowCode": { "type": "string" },
-                    "entityType": { "type": "string" },
-                    "status": { "type": "string" }
-                  }
-                }
+                "schema": { "$ref": "#/components/schemas/EnrichedApprovalRequestDetail" }
               }
             }
-          }
+          },
+          "404": { "description": "Approval request not found" }
         }
       }
     },
@@ -1143,6 +1139,8 @@
       "get": {
         "tags": ["Approval Workflow - Approvals"],
         "summary": "Get pending approvals for an approver",
+        "deprecated": true,
+        "description": "DEPRECATED — Use POST /api/approval-workflow/approvals/my-tasks/search with status=Pending filter instead. This endpoint remains for backward compatibility but will be removed in a future version.",
         "parameters": [
           {
             "name": "approverId",
@@ -1168,6 +1166,103 @@
                     }
                   }
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/approval-workflow/approvals/count": {
+      "get": {
+        "tags": ["Approval Workflow - Approvals"],
+        "summary": "Get pending approval counts for the authenticated user",
+        "description": "Returns total pending count and breakdown by workflow. UserId extracted from JWT.",
+        "responses": {
+          "200": {
+            "description": "Pending approval counts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "pendingCount": { "type": "integer", "description": "Total pending tasks" },
+                    "byWorkflow": {
+                      "type": "object",
+                      "additionalProperties": { "type": "integer" },
+                      "description": "Pending counts keyed by workflow code"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/approval-workflow/approvals/my-tasks/search": {
+      "post": {
+        "tags": ["Approval Workflow - Approvals"],
+        "summary": "Search current user's approval tasks (approver perspective)",
+        "description": "Returns approval stage executions assigned to the authenticated user. UserId derived from JWT (non-overridable). Supports filtering by status, entityType, workflowCode, date range. Response includes summary counts for tab badges.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SearchRequest" },
+              "example": {
+                "filters": [
+                  { "field": "status", "operator": "equals", "value": "Pending" }
+                ],
+                "sortBy": "createdAt",
+                "sortOrder": "desc",
+                "page": 1,
+                "pageSize": 20,
+                "eagerLoad": ["request", "request.workflow", "stage", "request.requestedByUser", "request.stageExecutions", "request.stageExecutions.stage"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User-scoped approval executions with summary counts",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MyTasksSearchResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/approval-workflow/requests/my-submissions/search": {
+      "post": {
+        "tags": ["Approval Workflow - Requests"],
+        "summary": "Search current user's submitted approval requests",
+        "description": "Returns approval requests where requestedBy = authenticated user. UserId derived from JWT (non-overridable). Supports filtering by status, entityType, date range. Response includes summary counts.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SearchRequest" },
+              "example": {
+                "filters": [
+                  { "field": "status", "operator": "equals", "value": "Pending" }
+                ],
+                "sortBy": "createdAt",
+                "sortOrder": "desc",
+                "page": 1,
+                "pageSize": 20,
+                "eagerLoad": ["workflow", "stageExecutions", "stageExecutions.stage", "requestedByUser"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User-scoped approval requests with summary counts",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MySubmissionsSearchResponse" }
               }
             }
           }
@@ -5383,7 +5478,18 @@
         "unitId": { "type": ["string", "null"] },
         "requestedBy": { "type": "string" },
         "requestedAt": { "type": "string", "format": "date-time" },
-        "status": { "type": "string" }
+        "status": { "type": "string", "enum": ["Pending", "Approved", "Rejected", "Cancelled"] },
+        "currentStageOrder": { "type": ["integer", "null"] },
+        "entityLabel": { "type": ["string", "null"], "description": "Human-readable label for the entity, e.g. 'John Doe (MEM-2025-00456)'" },
+        "entityContext": { "type": ["object", "null"], "description": "JSON snapshot of entity attributes captured at submission time" },
+        "entityContextSnapshotAt": { "type": ["string", "null"], "format": "date-time", "description": "When the entity context snapshot was captured" },
+        "approvedBy": { "type": ["string", "null"] },
+        "approvedAt": { "type": ["string", "null"], "format": "date-time" },
+        "rejectedBy": { "type": ["string", "null"] },
+        "rejectedAt": { "type": ["string", "null"], "format": "date-time" },
+        "rejectionReason": { "type": ["string", "null"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": ["string", "null"], "format": "date-time" }
       }
     },
     "ApprovalRequestsSearchResponse": {
@@ -5394,6 +5500,128 @@
         "page": { "type": "integer" },
         "pageSize": { "type": "integer" },
         "totalPages": { "type": "integer" }
+      }
+    },
+    "StatusSummary": {
+      "type": "object",
+      "description": "Status counts for tab badge rendering",
+      "additionalProperties": { "type": "integer" },
+      "example": {
+        "Pending": 5,
+        "Approved": 38,
+        "Rejected": 2,
+        "Skipped": 0
+      }
+    },
+    "UserSummary": {
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "format": "uuid" },
+        "name": { "type": "string" }
+      }
+    },
+    "WorkflowSummary": {
+      "type": "object",
+      "properties": {
+        "workflowId": { "type": "string", "format": "uuid" },
+        "workflowCode": { "type": "string" },
+        "workflowName": { "type": "string" },
+        "module": { "type": "string" },
+        "totalStages": { "type": "integer" }
+      }
+    },
+    "ExecutionDetail": {
+      "type": "object",
+      "description": "A single stage execution within an approval request",
+      "properties": {
+        "executionId": { "type": "string", "format": "uuid" },
+        "stageId": { "type": "string", "format": "uuid" },
+        "stageOrder": { "type": "integer" },
+        "stageName": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "Approved", "Rejected", "Skipped"] },
+        "assignedApprover": {
+          "allOf": [{ "$ref": "#/components/schemas/UserSummary" }],
+          "nullable": true
+        },
+        "reviewedBy": {
+          "allOf": [{ "$ref": "#/components/schemas/UserSummary" }],
+          "nullable": true
+        },
+        "reviewedAt": { "type": ["string", "null"], "format": "date-time" },
+        "decision": { "type": ["string", "null"], "enum": ["Approve", "Reject", null] },
+        "comments": { "type": ["string", "null"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+    "EnrichedApprovalRequestDetail": {
+      "type": "object",
+      "description": "Full enriched detail of an approval request including entity context, workflow metadata, all stage executions with reviewer names.",
+      "properties": {
+        "requestId": { "type": "string", "format": "uuid" },
+        "workflowId": { "type": "string", "format": "uuid" },
+        "entityType": { "type": "string" },
+        "entityId": { "type": "string", "format": "uuid" },
+        "status": { "type": "string", "enum": ["Pending", "Approved", "Rejected", "Cancelled"] },
+        "currentStageOrder": { "type": ["integer", "null"] },
+        "entityLabel": { "type": ["string", "null"], "description": "Human-readable label, e.g. 'John Doe (MEM-2025-00456)'" },
+        "entityContext": { "type": ["object", "null"], "description": "JSON snapshot of entity attributes at submission time. Shape varies by entityType." },
+        "entityContextSnapshotAt": { "type": ["string", "null"], "format": "date-time" },
+        "forumId": { "type": ["string", "null"], "format": "uuid" },
+        "areaId": { "type": ["string", "null"], "format": "uuid" },
+        "unitId": { "type": ["string", "null"], "format": "uuid" },
+        "requestedBy": { "$ref": "#/components/schemas/UserSummary" },
+        "requestedAt": { "type": "string", "format": "date-time" },
+        "workflow": { "$ref": "#/components/schemas/WorkflowSummary" },
+        "executions": {
+          "type": "array",
+          "items": { "$ref": "#/components/schemas/ExecutionDetail" }
+        },
+        "approvedBy": { "type": ["string", "null"] },
+        "approvedAt": { "type": ["string", "null"], "format": "date-time" },
+        "rejectedBy": { "type": ["string", "null"] },
+        "rejectedAt": { "type": ["string", "null"], "format": "date-time" },
+        "rejectionReason": { "type": ["string", "null"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+    "MyTasksSearchResponse": {
+      "type": "object",
+      "description": "Paginated approval stage executions assigned to the authenticated user, with summary counts.",
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "Approval stage executions. Eager-load request, request.workflow, stage etc. for full card rendering.",
+          "items": { "type": "object" }
+        },
+        "total": { "type": "integer" },
+        "page": { "type": "integer" },
+        "pageSize": { "type": "integer" },
+        "totalPages": { "type": "integer" },
+        "summary": {
+          "$ref": "#/components/schemas/StatusSummary",
+          "description": "Counts by execution status (Pending, Approved, Rejected, Skipped) — powers tab badges"
+        }
+      }
+    },
+    "MySubmissionsSearchResponse": {
+      "type": "object",
+      "description": "Paginated approval requests submitted by the authenticated user, with summary counts.",
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "Approval requests. Eager-load workflow, stageExecutions etc. for pipeline rendering.",
+          "items": { "$ref": "#/components/schemas/ApprovalRequest" }
+        },
+        "total": { "type": "integer" },
+        "page": { "type": "integer" },
+        "pageSize": { "type": "integer" },
+        "totalPages": { "type": "integer" },
+        "summary": {
+          "$ref": "#/components/schemas/StatusSummary",
+          "description": "Counts by request status (Pending, Approved, Rejected, Cancelled) — powers tab badges"
+        }
       }
     },
     "/api/death-claims/report": {
@@ -8363,31 +8591,85 @@
       },
       "AgentContributionItem": {
         "type": "object",
-        "description": "A contribution record for a member under an agent",
+        "description": "Full member contribution record with relations and computed fields",
         "properties": {
           "contributionId": { "type": "string", "format": "uuid" },
+          "cycleId": { "type": "string", "format": "uuid" },
+          "memberId": { "type": "string", "format": "uuid" },
+          "memberCode": { "type": "string" },
+          "memberName": { "type": "string" },
+          "tierId": { "type": "string", "format": "uuid" },
+          "agentId": { "type": "string", "format": "uuid" },
+          "expectedAmount": { "type": "number" },
+          "contributionStatus": { "type": "string", "enum": ["Pending", "WalletDebitRequested", "Acknowledged", "Collected", "Missed", "Exempted"] },
+          "paymentMethod": { "type": "string", "enum": ["Wallet", "DirectCash"], "nullable": true },
+          "collectionDate": { "type": "string", "format": "date-time", "nullable": true },
+          "collectedBy": { "type": "string", "format": "uuid", "nullable": true },
+          "walletDebitRequestId": { "type": "string", "format": "uuid", "nullable": true },
+          "debitAcknowledgedAt": { "type": "string", "format": "date-time", "nullable": true },
+          "cashReceiptReference": { "type": "string", "nullable": true },
+          "journalEntryId": { "type": "string", "format": "uuid", "nullable": true },
+          "isConsecutiveMiss": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time", "nullable": true },
+          "cycle": {
+            "type": "object",
+            "description": "Full contribution cycle details",
+            "properties": {
+              "cycleId": { "type": "string", "format": "uuid" },
+              "cycleNumber": { "type": "string" },
+              "deathClaimId": { "type": "string", "format": "uuid" },
+              "claimNumber": { "type": "string" },
+              "deceasedMemberId": { "type": "string", "format": "uuid" },
+              "deceasedMemberName": { "type": "string" },
+              "benefitAmount": { "type": "number" },
+              "forumId": { "type": "string", "format": "uuid" },
+              "startDate": { "type": "string", "format": "date-time" },
+              "collectionDeadline": { "type": "string", "format": "date-time" },
+              "cycleStatus": { "type": "string", "enum": ["Active", "Closed"] },
+              "totalMembers": { "type": "integer" },
+              "totalExpectedAmount": { "type": "number" },
+              "totalCollectedAmount": { "type": "number" },
+              "totalPendingAmount": { "type": "number" },
+              "membersCollected": { "type": "integer" },
+              "membersPending": { "type": "integer" },
+              "membersMissed": { "type": "integer" },
+              "closedDate": { "type": "string", "format": "date-time", "nullable": true },
+              "closedBy": { "type": "string", "format": "uuid", "nullable": true },
+              "createdAt": { "type": "string", "format": "date-time" },
+              "updatedAt": { "type": "string", "format": "date-time", "nullable": true }
+            }
+          },
           "member": {
             "type": "object",
+            "description": "Member details with wallet",
             "properties": {
               "memberId": { "type": "string", "format": "uuid" },
               "memberCode": { "type": "string" },
               "firstName": { "type": "string" },
               "lastName": { "type": "string" },
-              "walletBalance": { "type": "number", "description": "Current wallet balance" },
-              "isLowBalance": { "type": "boolean", "description": "True if below minimum threshold" }
+              "agentId": { "type": "string", "format": "uuid" },
+              "wallet": {
+                "type": "object",
+                "nullable": true,
+                "properties": {
+                  "currentBalance": { "type": "number" }
+                }
+              }
             }
           },
-          "cycle": {
+          "agent": {
             "type": "object",
+            "description": "Agent details",
             "properties": {
-              "cycleId": { "type": "string", "format": "uuid" },
-              "cycleCode": { "type": "string", "description": "Cycle number (e.g., CC-2026-00001)" },
-              "dueDate": { "type": "string", "format": "date-time", "description": "Collection deadline" },
-              "daysRemaining": { "type": "integer", "description": "Days until deadline (negative = overdue)" }
+              "agentId": { "type": "string", "format": "uuid" },
+              "agentCode": { "type": "string" },
+              "firstName": { "type": "string" },
+              "lastName": { "type": "string" }
             }
           },
-          "amount": { "type": "number", "description": "Expected contribution amount" },
-          "status": { "type": "string", "enum": ["Pending", "Collected", "Missed", "Exempted", "WalletDebitRequested", "Acknowledged"] }
+          "isLowBalance": { "type": "boolean", "description": "Computed: true if wallet balance is below minimum threshold" },
+          "daysRemaining": { "type": "integer", "description": "Computed: days until collection deadline (negative = overdue)" }
         }
       },
       "AgentContributionsResponse": {

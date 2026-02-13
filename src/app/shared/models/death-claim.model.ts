@@ -257,19 +257,9 @@ export interface MemberContribution {
   updatedAt: string;
 
   // Related data
-  member?: {
-    memberId: string;
-    memberCode: string;
-    firstName: string;
-    lastName: string;
-    contactNumber: string;
-  };
-  agent?: {
-    agentId: string;
-    agentCode: string;
-    firstName: string;
-    lastName: string;
-  };
+  member?: Partial<Member>;
+  agent?: Partial<Agent>;
+  cycle?: Partial<ContributionCycle>;
 }
 
 // Record Cash Request

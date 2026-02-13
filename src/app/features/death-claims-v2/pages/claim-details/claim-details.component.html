@@ -62,7 +62,7 @@
                 <span class="text-sm font-semibold text-gray-900">Death Details</span>
               </div>
               <div class="p-5">
-                <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                   <div>
                     <div class="text-xs text-gray-400 mb-0.5">Cause of Death</div>
                     <div class="text-sm font-medium text-gray-900">{{ claim()!.causeOfDeath || '—' }}</div>
@@ -90,7 +90,7 @@
               </div>
               
               <div class="p-5">
-                <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                   <div>
                     <div class="text-xs text-gray-400 mb-0.5">Name</div>
                     <div class="text-sm font-medium text-gray-900">{{ claimNominee()!.name || '—' }}</div>
@@ -166,7 +166,7 @@
               }
             </div>
             <div class="p-5">
-              <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                 <div>
                   <div class="text-xs text-gray-400 mb-0.5">Tier</div>
                   <div class="text-sm font-medium text-gray-900">{{ claimMember()?.tier?.tierName || '—' }}</div>

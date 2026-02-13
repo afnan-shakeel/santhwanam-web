@@ -1,5 +1,5 @@
 <!-- Quick Actions Bar - Shown only on own profile -->
-<div class="flex items-center justify-between py-3 px-6 bg-slate-50 border-b border-slate-200">
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 px-4 sm:px-6 bg-slate-50 border-b border-slate-200">
   <!-- Cash Balance -->
   <div class="flex items-center gap-2">
     @if (isLoading()) {
@@ -8,7 +8,7 @@
         <div class="h-6 w-24 bg-slate-200 rounded"></div>
       </div>
     } @else {
-      <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg class="h-5 w-5 text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
       </svg>
@@ -20,7 +20,7 @@
   </div>
 
   <!-- Action Buttons -->
-  <div class="flex items-center gap-3">
+  <div class="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
     <!-- Receive Cash Button -->
     <app-button
       variant="secondary"

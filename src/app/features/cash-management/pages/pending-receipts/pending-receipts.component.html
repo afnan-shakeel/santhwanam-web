@@ -1,9 +1,9 @@
 <!-- Pending Receipts Page -->
 <div class="min-h-screen bg-gray-50">
   <!-- Content -->
-  <div class="max-w-[1080px] mx-auto px-7 py-6">
+  <div class="max-w-[1080px] mx-auto px-4 sm:px-7 py-6">
     <!-- Page Header (inline) -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex items-start sm:items-center justify-between gap-3 mb-6">
       <div>
         <h1 class="text-xl font-bold tracking-tight text-gray-900">Pending Receipts</h1>
         <p class="mt-0.5 text-[13.5px] text-gray-500">Cash handovers awaiting your acknowledgment</p>
@@ -11,7 +11,7 @@
       <button 
         (click)="onRefresh()"
         [disabled]="isLoading()"
-        class="inline-flex items-center gap-[7px] px-[18px] py-[9px] text-[13.5px] font-[550] text-gray-900 bg-white border border-gray-200 rounded-md hover:border-gray-400 hover:bg-gray-50 disabled:opacity-50 transition-all">
+        class="inline-flex items-center gap-[7px] px-[18px] py-[9px] text-[13.5px] font-[550] text-gray-900 bg-white border border-gray-200 rounded-md hover:border-gray-400 hover:bg-gray-50 disabled:opacity-50 transition-all shrink-0">
         <svg class="w-3.5 h-3.5" [class.animate-spin]="isLoading()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
         </svg>
@@ -23,7 +23,8 @@
       <!-- Loading State -->
       <div class="space-y-3">
         @for (i of [1, 2, 3]; track i) {
-          <div class="flex items-center gap-4 px-6 py-5 bg-white border border-gray-200 rounded-lg">
+          <!-- Desktop skeleton -->
+          <div class="hidden sm:flex items-center gap-4 px-6 py-5 bg-white border border-gray-200 rounded-lg">
             <div class="w-11 h-11 bg-gray-100 rounded-full animate-pulse"></div>
             <div class="flex-1 space-y-2">
               <div class="h-4 w-32 bg-gray-100 rounded animate-pulse"></div>
@@ -31,11 +32,22 @@
             </div>
             <div class="h-8 w-24 bg-gray-100 rounded-lg animate-pulse"></div>
           </div>
+          <!-- Mobile skeleton -->
+          <div class="sm:hidden px-4 py-4 bg-white border border-gray-200 rounded-lg space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-gray-100 rounded-full animate-pulse"></div>
+              <div class="flex-1 space-y-2">
+                <div class="h-4 w-28 bg-gray-100 rounded animate-pulse"></div>
+                <div class="h-3 w-36 bg-gray-100 rounded animate-pulse"></div>
+              </div>
+            </div>
+            <div class="h-9 w-full bg-gray-100 rounded-lg animate-pulse"></div>
+          </div>
         }
       </div>
     } @else if (pendingHandovers().length === 0) {
       <!-- Empty State -->
-      <div class="bg-white border border-gray-200 rounded-xl p-12 text-center">
+      <div class="bg-white border border-gray-200 rounded-xl p-8 sm:p-12 text-center">
         <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
           <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
@@ -48,7 +60,8 @@
       <!-- Receipt List -->
       <div class="space-y-3">
         @for (handover of pendingHandovers(); track handover.handoverId) {
-          <div class="flex items-center gap-4 px-6 py-5 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+          <!-- Desktop Card (sm+) -->
+          <div class="hidden sm:flex items-center gap-4 px-6 py-5 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
             <!-- Avatar -->
             <div class="w-11 h-11 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 bg-linear-to-br from-gray-300 to-gray-400 text-white">
               {{ handover.fromUser.firstName.charAt(0) }}{{ handover.fromUser.lastName.charAt(0) }}
@@ -86,11 +99,50 @@
               </div>
             </div>
           </div>
+
+          <!-- Mobile Card (<sm) -->
+          <div class="sm:hidden bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+            <div class="px-4 py-4">
+              <!-- Top: Avatar + Name/Role + Amount -->
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 bg-linear-to-br from-gray-300 to-gray-400 text-white">
+                  {{ handover.fromUser.firstName.charAt(0) }}{{ handover.fromUser.lastName.charAt(0) }}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                      <span class="text-[14px] font-semibold text-gray-900">{{ handover.fromUser.firstName }} {{ handover.fromUser.lastName }}</span>
+                      <span class="ml-1.5 inline-block text-[10.5px] font-medium px-1.5 py-0.5 rounded bg-[#F6F5F2] text-gray-500 border border-gray-100">{{ handover.fromUserRole }}</span>
+                    </div>
+                    <span class="text-[17px] font-bold tracking-tight text-gray-900 shrink-0">{{ formatCurrency(handover.amount) }}</span>
+                  </div>
+                  <div class="flex items-center justify-between mt-1">
+                    <p class="text-[12px] text-gray-500">{{ formatDate(handover.initiatedAt) }} · {{ getTimeAgo(handover.initiatedAt) }}</p>
+                    <span class="inline-flex items-center gap-1 px-2 py-[2px] rounded-xl text-[11px] font-[550] bg-amber-50 text-amber-600">
+                      <span class="w-[5px] h-[5px] rounded-full bg-current"></span>
+                      Pending
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Action Button - Full width at bottom -->
+            <div class="px-4 pb-4">
+              <button 
+                (click)="onAcknowledge(handover)"
+                class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-[550] text-white bg-primary-600 rounded-md shadow-sm hover:bg-primary-700 transition-all">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                Review & Acknowledge
+              </button>
+            </div>
+          </div>
         }
       </div>
 
       <!-- Summary Bar -->
-      <div class="flex items-center justify-between px-5 py-4 bg-white border border-gray-200 rounded-lg mt-5">
+      <div class="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 bg-white border border-gray-200 rounded-lg mt-5">
         <div class="text-[13px] text-gray-500">
           <strong class="text-[15px] text-gray-900">{{ pendingHandovers().length }}</strong> handover{{ pendingHandovers().length !== 1 ? 's' : '' }} pending
         </div>

@@ -14,7 +14,7 @@
 
   <!-- Stats Strip -->
   <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-    <div class="flex items-stretch divide-x divide-gray-100">
+    <div class="grid grid-cols-2 md:grid-cols-5 divide-x divide-gray-100">
       @if (statsLoading()) {
         @for (i of [1,2,3,4,5]; track i) {
           <div class="flex-1 px-5 py-4">

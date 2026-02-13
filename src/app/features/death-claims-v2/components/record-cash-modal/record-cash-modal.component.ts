@@ -21,17 +21,17 @@ import { MemberContribution } from '../../../../shared/models/death-claim.model'
       @if (contribution()) {
         <div class="space-y-4">
           <!-- Info -->
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between">
+          <div class="space-y-2 text-sm w-full">
+            <div class="flex justify-between space-x-4">
               <span class="text-gray-500">Member</span>
-              <span class="font-medium text-gray-900">
+              <span class="font-medium text-gray-900 max-w-[300px] truncate">
                 {{ contribution()!.member ? (contribution()!.member!.firstName + ' ' + contribution()!.member!.lastName) : '—' }}
                 ({{ contribution()!.member?.memberCode || '—' }})
               </span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-500">Cycle</span>
-              <span class="font-medium text-gray-900">{{ contribution()!.cycleId || '—' }}</span>
+              <span class="font-medium text-gray-900">{{ contribution()!.cycle ? (contribution()!.cycle!.cycleNumber) : '—' }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-500">Amount</span>
