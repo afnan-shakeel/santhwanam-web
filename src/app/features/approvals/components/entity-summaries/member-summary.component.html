@@ -1,0 +1,59 @@
+<div class="space-y-3">
+  <!-- Title row -->
+  <div class="flex items-center gap-3">
+    <div class="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 text-sm">👤</div>
+    <div class="min-w-0">
+      <div class="font-semibold text-sm text-gray-900">{{ context['memberName'] }}</div>
+      <div class="text-xs text-gray-500 font-mono">{{ context['memberCode'] }}</div>
+    </div>
+  </div>
+
+  @if (!compact) {
+    <!-- Detail grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Tier</div>
+        <div class="text-xs text-gray-800 font-medium">{{ context['tier'] }}</div>
+      </div>
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">DOB</div>
+        <div class="text-xs text-gray-800 font-medium">{{ context['dateOfBirth'] }}</div>
+      </div>
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Contact</div>
+        <div class="text-xs text-gray-800 font-medium">{{ context['contactNumber'] }}</div>
+      </div>
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Email</div>
+        <div class="text-xs text-gray-800 font-medium truncate">{{ context['email'] }}</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Agent</div>
+        <div class="text-xs text-gray-800 font-medium">{{ context['agent'] }}</div>
+      </div>
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Unit</div>
+        <div class="text-xs text-gray-800 font-medium">{{ context['unit'] }}</div>
+      </div>
+    </div>
+
+    @if (context['hierarchy']) {
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Hierarchy</div>
+        <div class="text-xs text-gray-800 font-medium">{{ context['hierarchy'] }}</div>
+      </div>
+    }
+
+    <div class="flex items-center gap-4 text-xs text-gray-600">
+      @if (context['nomineeCount'] != null) {
+        <span>📋 {{ context['nomineeCount'] }} Nominees</span>
+      }
+      @if (context['documentsUploaded'] != null) {
+        <span>📎 {{ context['documentsUploaded'] }} Documents</span>
+      }
+    </div>
+  }
+</div>

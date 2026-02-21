@@ -32,8 +32,16 @@ export interface SearchRequest {
 
 export interface SearchResponse<T = any> {
   items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
+  pagination: {
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    // total: number; // For backward compatibility, can be removed later. use totalItems instead.
+    totalPages: number;
+  };
+  summary?: any;
+  // total?: number;
+  // page?: number;
+  // pageSize?: number;
+  // totalPages?: number;
 }

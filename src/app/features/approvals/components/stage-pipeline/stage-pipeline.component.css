@@ -1,0 +1,20 @@
+@reference "../../../../../styles.css";
+
+.pipeline-dot {
+  @apply w-7 h-7 rounded-full flex items-center justify-center border-2 text-xs font-bold transition-all;
+}
+.pipeline-dot.done {
+  @apply bg-green-500 text-white border-green-500;
+}
+.pipeline-dot.current {
+  @apply bg-white text-primary-600 border-primary-500 ring-4 ring-primary-100;
+}
+.pipeline-dot.waiting {
+  @apply bg-gray-100 text-gray-400 border-gray-200;
+}
+.pipeline-dot.rejected {
+  @apply bg-red-500 text-white border-red-500;
+}
+.pipeline-dot.skipped {
+  @apply bg-gray-200 text-gray-400 border-gray-200;
+}

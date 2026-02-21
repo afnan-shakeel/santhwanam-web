@@ -29,7 +29,7 @@ interface BannerAction {
 })
 export class ClaimActionBannerComponent {
   claim = input.required<DeathClaim>();
-  viewMode = input<'admin' | 'agent' | 'viewer'>('admin');
+  viewMode = input<string>('admin');
 
   bannerAction = output<string>();
 
@@ -113,7 +113,7 @@ export class ClaimActionBannerComponent {
   }
 
   private getVerifiedConfig(mode: string): BannerConfig {
-    const isAdmin = mode === 'admin';
+    const isAdmin = (mode === 'admin' || mode === 'agent');
     return {
       variant: 'verification',
       icon: '✅',

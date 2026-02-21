@@ -37,10 +37,12 @@ export class ContributionCyclesComponent implements OnInit {
   statsLoading = signal(true);
   cyclesData = signal<SearchResponse<ContributionCycle>>({
     items: [],
-    total: 0,
-    page: 1,
-    pageSize: 10,
-    totalPages: 0
+    pagination: {
+      totalItems: 0,
+      page: 1,
+      pageSize: 10,
+      totalPages: 0
+    }
   });
   tableLoading = signal(false);
 

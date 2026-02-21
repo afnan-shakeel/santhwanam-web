@@ -16,8 +16,11 @@ import {
   AgentContributionsResponse,
   AgentContributionsQueryParams,
   AgentLowBalanceMembersResponse,
-  AgentLowBalanceQueryParams
+  AgentLowBalanceQueryParams,
+  LowBalanceMemberItem,
+  AgentMember
 } from '../../shared/models/agent-profile.model';
+import { MemberContributionWithRelations } from '../../shared/models/contribution.model';
 
 @Injectable({
   providedIn: 'root'
@@ -88,7 +91,7 @@ export class AgentService {
   /**
    * Get agent's members (paginated)
    */
-  getAgentMembers(agentId: string, params?: AgentMembersQueryParams): Observable<AgentMembersResponse> {
+  getAgentMembers(agentId: string, params?: AgentMembersQueryParams): Observable<SearchResponse<AgentMember>> {
     const queryParams: Record<string, string | number | boolean> = {};
     if (params) {
       if (params.page) queryParams['page'] = params.page;
@@ -97,7 +100,7 @@ export class AgentService {
       if (params.status) queryParams['status'] = params.status;
       if (params.tier) queryParams['tier'] = params.tier;
     }
-    return this.http.get<AgentMembersResponse>(`/agents/${agentId}/members`, { params: queryParams });
+    return this.http.get<SearchResponse<AgentMember>>(`/agents/${agentId}/members`, { params: queryParams });
   }
 
   /**
@@ -159,7 +162,7 @@ export class AgentService {
   /**
    * Get agent's contributions (with optional filtering)
    */
-  getAgentContributions(agentId: string, params?: AgentContributionsQueryParams): Observable<AgentContributionsResponse> {
+  getAgentContributions(agentId: string, params?: AgentContributionsQueryParams): Observable<SearchResponse<MemberContributionWithRelations>> {
     const queryParams: Record<string, string | number> = {};
     if (params) {
       if (params.page) queryParams['page'] = params.page;
@@ -168,26 +171,26 @@ export class AgentService {
       if (params.cycleId) queryParams['cycleId'] = params.cycleId;
       if (params.search) queryParams['search'] = params.search;
     }
-    return this.http.get<AgentContributionsResponse>(`/agents/${agentId}/contributions`, { params: queryParams });
+    return this.http.get<SearchResponse<MemberContributionWithRelations>>(`/agents/${agentId}/contributions`, { params: queryParams });
   }
 
   /**
    * Get agent's pending contributions (convenience method)
    */
-  getPendingContributions(agentId: string, params?: Omit<AgentContributionsQueryParams, 'status'>): Observable<AgentContributionsResponse> {
+  getPendingContributions(agentId: string, params?: Omit<AgentContributionsQueryParams, 'status'>): Observable<SearchResponse<MemberContributionWithRelations>> {
     return this.getAgentContributions(agentId, { ...params, status: 'Pending' });
   }
 
   /**
    * Get agent's members with low wallet balance
    */
-  getLowBalanceMembers(agentId: string, params?: AgentLowBalanceQueryParams): Observable<AgentLowBalanceMembersResponse> {
+  getLowBalanceMembers(agentId: string, params?: AgentLowBalanceQueryParams): Observable<SearchResponse<LowBalanceMemberItem>> {
     const queryParams: Record<string, string | number> = {};
     if (params) {
       if (params.page) queryParams['page'] = params.page;
       if (params.limit) queryParams['limit'] = params.limit;
       if (params.search) queryParams['search'] = params.search;
     }
-    return this.http.get<AgentLowBalanceMembersResponse>(`/agents/${agentId}/members/low-balance`, { params: queryParams });
+    return this.http.get<SearchResponse<LowBalanceMemberItem>>(`/agents/${agentId}/members/low-balance`, { params: queryParams });
   }
 }

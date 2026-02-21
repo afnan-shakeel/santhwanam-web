@@ -1,0 +1,114 @@
+<div class="mx-auto px-4">
+  <!-- Breadcrumbs -->
+  <app-breadcrumbs [items]="breadcrumbs" />
+
+  <!-- Page Header -->
+  <div class="pt-4 pb-3">
+    <h1 class="text-xl font-bold text-gray-900 font-display tracking-tight">My Approval Tasks</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Items requiring your review</p>
+  </div>
+
+  <!-- Status Tabs -->
+  <div class="flex gap-1.5 mb-4 overflow-x-auto pb-1">
+    <button
+      class="tab-pill"
+      [class.tab-pill-active]="activeTab() === 'action'"
+      (click)="switchTab('action')">
+      Action Required
+      <span class="tab-count" [class.tab-count-active]="activeTab() === 'action'">{{ tabCounts().action }}</span>
+    </button>
+    <button
+      class="tab-pill"
+      [class.tab-pill-active]="activeTab() === 'completed'"
+      (click)="switchTab('completed')">
+      Completed
+      <span class="tab-count" [class.tab-count-active]="activeTab() === 'completed'">{{ tabCounts().completed }}</span>
+    </button>
+    <button
+      class="tab-pill"
+      [class.tab-pill-active]="activeTab() === 'rejected'"
+      (click)="switchTab('rejected')">
+      Rejected
+      <span class="tab-count" [class.tab-count-active]="activeTab() === 'rejected'">{{ tabCounts().rejected }}</span>
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="flex gap-3 mb-5 flex-wrap">
+    <div class="w-52">
+      <app-select
+        [options]="entityTypeOptions"
+        placeholder="All Entity Types"
+        size="sm"
+        [value]="selectedEntityType()"
+        (valueChange)="onEntityTypeChange($event)" />
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="space-y-4">
+      @for (i of [1,2,3]; track i) {
+        <div class="bg-white border border-gray-200 rounded-xl p-6 animate-pulse">
+          <div class="h-4 bg-gray-200 rounded w-1/3 mb-3"></div>
+          <div class="h-3 bg-gray-100 rounded w-2/3 mb-2"></div>
+          <div class="h-3 bg-gray-100 rounded w-1/2"></div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!loading()) {
+    <!-- Empty state -->
+    @if (tasks().length === 0) {
+      <div class="text-center py-16">
+        <div class="text-4xl mb-3">📋</div>
+        <h3 class="text-sm font-semibold text-gray-700">No tasks found</h3>
+        <p class="text-xs text-gray-500 mt-1">
+          @switch (activeTab()) {
+            @case ('action') { You're all caught up! No pending tasks. }
+            @case ('completed') { No completed tasks yet. }
+            @case ('rejected') { No rejected tasks yet. }
+          }
+        </p>
+      </div>
+    }
+
+    <!-- Task cards -->
+    @if (tasks().length > 0) {
+      <div class="space-y-4">
+        @if (activeTab() === 'action') {
+          @for (task of tasks(); track task.executionId) {
+            <div>
+                <app-task-card
+                  [task]="task"
+                  [currentUserId]="currentUserId()"
+                  [processing]="processingId() === task.executionId"
+                  (approve)="onApprove($event)"
+                  (reject)="onReject($event)" />
+            </div>
+          }
+        } @else {
+          @for (task of tasks(); track task.executionId) {
+            <div>
+                <app-history-card [task]="task" />
+            </div>
+          }
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="mt-6">
+          <app-pagination
+            [currentPage]="currentPage()"
+            [totalPages]="totalPages()"
+            [totalItems]="totalItems()"
+            [pageSize]="pageSize"
+            (pageChange)="onPageChange($event)" />
+        </div>
+      }
+    }
+  }
+</div>

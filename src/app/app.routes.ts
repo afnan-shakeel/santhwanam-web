@@ -537,18 +537,6 @@ export const routes: Routes = [
       {
         path: 'death-claims',
         children: [
-          {
-            path: '',
-            loadComponent: () => import('./features/death-claims/claims-dashboard/claims-dashboard.component').then((m) => m.ClaimsDashboardComponent)
-          },
-          {
-            path: 'new',
-            loadComponent: () => import('./features/death-claims/submit-claim/submit-claim.component').then((m) => m.SubmitClaimComponent)
-          },
-          {
-            path: ':claimId',
-            loadComponent: () => import('./features/death-claims/claim-details/claim-details.component').then((m) => m.ClaimDetailsComponent)
-          }
         ]
       },
       // Death Claims routes (v2 — redesigned)
@@ -561,7 +549,7 @@ export const routes: Routes = [
           },
           {
             path: 'new',
-            loadComponent: () => import('./features/death-claims/submit-claim/submit-claim.component').then((m) => m.SubmitClaimComponent)
+            loadComponent: () => import('./features/death-claims-v2/pages/submit-claim/submit-claim.component').then((m) => m.SubmitClaimComponent)
           },
           {
             path: 'cycles',
@@ -573,18 +561,18 @@ export const routes: Routes = [
           }
         ]
       },
+      // User-scoped approval views (Part 2)
       {
-        path: 'approvals/my-approvals',
-        children: [
-          {
-            path: '',
-            loadComponent: () => import('./features/approvals/my-approvals/my-approvals.component').then((m) => m.MyApprovalsComponent)
-          },
-          {
-            path: ':requestId',
-            loadComponent: () => import('./features/approvals/my-approvals/approval-details.component').then((m) => m.ApprovalDetailsComponent)
-          }
-        ]
+        path: 'approvals/my-tasks',
+        loadComponent: () => import('./features/approvals/pages/my-tasks/my-tasks.component').then((m) => m.MyTasksComponent)
+      },
+      {
+        path: 'approvals/my-submissions',
+        loadComponent: () => import('./features/approvals/pages/my-submissions/my-submissions.component').then((m) => m.MySubmissionsComponent)
+      },
+      {
+        path: 'approvals/requests/:requestId',
+        loadComponent: () => import('./features/approvals/pages/request-detail/request-detail.component').then((m) => m.RequestDetailComponent)
       },
     ]
   },

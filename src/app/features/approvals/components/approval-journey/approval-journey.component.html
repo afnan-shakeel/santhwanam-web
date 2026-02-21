@@ -1,0 +1,79 @@
+<div class="flex flex-col">
+  @for (exec of stages(); track exec.executionId; let last = $last) {
+    <div class="flex gap-4" [class.pb-6]="!last">
+      <!-- Track column -->
+      <div class="flex flex-col items-center relative">
+        <div class="tl-dot shrink-0" [ngClass]="getDotClass(exec)">
+          <span class="text-xs font-bold">{{ getDotIcon(exec) }}</span>
+        </div>
+        @if (!last) {
+          <div class="w-0.5 flex-1 mt-1.5 rounded-full transition-colors"
+               [class.bg-green-500]="exec.status === 'Approved'"
+               [class.bg-red-400]="exec.status === 'Rejected'"
+               [class.bg-gray-200]="exec.status !== 'Approved' && exec.status !== 'Rejected'">
+          </div>
+        }
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 min-w-0 pt-0.5">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-sm font-semibold text-gray-800"
+                [class.text-primary-600]="getDotClass(exec) === 'current'"
+                [class.text-red-600]="exec.status === 'Rejected'">
+            {{ exec.stage?.stageName }}
+          </span>
+          @if (isCurrentUser(exec)) {
+            <span class="text-[10px] font-bold text-primary-600 bg-primary-50 px-1.5 py-0.5 rounded-full border border-primary-200">YOU</span>
+          }
+          @if (getDecisionBadge(exec); as badge) {
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full" [ngClass]="badge.class">
+              {{ badge.text }}
+            </span>
+          }
+        </div>
+
+        <!-- Reviewer info -->
+        <div class="mt-1 text-xs text-gray-500">
+          @if (exec.assignedApprover) {
+            <span>
+              <strong class="text-gray-700">{{ exec.assignedApprover.fullName }}</strong>
+              @if (exec.assignedApprover) {
+                <span class="text-gray-400"> · {{ "exec.assignedApprover.role" }}</span>
+              }
+              @if (exec.assignedApprover) {
+                <span class="text-gray-400"> · {{ "exec.assignedApprover.scopeEntityName" }}</span>
+              }
+            </span>
+          }
+        </div>
+
+        @if (exec.reviewedAt) {
+          <div class="text-[11px] text-gray-400 mt-0.5">
+            {{ exec.reviewedAt | date:'d MMM yyyy, h:mm a' }}
+          </div>
+        }
+
+        <!-- Comments -->
+        @if (exec.comments) {
+          <div class="mt-2 p-2.5 rounded-lg text-xs text-gray-700 border-l-2"
+               [class.border-green-400]="exec.status === 'Approved'"
+               [class.bg-green-50]="exec.status === 'Approved'"
+               [class.border-red-400]="exec.status === 'Rejected'"
+               [class.bg-red-50]="exec.status === 'Rejected'"
+               [class.border-gray-300]="exec.status !== 'Approved' && exec.status !== 'Rejected'"
+               [class.bg-gray-50]="exec.status !== 'Approved' && exec.status !== 'Rejected'">
+            "{{ exec.comments }}"
+          </div>
+        }
+
+        <!-- Waiting duration for current pending stage -->
+        @if (getWaitingDuration(exec); as duration) {
+          <div class="mt-2 inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-1 rounded-full bg-amber-100 text-amber-700">
+            ⏱️ Waiting {{ duration }}
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

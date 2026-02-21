@@ -135,13 +135,13 @@
 </div>
 
 <!-- Pagination -->
-@if (contributions().totalPages > 1) {
+@if (contributions().pagination.totalPages > 1) {
   <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
     <span class="text-xs text-gray-400">
-      Showing {{ ((currentPage() - 1) * 20) + 1 }}–{{ currentPage() * 20 > contributions().total ? contributions().total : currentPage() * 20 }} of {{ contributions().total }}
+      Showing {{ ((currentPage() - 1) * 20) + 1 }}–{{ currentPage() * 20 > contributions().pagination.totalItems ? contributions().pagination.totalItems : currentPage() * 20 }} of {{ contributions().pagination.totalItems }}
     </span>
     <div class="flex items-center gap-1">
-      @for (page of [].constructor(contributions().totalPages); track $index) {
+      @for (page of [].constructor(contributions().pagination.totalPages); track $index) {
         <button
           class="w-7 h-7 rounded text-xs cursor-pointer transition-colors"
           [ngClass]="{

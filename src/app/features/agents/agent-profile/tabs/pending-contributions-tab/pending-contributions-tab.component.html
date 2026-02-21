@@ -161,10 +161,9 @@
   }
 </div>
 
-@if (showRecordCashModal() && selectedContribution()) {
-  <app-record-cash-modal
-    [contribution]="selectedContribution()!"
-    (closeModal)="closeRecordCashModal()"
-    (cashRecorded)="onCashRecorded()"
-  />
-}
+<app-record-cash-modal
+  [open]="showRecordCashModal()"
+  [contribution]="selectedContribution()"
+  (closed)="showRecordCashModal.set(false); selectedContribution.set(null)"
+  (recorded)="onCashRecorded()"
+/>

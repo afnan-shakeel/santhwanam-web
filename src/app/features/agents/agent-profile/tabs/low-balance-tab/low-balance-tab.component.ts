@@ -16,6 +16,7 @@ import { BadgeComponent } from '../../../../../shared/components/badge/badge.com
 import { PaginationComponent } from '../../../../../shared/components/pagination/pagination.component';
 import { ButtonComponent } from '../../../../../shared/components/button/button.component';
 import { InputComponent } from '../../../../../shared/components/input/input.component';
+import { SearchResponse } from '../../../../../shared/models/search.model';
 
 @Component({
   selector: 'app-low-balance-tab',
@@ -35,7 +36,7 @@ export class LowBalanceTabComponent implements OnInit {
   // State
   agentId = signal<string>('');
   loading = signal(true);
-  membersData = signal<AgentLowBalanceMembersResponse | null>(null);
+  membersData = signal<SearchResponse<LowBalanceMemberItem> | null>(null);
   threshold = signal(200); // Default value
 
   // Pagination

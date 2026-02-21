@@ -28,10 +28,12 @@ export class MembersComponent {
 
   memberData = signal<SearchResponse<Member>>({
     items: [],
-    total: 0,
-    page: 1,
-    pageSize: 10,
-    totalPages: 0
+    pagination: {
+      totalItems: 0,
+      page: 1,
+      pageSize: 10,
+      totalPages: 0
+    }
   });
 
   loading = signal(false);
@@ -165,7 +167,7 @@ export class MembersComponent {
   }
 
   onViewMember(member: Member): void {
-    
+
     this.router.navigate(['/members', member.memberId, 'profile']);
   }
 
@@ -175,7 +177,7 @@ export class MembersComponent {
 
   onSuspendMember(member: Member): void {
     if (member.memberStatus !== 'Active') return;
-    
+
     if (confirm(`Are you sure you want to suspend ${member.firstName} ${member.lastName}?`)) {
       this.memberService.suspendMember(member.memberId).subscribe({
         next: () => {
@@ -191,7 +193,7 @@ export class MembersComponent {
 
   onReactivateMember(member: Member): void {
     if (member.memberStatus !== 'Suspended') return;
-    
+
     if (confirm(`Are you sure you want to reactivate ${member.firstName} ${member.lastName}?`)) {
       this.memberService.reactivateMember(member.memberId).subscribe({
         next: () => {
@@ -210,7 +212,7 @@ export class MembersComponent {
       alert('Only draft members can be deleted.');
       return;
     }
-    
+
     if (confirm(`Are you sure you want to delete ${member.firstName} ${member.lastName}? This action cannot be undone.`)) {
       this.memberService.deleteMember(member.memberId).subscribe({
         next: () => {

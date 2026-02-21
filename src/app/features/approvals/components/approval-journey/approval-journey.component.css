@@ -1,0 +1,20 @@
+@reference "../../../../../styles.css";
+
+.tl-dot {
+  @apply w-8 h-8 rounded-full flex items-center justify-center border-2 text-xs font-bold transition-all;
+}
+.tl-dot.done {
+  @apply bg-green-500 text-white border-green-500;
+}
+.tl-dot.current {
+  @apply bg-white text-primary-600 border-primary-500 ring-4 ring-primary-100;
+}
+.tl-dot.waiting {
+  @apply bg-gray-100 text-gray-400 border-gray-200;
+}
+.tl-dot.rejected {
+  @apply bg-red-500 text-white border-red-500;
+}
+.tl-dot.skipped {
+  @apply bg-gray-200 text-gray-400 border-gray-200;
+}

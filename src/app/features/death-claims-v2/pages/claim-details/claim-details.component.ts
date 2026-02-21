@@ -28,6 +28,7 @@ import {
   MemberContribution,
   ClaimStatus
 } from '../../../../shared/models/death-claim.model';
+import { AccessService } from '../../../../core/services/access.service';
 
 type ActiveTab = 'details' | 'contributions' | 'activity';
 
@@ -59,6 +60,7 @@ export class ClaimDetailsV2Component implements OnInit {
   private claimsService = inject(DeathClaimsService);
   private contributionsService = inject(ContributionsService);
   private approvalService = inject(ApprovalWorkflowService);
+  private accessService = inject(AccessService);
   private toastService = inject(ToastService);
 
   // Core state
@@ -92,7 +94,14 @@ export class ClaimDetailsV2Component implements OnInit {
 
   // UI state
   activeTab = signal<ActiveTab>('details');
-  viewMode = signal<'admin' | 'agent' | 'viewer'>('admin'); // TODO: derive from auth context
+  _viewMode = this.accessService.viewMode; // 'superadmin' | 'admin' | 'agent'
+  // compute a simplified view mode for easier permission checks in the template - with admin/agent only
+  viewMode = computed(() => {
+    const vm = this._viewMode();
+    if (vm === 'superadmin' || vm === 'admin') return 'admin';
+    return vm;
+  });
+  // viewMode = signal<'admin' | 'agent' | 'viewer'>('admin'); // TODO: derive from auth context
 
   // Modal state
   showRecordCashModal = signal(false);
@@ -425,7 +434,7 @@ export class ClaimDetailsV2Component implements OnInit {
     this.approvalService.getApprovalRequestDetails(requestId).subscribe({
       next: (response) => {
         console.log('Approval details loaded:', response);
-        this.approvalExecutions.set(response.executions);
+        this.approvalExecutions.set(response.executions || []);
         console.log('Approval details loaded:', this.currentExecution());
       },
       error: () => {

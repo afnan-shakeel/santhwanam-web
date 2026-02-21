@@ -38,10 +38,12 @@ export class ClaimsListingComponent implements OnInit {
   statsLoading = signal(true);
   claimsData = signal<SearchResponse<DeathClaim>>({
     items: [],
-    total: 0,
-    page: 1,
-    pageSize: 10,
-    totalPages: 0
+    pagination: {
+      totalItems: 0,
+      page: 1,
+      pageSize: 10,
+      totalPages: 0
+    }
   });
   tableLoading = signal(false);
   activeStatFilter = signal<string | null>(null);
@@ -69,16 +71,16 @@ export class ClaimsListingComponent implements OnInit {
         label: 'Filed By',
         sortable: false,
         format: (value: any, row: DeathClaim) => {
-            const reporter = value;
-            return reporter ? `${row.reportedByRole || ''} ${reporter.firstName} ${reporter.lastName}` : '—';
+          const reporter = value;
+          return reporter ? `${row.reportedByRole || ''} ${reporter.firstName} ${reporter.lastName}` : '—';
         }
       },
-    //   {
-    //     key: 'benefitAmount',
-    //     label: 'Benefit',
-    //     sortable: true,
-    //     format: (value: number) => value ? `INR ${value.toLocaleString('en', { minimumFractionDigits: 3 })}` : '—'
-    //   },
+      //   {
+      //     key: 'benefitAmount',
+      //     label: 'Benefit',
+      //     sortable: true,
+      //     format: (value: number) => value ? `INR ${value.toLocaleString('en', { minimumFractionDigits: 3 })}` : '—'
+      //   },
       {
         key: 'claimStatus',
         label: 'Status',

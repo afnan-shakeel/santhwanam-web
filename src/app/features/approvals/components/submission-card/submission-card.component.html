@@ -1,0 +1,74 @@
+
+<div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+  <!-- Header -->
+  <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between flex-wrap gap-2"
+       [ngClass]="headerBgClass">
+    <span class="text-xs font-semibold" [ngClass]="statusBadge.textClass">
+      {{ statusBadge.text }}
+    </span>
+    <span class="text-xs text-gray-400">{{ submission.requestedAt | date:'d MMM yyyy' }}</span>
+  </div>
+
+  <!-- Entity info -->
+  <div class="px-5 py-3 border-b border-gray-100">
+    <div class="flex items-center gap-2.5">
+      <span class="text-lg">{{ entityTypeIcon }}</span>
+      <div class="min-w-0">
+        <div class="text-sm font-medium text-gray-800">{{ entityTypeLabel }}</div>
+        <div class="text-xs text-gray-500 truncate">{{ submission.entityLabel || submission.entityId }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="px-5 py-3 border-b border-gray-100">
+    @if(submission.executions){
+        <app-stage-pipeline
+          [executions]="submission.executions"
+          [currentStageOrder]="submission.currentStageOrder" />
+    }
+  </div>
+
+  <!-- Context info -->
+  <div class="px-5 py-3 border-b border-gray-100">
+    @if (submission.status === 'Pending' && waitingInfo) {
+      <div class="flex items-center gap-2 text-xs text-gray-600">
+        <span>Waiting on: <strong class="text-gray-800">{{ waitingInfo.name }}</strong></span>
+        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-medium bg-gray-100"
+              [ngClass]="waitingInfo.colorClass">
+          ⏱️ {{ waitingInfo.duration }}
+        </span>
+      </div>
+    }
+
+    @if (submission.status === 'Approved' && lastApprover) {
+      <div class="flex items-center gap-2 text-xs">
+        <span class="text-green-600">✅ Final approval by <strong>{{ lastApprover }}</strong></span>
+        @if (submission.approvedAt) {
+          <span class="text-gray-400">· {{ submission.approvedAt | date:'d MMM' }}</span>
+        }
+      </div>
+    }
+
+    @if (submission.status === 'Rejected') {
+      <div class="p-2.5 bg-red-50 border border-red-100 rounded-lg">
+        <div class="flex items-center gap-1 text-xs text-red-700 font-semibold mb-1">
+          ❌ Rejected
+          @if (submission.rejectedByUser) {
+            by {{ submission.rejectedByUser.firstName }} {{ submission.rejectedByUser.lastName }}
+          }
+        </div>
+        @if (submission.rejectionReason) {
+          <div class="text-xs text-gray-700">"{{ submission.rejectionReason }}"</div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Footer -->
+  <div class="px-5 py-2.5 bg-gray-50 flex items-center justify-end">
+    <button class="text-xs text-primary-600 font-medium hover:underline" (click)="viewDetails()">
+      View Details →
+    </button>
+  </div>
+</div>

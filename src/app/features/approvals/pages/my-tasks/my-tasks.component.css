@@ -1,0 +1,14 @@
+@reference "../../../../../styles.css";
+
+.tab-pill {
+  @apply inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-gray-200 bg-white text-sm font-medium text-gray-500 cursor-pointer whitespace-nowrap transition-all hover:border-primary-400 hover:text-primary-600;
+}
+.tab-pill-active {
+  @apply bg-primary-600 border-primary-600 text-white hover:border-primary-600 hover:text-white;
+}
+.tab-count {
+  @apply text-xs font-bold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500;
+}
+.tab-count-active {
+  @apply bg-white/25 text-white;
+}

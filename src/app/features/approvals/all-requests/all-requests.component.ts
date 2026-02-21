@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 import { ApprovalWorkflowService } from '../../../core/services/approval-workflow.service';
-import { 
-  ApprovalRequest, 
+import {
+  ApprovalRequest,
   ApprovalRequestStatus,
   ModuleType
 } from '../../../shared/models/approval-workflow.model';
@@ -26,10 +26,12 @@ export class AllRequestsComponent implements OnInit {
 
   requestData = signal<SearchResponse<ApprovalRequest>>({
     items: [],
-    total: 0,
-    page: 1,
-    pageSize: 10,
-    totalPages: 0
+    pagination: {
+      totalItems: 0,
+      page: 1,
+      pageSize: 10,
+      totalPages: 0
+    }
   });
 
   loading = signal(false);
@@ -46,7 +48,7 @@ export class AllRequestsComponent implements OnInit {
       pending: allItems.filter(r => r.status === 'Pending').length,
       approved: allItems.filter(r => r.status === 'Approved').length,
       rejected: allItems.filter(r => r.status === 'Rejected').length,
-      total: this.requestData().total
+      total: this.requestData().pagination.totalItems
     };
   });
 
@@ -119,8 +121,8 @@ export class AllRequestsComponent implements OnInit {
 
   emitSearch(): void {
     const request: SearchRequest = {
-      page: this.requestData().page,
-      pageSize: this.requestData().pageSize,
+      page: this.requestData().pagination.page,
+      pageSize: this.requestData().pagination.pageSize,
       sortBy: 'requestedAt',
       sortOrder: 'desc'
     };
@@ -133,8 +135,8 @@ export class AllRequestsComponent implements OnInit {
 
   loadRequests(request: SearchRequest): void {
     this.loading.set(true);
-    
-    request.eagerLoad = ['workflow', 'stageExecutions', 'requestedByUser'];
+
+    request.eagerLoad = ['workflow', 'executions', 'requestedByUser'];
     this.approvalService.searchApprovalRequests(request).subscribe({
       next: (response) => {
         this.requestData.set(response);

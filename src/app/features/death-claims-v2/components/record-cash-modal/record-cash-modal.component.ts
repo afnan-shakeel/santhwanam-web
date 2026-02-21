@@ -5,6 +5,7 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
 import { ContributionsService } from '../../../../core/services/contributions.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { MemberContribution } from '../../../../shared/models/death-claim.model';
+import { MemberContributionWithRelations } from '../../../../shared/models/contribution.model';
 
 @Component({
     selector: 'app-record-cash-modal',
@@ -78,7 +79,7 @@ export class RecordCashModalV2Component {
     private toastService = inject(ToastService);
 
     open = input.required<boolean>();
-    contribution = input.required<MemberContribution | null>();
+    contribution = input.required<MemberContribution | MemberContributionWithRelations | null>();
 
     closed = output<void>();
     recorded = output<void>();

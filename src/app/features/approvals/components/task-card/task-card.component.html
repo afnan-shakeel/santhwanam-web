@@ -1,0 +1,70 @@
+<div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+  <!-- Header -->
+  <div class="px-5 py-3 bg-red-50 border-b border-red-100 flex items-center justify-between flex-wrap gap-2">
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full" [ngClass]="entityTypeBadgeClass">
+        {{ entityTypeLabel }}
+      </span>
+      <span class="text-xs font-medium text-gray-500">{{ task.stage?.stageName }}</span>
+    </div>
+  </div>
+
+  <!-- Entity Summary -->
+  <div class="p-5 border-b border-gray-100">
+    @if (hasEntityContext) {
+      <app-entity-summary
+        [entityType]="entityType"
+        [context]="entityContext"
+        [entityLabel]="entityLabel" />
+    } @else {
+      <div class="text-sm text-gray-600">
+        {{ entityLabel || (entityType + ' · ' + task.request?.entityId) }}
+      </div>
+    }
+  </div>
+
+  <!-- Snapshot notice -->
+  @if (hasEntityContext) {
+    <div class="px-5 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center justify-between text-xs text-gray-500">
+      <span>ℹ️ Snapshot at time of submission</span>
+      <button class="text-primary-600 font-medium hover:underline" (click)="viewDetails()">
+        View Full Details →
+      </button>
+    </div>
+  }
+
+  <!-- Stage Pipeline -->
+  <div class="px-5 py-3 border-b border-gray-100">
+    @if(task.request && task.request.executions){
+        <app-stage-pipeline
+          [executions]="task.request.executions"
+          [currentStageOrder]="task.request.currentStageOrder"
+          [currentUserId]="currentUserId" />
+    }
+  </div>
+
+  <!-- Action Area -->
+  <div class="p-5 space-y-3">
+    <textarea
+      class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 placeholder-gray-400 resize-none focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition"
+      rows="2"
+      placeholder="Add comments (optional)..."
+      [value]="comments()"
+      (input)="updateComments($event)"
+      [disabled]="processing"
+    ></textarea>
+    <div class="flex items-center justify-between">
+      <button class="text-xs text-primary-600 font-medium hover:underline" (click)="viewDetails()">
+        View Full Details
+      </button>
+      <div class="flex items-center gap-2">
+        <app-button variant="danger" size="sm" [disabled]="processing" (click)="onReject()">
+          Reject
+        </app-button>
+        <app-button variant="primary" size="sm" [disabled]="processing" (click)="onApprove()">
+          ✓ Approve
+        </app-button>
+      </div>
+    </div>
+  </div>
+</div>

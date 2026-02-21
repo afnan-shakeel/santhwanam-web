@@ -6,15 +6,15 @@ import { ContributionsService } from '../../../../../core/services/contributions
 import { ToastService } from '../../../../../core/services/toast.service';
 import { MemberContribution } from '../../../../../shared/models/death-claim.model';
 import { MemberContributionWithRelations } from '../../../../../shared/models/contribution.model';
-import { RecordCashModalComponent } from "../../../../death-claims/claim-details/record-cash-modal/record-cash-modal.component";
 import { AccessService } from '../../../../../core/services/access.service';
 import { ButtonComponent } from "../../../../../shared/components/button/button.component";
+import { RecordCashModalV2Component } from '../../../../death-claims-v2/components/record-cash-modal/record-cash-modal.component';
 
 
 @Component({
   selector: 'app-member-contributions-tab',
   standalone: true,
-  imports: [CommonModule, RecordCashModalComponent, ButtonComponent],
+  imports: [CommonModule, RecordCashModalV2Component, ButtonComponent],
   templateUrl: './member-contributions-tab.component.html',
   styleUrls: ['./member-contributions-tab.component.css']
 })
@@ -170,10 +170,8 @@ export class MemberContributionsTabComponent implements OnInit {
       this.selectedContribution.set(null);
     }
   
-    onCashRecorded(contribution: MemberContribution | MemberContributionWithRelations): void {
-    //   this.contributions.update(contribs => 
-    //     contribs.map(c => c.contributionId === contribution.contributionId ? contribution : c)
-    //   );
+    onCashRecorded(): void {
       this.closeRecordCashModal();
+      this.loadContributions();
     }
 }

@@ -49,7 +49,7 @@ export class SelectComponent<T = string> implements ControlValueAccessor {
   @Output() blur = new EventEmitter<void>();
   @Output() valueChange = new EventEmitter<T | null>();
 
-  value: T | null = null;
+  @Input() value: T | null = null;
   disabled = false;
 
   private onChange: (value: unknown) => void = () => {};

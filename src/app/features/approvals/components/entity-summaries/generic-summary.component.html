@@ -1,0 +1,18 @@
+<div class="space-y-3">
+  @if (entityLabel) {
+    <div class="font-semibold text-sm text-gray-900">{{ entityLabel }}</div>
+  }
+
+  @if (!compact && context) {
+    <div class="grid grid-cols-2 gap-3">
+      @for (entry of context | keyvalue; track entry.key) {
+        @if (isSimpleValue(entry.value)) {
+          <div>
+            <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{{ entry.key }}</div>
+            <div class="text-xs text-gray-800 font-medium">{{ entry.value }}</div>
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

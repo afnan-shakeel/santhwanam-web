@@ -10,6 +10,7 @@ import { BadgeComponent } from '../../../../../shared/components/badge/badge.com
 import { SelectComponent, SelectOption } from '../../../../../shared/components/select/select.component';
 import { InputComponent } from '../../../../../shared/components/input/input.component';
 import { AccessService } from '../../../../../core/services/access.service';
+import { SearchResponse } from '../../../../../shared/models/search.model';
 
 type MemberStatusFilter = 'Active' | 'Suspended' | 'Frozen' | 'Closed' | 'Deceased' | '';
 
@@ -28,7 +29,7 @@ export class AgentMembersTabComponent implements OnInit {
 
   agentId = signal<string>('');
   loading = signal(true);
-  membersData = signal<AgentMembersResponse | null>(null);
+  membersData = signal<SearchResponse<AgentMember> | null>(null);
   currentPage = signal(1);
   pageSize = signal(10);
   searchQuery = signal('');
@@ -44,7 +45,7 @@ export class AgentMembersTabComponent implements OnInit {
 
   // Computed values
   members = computed(() => this.membersData()?.items || []);
-  totalItems = computed(() => this.membersData()?.pagination.total || 0);
+  totalItems = computed(() => this.membersData()?.pagination.totalItems || 0);
   totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize()));
 
   // Summary stats
@@ -52,7 +53,7 @@ export class AgentMembersTabComponent implements OnInit {
     const data = this.membersData();
     if (!data) return null;
     return {
-      total: data.pagination.total,
+      total: data.pagination.totalItems,
       active: data.items.filter(m => m.memberStatus === 'Active').length,
       suspended: data.items.filter(m => m.memberStatus === 'Suspended').length
     };

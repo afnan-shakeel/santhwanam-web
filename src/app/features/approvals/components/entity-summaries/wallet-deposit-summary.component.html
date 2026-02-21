@@ -1,0 +1,36 @@
+<div class="space-y-3">
+  <div class="flex items-center gap-3">
+    <div class="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-sm">💳</div>
+    <div class="min-w-0">
+      <div class="font-semibold text-sm text-gray-900">{{ context['memberName'] }}</div>
+      <div class="text-xs text-gray-500 font-mono">{{ context['memberCode'] }}</div>
+    </div>
+  </div>
+
+  @if (!compact) {
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Deposit</div>
+        <div class="text-xs text-gray-800 font-medium">₹{{ context['depositAmount'] | number }} · {{ context['paymentMethod'] || 'Cash' }}</div>
+      </div>
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Balance Change</div>
+        <div class="text-xs text-gray-800 font-medium">₹{{ context['currentBalance'] | number }} → ₹{{ context['balanceAfterDeposit'] | number }}</div>
+      </div>
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Collected By</div>
+        <div class="text-xs text-gray-800 font-medium">{{ context['collectedBy'] }}</div>
+      </div>
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Collection Date</div>
+        <div class="text-xs text-gray-800 font-medium">{{ context['collectionDate'] }}</div>
+      </div>
+    </div>
+
+    @if (context['notes']) {
+      <div class="p-2.5 bg-gray-50 rounded-lg text-xs text-gray-600">
+        <strong class="text-gray-800">Notes:</strong> {{ context['notes'] }}
+      </div>
+    }
+  }
+</div>

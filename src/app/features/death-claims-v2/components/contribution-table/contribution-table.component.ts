@@ -34,10 +34,12 @@ export class ContributionTableComponent implements OnInit {
   // State
   contributions = signal<SearchResponse<MemberContribution>>({
     items: [],
-    total: 0,
-    page: 1,
-    pageSize: 20,
-    totalPages: 0
+    pagination: {
+      totalItems: 0,
+      page: 1,
+      pageSize: 10,
+      totalPages: 0
+    }
   });
   loading = signal(false);
   activeFilter = signal<ContributionStatus | 'All'>('All');

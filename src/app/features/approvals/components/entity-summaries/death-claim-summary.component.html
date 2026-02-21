@@ -1,0 +1,79 @@
+<div class="space-y-3">
+  <!-- Title row -->
+  <div class="flex items-center gap-3">
+    <div class="w-9 h-9 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-sm">💀</div>
+    <div class="min-w-0">
+      <div class="font-semibold text-sm text-gray-900">Claim for: {{ context['deceasedName'] }}</div>
+      <div class="text-xs text-gray-500 font-mono">{{ context['claimNumber'] }}</div>
+    </div>
+  </div>
+
+  @if (!compact) {
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Deceased</div>
+        <div class="text-xs text-gray-800 font-medium">{{ context['deceasedName'] }} ({{ context['deceasedCode'] }})</div>
+      </div>
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Death Date</div>
+        <div class="text-xs text-gray-800 font-medium">{{ context['deathDate'] }}</div>
+      </div>
+    </div>
+
+    @if (context['causeOfDeath']) {
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Cause of Death</div>
+        <div class="text-xs text-gray-800 font-medium">{{ context['causeOfDeath'] }}</div>
+      </div>
+    }
+
+    <!-- Benefit highlight -->
+    @if (context['benefitAmount']) {
+      <div class="flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+        <span class="text-sm">💰</span>
+        <span class="font-bold text-amber-700">Benefit: ₹{{ context['benefitAmount'] | number }}</span>
+        @if (context['tier']) {
+          <span class="text-xs text-amber-600 ml-1">· {{ context['tier'] }}</span>
+        }
+      </div>
+    }
+
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Nominee</div>
+        <div class="text-xs text-gray-800 font-medium">{{ context['nominee'] }}</div>
+      </div>
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Nominee Contact</div>
+        <div class="text-xs text-gray-800 font-medium">{{ context['nomineeContact'] }}</div>
+      </div>
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Agent</div>
+        <div class="text-xs text-gray-800 font-medium">{{ context['agent'] }}</div>
+      </div>
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Unit</div>
+        <div class="text-xs text-gray-800 font-medium">{{ context['unit'] }}</div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3 flex-wrap text-xs">
+      @if (context['documentsVerified']) {
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-semibold">
+          ✅ {{ context['documentsVerified'] }} Docs verified
+        </span>
+      }
+      @if (context['verificationStatus']) {
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-semibold">
+          ✅ Verification {{ context['verificationStatus'] }}
+        </span>
+      }
+    </div>
+
+    @if (context['verificationNotes']) {
+      <div class="p-2.5 bg-gray-50 rounded-lg text-xs text-gray-600">
+        <strong class="text-gray-800">Verification Notes:</strong> {{ context['verificationNotes'] }}
+      </div>
+    }
+  }
+</div>

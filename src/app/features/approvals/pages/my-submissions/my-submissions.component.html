@@ -1,0 +1,120 @@
+<div class="mx-auto">
+  <!-- Breadcrumbs -->
+  <app-breadcrumbs [items]="breadcrumbs" />
+
+  <!-- Page Header -->
+  <div class="pt-4 pb-3">
+    <h1 class="text-xl font-bold text-gray-900 font-display tracking-tight">My Submissions</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Track approval progress</p>
+  </div>
+
+  <!-- Status Tabs -->
+  <div class="flex gap-1.5 mb-4 overflow-x-auto pb-1">
+    <button
+      class="tab-pill"
+      [class.tab-pill-active]="activeTab() === 'in-progress'"
+      (click)="switchTab('in-progress')">
+      In Progress
+      <span class="tab-count" [class.tab-count-active]="activeTab() === 'in-progress'">{{ tabCounts()['in-progress'] }}</span>
+    </button>
+    <button
+      class="tab-pill"
+      [class.tab-pill-active]="activeTab() === 'approved'"
+      (click)="switchTab('approved')">
+      Approved
+      <span class="tab-count" [class.tab-count-active]="activeTab() === 'approved'">{{ tabCounts().approved }}</span>
+    </button>
+    <button
+      class="tab-pill"
+      [class.tab-pill-active]="activeTab() === 'rejected'"
+      (click)="switchTab('rejected')">
+      Rejected
+      <span class="tab-count" [class.tab-count-active]="activeTab() === 'rejected'">{{ tabCounts().rejected }}</span>
+    </button>
+    <button
+      class="tab-pill"
+      [class.tab-pill-active]="activeTab() === 'all'"
+      (click)="switchTab('all')">
+      All
+      <span class="tab-count" [class.tab-count-active]="activeTab() === 'all'">{{ tabCounts().all }}</span>
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="flex gap-3 mb-5 flex-wrap">
+    <div class="w-52">
+      <app-select
+        [options]="entityTypeOptions"
+        placeholder="All Entity Types"
+        size="sm"
+        [value]="selectedEntityType()"
+        (valueChange)="onEntityTypeChange($event)" />
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="space-y-4">
+      @for (i of [1,2,3]; track i) {
+        <div class="bg-white border border-gray-200 rounded-xl p-6 animate-pulse">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="h-5 w-20 bg-gray-200 rounded-full"></div>
+            <div class="h-3 w-32 bg-gray-100 rounded"></div>
+          </div>
+          <div class="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+          <div class="h-3 bg-gray-100 rounded w-2/3 mb-4"></div>
+          <div class="flex gap-4 mb-3">
+            <div class="h-3 w-3 rounded-full bg-gray-200"></div>
+            <div class="h-0.5 flex-1 bg-gray-100 mt-1.5"></div>
+            <div class="h-3 w-3 rounded-full bg-gray-200"></div>
+            <div class="h-0.5 flex-1 bg-gray-100 mt-1.5"></div>
+            <div class="h-3 w-3 rounded-full bg-gray-200"></div>
+          </div>
+          <div class="h-3 bg-gray-100 rounded w-1/2"></div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!loading()) {
+    <!-- Empty state -->
+    @if (submissions().length === 0) {
+      <div class="text-center py-16">
+        <div class="text-4xl mb-3">📤</div>
+        <h3 class="text-sm font-semibold text-gray-700">No submissions found</h3>
+        <p class="text-xs text-gray-500 mt-1">
+          @switch (activeTab()) {
+            @case ('in-progress') { No requests currently awaiting approval. }
+            @case ('approved') { No approved requests yet. }
+            @case ('rejected') { No rejected requests. }
+            @case ('all') { You haven't submitted any approval requests yet. }
+          }
+        </p>
+      </div>
+    }
+
+    <!-- Submission cards -->
+    @if (submissions().length > 0) {
+      <div class="space-y-4">
+        @for (submission of submissions(); track submission.requestId) {
+            <div>
+                <app-submission-card [submission]="submission" />
+            </div>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="mt-6">
+          <app-pagination
+            [currentPage]="currentPage()"
+            [totalPages]="totalPages()"
+            [totalItems]="totalItems()"
+            [pageSize]="pageSize"
+            (pageChange)="onPageChange($event)" />
+        </div>
+      }
+    }
+  }
+</div>

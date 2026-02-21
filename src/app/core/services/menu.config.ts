@@ -80,11 +80,28 @@ export const MENU_CONFIG: MenuItemConfig[] = [
   // ═══════════════════════════════════════════════════════════════════════════
   // PERSONAL / SELF-SERVICE
   // ═══════════════════════════════════════════════════════════════════════════
-  { 
-    label: 'My Approvals', 
-    route: '/approvals/my-approvals',
+  {
+    label: 'Approvals',
+    route: '/approvals',
     icon: 'task_alt',
-    permissions: [PERMISSIONS.APPROVAL.REQUEST.APPROVE, PERMISSIONS.APPROVAL.REQUEST.REJECT]
+    permissions: [PERMISSIONS.APPROVAL.REQUEST.APPROVE, PERMISSIONS.APPROVAL.REQUEST.REJECT, PERMISSIONS.APPROVAL.REQUEST.READ],
+    roles: ['super_admin', 'forum_admin', 'area_admin', 'unit_admin', 'agent', 'member'],
+    children: [
+      {
+        label: 'My Tasks',
+        route: '/approvals/my-tasks',
+        icon: 'assignment_turned_in',
+        roles: ['super_admin', 'forum_admin', 'area_admin', 'unit_admin'],
+        // permissions: [PERMISSIONS.APPROVAL.REQUEST.APPROVE, PERMISSIONS.APPROVAL.REQUEST.REJECT]
+      },
+      {
+        label: 'My Submissions',
+        route: '/approvals/my-submissions',
+        icon: 'send',
+        roles: ['super_admin', 'forum_admin', 'area_admin', 'unit_admin', 'agent'],
+        // permissions: [PERMISSIONS.APPROVAL.REQUEST.READ]
+      }
+    ]
   },
   { 
     label: 'My Wallet', 

@@ -32,10 +32,12 @@ export class AreasComponent {
 
   areaData = signal<SearchResponse<Area>>({
     items: [],
-    total: 0,
-    page: 1,
-    pageSize: 10,
-    totalPages: 0
+    pagination: {
+      totalItems: 0,
+      page: 1,
+      pageSize: 10,
+      totalPages: 0
+    }
   });
 
   loading = signal(false);

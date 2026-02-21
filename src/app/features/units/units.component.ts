@@ -32,10 +32,12 @@ export class UnitsComponent {
 
   unitData = signal<SearchResponse<Unit>>({
     items: [],
-    total: 0,
-    page: 1,
-    pageSize: 10,
-    totalPages: 0
+    pagination: {
+      totalItems: 0,
+      page: 1,
+      pageSize: 10,
+      totalPages: 0
+    }
   });
 
   loading = signal(false);

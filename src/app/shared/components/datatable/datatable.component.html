@@ -445,7 +445,7 @@
 
     <!-- Pagination -->
     @if (data && data.items.length > 0) {
-    <app-pagination [currentPage]="data.page" [totalPages]="data.totalPages" [totalItems]="data.total"
+    <app-pagination [currentPage]="data.pagination.page" [totalPages]="data.pagination.totalPages" [totalItems]="data.pagination.totalItems"
         [pageSize]="data.pageSize" (pageChange)="onPageChange($event)">
     </app-pagination>
     }

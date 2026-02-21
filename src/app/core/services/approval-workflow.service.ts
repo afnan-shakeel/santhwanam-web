@@ -12,8 +12,13 @@ import {
   UpdateStageRequest,
   ApprovalRequest,
   ApprovalRequestDetailsResponse,
-  ProcessApprovalRequest
+  ProcessApprovalRequest,
+  MyTasksSearchResponse,
+  MySubmissionsSearchResponse,
+  EnrichedApprovalRequestDetail,
+  ApprovalExecution
 } from '../../shared/models/approval-workflow.model';
+
 
 @Injectable({
   providedIn: 'root'
@@ -68,11 +73,11 @@ export class ApprovalWorkflowService {
     return this.http.post<SearchResponse<ApprovalRequest>>('/approval-workflow/requests/search', request);
   }
 
-  getApprovalRequestDetails(requestId: string): Observable<ApprovalRequestDetailsResponse> {
-    return this.http.get<ApprovalRequestDetailsResponse>(`/approval-workflow/requests/${requestId}`);
+  getApprovalRequestDetails(requestId: string): Observable<ApprovalRequest> {
+    return this.http.get<ApprovalRequest>(`/approval-workflow/requests/${requestId}`);
   }
 
-  processApproval(request: ProcessApprovalRequest): Observable<void> {
+  processApproval(request: Partial<ApprovalExecution>): Observable<void> {
     return this.http.post<void>('/approval-workflow/requests/process', request);
   }
 
@@ -89,5 +94,24 @@ export class ApprovalWorkflowService {
     unitId?: string;
   }): Observable<{ requestId: string; status: string }> {
     return this.http.post<{ requestId: string; status: string }>('/approval-workflow/requests', request);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // User-Scoped Approval Views (Part 2)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /** Search approval tasks assigned to the current user (approver perspective) */
+  searchMyTasks(request: SearchRequest): Observable<SearchResponse<ApprovalExecution>> {
+    return this.http.post<SearchResponse<ApprovalExecution>>('/approval-workflow/approvals/my-tasks/search', request);
+  }
+
+  /** Search approval requests submitted by the current user (submitter perspective) */
+  searchMySubmissions(request: SearchRequest): Observable<SearchResponse<ApprovalRequest>> {
+    return this.http.post<SearchResponse<ApprovalRequest>>('/approval-workflow/requests/my-submissions/search', request);
+  }
+
+  /** Get enriched approval request detail (full journey with entity context) */
+  getEnrichedRequestDetail(requestId: string): Observable<EnrichedApprovalRequestDetail> {
+    return this.http.get<EnrichedApprovalRequestDetail>(`/approval-workflow/requests/${requestId}`);
   }
 }

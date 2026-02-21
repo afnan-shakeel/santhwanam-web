@@ -1,0 +1,74 @@
+<!-- Horizontal Pipeline (≤3 stages) -->
+@if (displayMode() === 'horizontal') {
+  <div class="flex items-start justify-between gap-1">
+    @for (stage of stages(); track stage.executionId; let i = $index; let last = $last) {
+      <div class="flex flex-col items-center text-center min-w-0 flex-1">
+        <div class="pipeline-dot" [ngClass]="getStatusClass(stage)">
+          <span class="text-xs font-bold">{{ getStatusIcon(stage) }}</span>
+        </div>
+        <span class="mt-1.5 text-xs font-medium text-gray-700 leading-tight line-clamp-2"
+              [class.text-primary-600]="isCurrentStage(stage)"
+              [class.font-semibold]="isCurrentStage(stage)">
+          {{ stage.stage?.stageName }}
+        </span>
+        @if (isCurrentUser(stage)) {
+          <span class="mt-0.5 text-[10px] font-bold text-primary-600 bg-primary-50 px-1.5 py-0.5 rounded-full">YOU</span>
+        } @else if (stage.assignedApprover?.firstName) {
+          <span class="mt-0.5 text-[10px] text-gray-500 truncate max-w-[90px]">{{ stage.assignedApprover?.firstName }} {{ stage.assignedApprover?.lastName }}</span>
+        }
+      </div>
+      @if (!last) {
+        <div class="flex items-center pt-3 px-0.5">
+          <div class="h-0.5 w-6 sm:w-10 rounded-full transition-colors"
+               [class.bg-green-500]="isConnectorDone(i)"
+               [class.bg-gray-200]="!isConnectorDone(i)">
+          </div>
+        </div>
+      }
+    }
+  </div>
+}
+
+<!-- Vertical Pipeline (4+ stages) -->
+@if (displayMode() === 'vertical') {
+  <div class="flex flex-col">
+    @for (stage of stages(); track stage.executionId; let last = $last) {
+      <div class="flex gap-3" [class.pb-5]="!last">
+        <!-- Track column -->
+        <div class="flex flex-col items-center relative">
+          <div class="pipeline-dot shrink-0" [ngClass]="getStatusClass(stage)">
+            <span class="text-xs font-bold">{{ getStatusIcon(stage) }}</span>
+          </div>
+          @if (!last) {
+            <div class="w-0.5 flex-1 mt-1 rounded-full transition-colors"
+                 [class.bg-green-500]="stage.status === 'Approved'"
+                 [class.bg-red-400]="stage.status === 'Rejected'"
+                 [class.bg-gray-200]="stage.status !== 'Approved' && stage.status !== 'Rejected'">
+            </div>
+          }
+        </div>
+        <!-- Content -->
+        <div class="min-w-0 pt-0.5">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-sm font-medium text-gray-800"
+                  [class.text-primary-600]="isCurrentStage(stage)"
+                  [class.font-semibold]="isCurrentStage(stage)">
+              {{ stage.stage?.stageName }}
+            </span>
+            @if (isCurrentUser(stage)) {
+              <span class="text-[10px] font-bold text-primary-600 bg-primary-50 px-1.5 py-0.5 rounded-full">YOU</span>
+            }
+          </div>
+          <div class="text-xs text-gray-500 mt-0.5">
+            @if (stage.assignedApprover?.firstName) {
+              <span>{{ stage.assignedApprover?.firstName }} {{ stage.assignedApprover?.lastName }}</span>
+            }
+            @if (stage.reviewedAt) {
+              <span> · {{ stage.reviewedAt | date:'d MMM, h:mm a' }}</span>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}

@@ -4851,6 +4851,7 @@
       "post": {
         "tags": ["Wallet - Deposits"],
         "summary": "Request a wallet deposit",
+        "description": "Creates a wallet deposit for a member. The wallet is credited immediately and any pending contributions are auto-settled from the wallet balance in FIFO order (oldest due date first). Returns the deposit details along with auto-pay settlement results.",
         "parameters": [
           {
             "name": "memberId",
@@ -4877,10 +4878,10 @@
         },
         "responses": {
           "201": {
-            "description": "Deposit request created",
+            "description": "Deposit processed with auto-pay settlement results",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/WalletDepositRequest" }
+                "schema": { "$ref": "#/components/schemas/DepositWithAutoPayResponse" }
               }
             }
           },
@@ -4934,6 +4935,52 @@
               }
             }
           }
+        }
+      }
+    },
+    "/api/wallet/deposits/bulk": {
+      "post": {
+        "tags": ["Wallet - Deposits"],
+        "summary": "Bulk wallet deposit for multiple members",
+        "description": "Allows an agent to submit deposit amounts for multiple members in a single request. Each deposit is processed individually (with auto-pay). Partial success is possible — individual failures do not block other deposits. Pre-validates all members belong to the requesting agent and are Active before processing.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["deposits"],
+                "properties": {
+                  "deposits": {
+                    "type": "array",
+                    "description": "Array of deposits to process. Min 1, max 50 items. No duplicate memberIds.",
+                    "minItems": 1,
+                    "maxItems": 50,
+                    "items": {
+                      "type": "object",
+                      "required": ["memberId", "amount"],
+                      "properties": {
+                        "memberId": { "type": "string", "format": "uuid", "description": "Member to deposit for" },
+                        "amount": { "type": "number", "minimum": 0.01, "description": "Deposit amount" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Bulk deposit results with per-member outcomes",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BulkDepositResponse" }
+              }
+            }
+          },
+          "400": { "description": "Validation error (duplicate members, unauthorized members, invalid amounts, etc.)" },
+          "404": { "description": "Agent not found" }
         }
       }
     },
@@ -8358,6 +8405,85 @@
           "createdAt": { "type": "string", "format": "date-time" },
           "approvedAt": { "type": "string", "format": "date-time", "nullable": true },
           "rejectedAt": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "AutoPaySettledContribution": {
+        "type": "object",
+        "description": "A contribution that was auto-settled from wallet balance",
+        "properties": {
+          "contributionId": { "type": "string", "format": "uuid" },
+          "cycleId": { "type": "string", "format": "uuid" },
+          "cycleCode": { "type": "string", "description": "Contribution cycle number (e.g. CC-2025-00015)" },
+          "amount": { "type": "number", "format": "decimal" }
+        }
+      },
+      "AutoPayRemainingPending": {
+        "type": "object",
+        "description": "A pending contribution that was not settled (insufficient balance)",
+        "properties": {
+          "contributionId": { "type": "string", "format": "uuid" },
+          "cycleCode": { "type": "string" },
+          "amount": { "type": "number", "format": "decimal" }
+        }
+      },
+      "AutoPayResult": {
+        "type": "object",
+        "nullable": true,
+        "description": "Result of auto-paying pending contributions from wallet balance after a deposit",
+        "properties": {
+          "settledContributions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/AutoPaySettledContribution" }
+          },
+          "remainingPending": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/AutoPayRemainingPending" }
+          },
+          "finalBalance": { "type": "number", "format": "decimal", "description": "Wallet balance after all auto-pay settlements" }
+        }
+      },
+      "DepositWithAutoPayResponse": {
+        "type": "object",
+        "description": "Deposit result enriched with auto-pay settlement details",
+        "properties": {
+          "deposit": { "$ref": "#/components/schemas/WalletDepositRequest" },
+          "autoPayResult": { "$ref": "#/components/schemas/AutoPayResult" }
+        }
+      },
+      "BulkDepositResultItem": {
+        "type": "object",
+        "description": "Per-member result of a bulk deposit",
+        "properties": {
+          "memberId": { "type": "string", "format": "uuid" },
+          "memberCode": { "type": "string" },
+          "memberName": { "type": "string" },
+          "status": { "type": "string", "enum": ["success", "failed"] },
+          "depositAmount": { "type": "number", "format": "decimal" },
+          "error": { "type": "string", "nullable": true, "description": "Error message if status is failed" },
+          "autoPayResult": { "$ref": "#/components/schemas/AutoPayResult" }
+        }
+      },
+      "BulkDepositSummary": {
+        "type": "object",
+        "description": "Aggregate summary of a bulk deposit batch",
+        "properties": {
+          "totalDeposits": { "type": "integer", "description": "Total deposits attempted" },
+          "successCount": { "type": "integer", "description": "Number of successful deposits" },
+          "failedCount": { "type": "integer", "description": "Number of failed deposits" },
+          "totalAmountDeposited": { "type": "number", "format": "decimal", "description": "Sum of all successful deposit amounts" },
+          "totalContributionsSettled": { "type": "integer", "description": "Total contributions auto-settled across all members" },
+          "totalAmountSettled": { "type": "number", "format": "decimal", "description": "Sum of all auto-settled contribution amounts" }
+        }
+      },
+      "BulkDepositResponse": {
+        "type": "object",
+        "description": "Response from bulk deposit endpoint with summary and per-member results",
+        "properties": {
+          "summary": { "$ref": "#/components/schemas/BulkDepositSummary" },
+          "results": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/BulkDepositResultItem" }
+          }
         }
       },
       "WalletDebitRequest": {

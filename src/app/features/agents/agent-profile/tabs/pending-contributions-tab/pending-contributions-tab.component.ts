@@ -14,14 +14,15 @@ import { PaginationComponent } from '../../../../../shared/components/pagination
 import { SelectComponent, SelectOption } from '../../../../../shared/components/select/select.component';
 import { ButtonComponent } from '../../../../../shared/components/button/button.component';
 import { InputComponent } from '../../../../../shared/components/input/input.component';
-import { RecordCashModalComponent } from '../../../../death-claims/claim-details/record-cash-modal/record-cash-modal.component';
 import { MemberContribution } from '../../../../../shared/models/death-claim.model';
 import { MemberContributionWithRelations } from '../../../../../shared/models/contribution.model';
+import { RecordCashModalV2Component } from '../../../../death-claims-v2/components/record-cash-modal/record-cash-modal.component';
+import { SearchResponse } from '../../../../../shared/models/search.model';
 
 @Component({
   selector: 'app-pending-contributions-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule, StatsCardComponent, PaginationComponent, SelectComponent, ButtonComponent, InputComponent, RecordCashModalComponent],
+  imports: [CommonModule, FormsModule, StatsCardComponent, PaginationComponent, SelectComponent, ButtonComponent, InputComponent, RecordCashModalV2Component],
   templateUrl: './pending-contributions-tab.component.html',
   styleUrl: './pending-contributions-tab.component.css'
 })
@@ -32,7 +33,7 @@ export class PendingContributionsTabComponent implements OnInit {
   // State
   agentId = signal<string>('');
   loading = signal(true);
-  contributionsData = signal<AgentContributionsResponse | null>(null);
+  contributionsData = signal<SearchResponse<MemberContributionWithRelations> | null>(null);
 
   // Pagination
   currentPage = signal(1);
@@ -51,7 +52,7 @@ export class PendingContributionsTabComponent implements OnInit {
   summary = computed(() => this.contributionsData()?.summary || { totalPending: 0, totalAmount: 0, activeCycles: [] });
   activeCycles = computed(() => this.summary().activeCycles || []);
   cycleOptions = computed<SelectOption<string>[]>(() =>
-    this.activeCycles().map(cycle => ({ value: cycle.cycleId, label: cycle.cycleCode }))
+    this.activeCycles().map((cycle: any) => ({ value: cycle.cycleId, label: cycle.cycleCode }))
   );
   totalItems = computed(() => this.contributionsData()?.pagination?.totalItems || 0);
   totalPages = computed(() => this.contributionsData()?.pagination?.totalPages || 0);

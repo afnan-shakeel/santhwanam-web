@@ -6,10 +6,12 @@ export interface User {
   email: string;
   firstName: string | null;
   lastName: string | null;
+  fullName?: string | null;
   isActive: boolean;
   userMetadata: any | null;
   createdAt: Date;
   lastSyncedAt: Date | null;
+  userRoles: Partial<UserRole>[];
 }
 
 // User role assignment types
